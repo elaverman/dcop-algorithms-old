@@ -1,0 +1,7 @@
+.*
+!/.gitignore
+bin/*
+project/target/
+project/project/
+project/scala*/
+target/*
