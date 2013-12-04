@@ -36,7 +36,29 @@ class VertexColoringVertex(
     val neighborhood: Map[Int, Int] = mostRecentSignalMap.seq.toMap.asInstanceOf[Map[Int, Int]]
     val centralVariableAssignment = (id, state)
     val currentConfig = VertexColoringConfig(neighborhood, domain, centralVariableAssignment)
-    val newState = optimizer.chooseNewAssignment(currentConfig)
+    val newState = optimizer.computeNewAssignment(currentConfig)
+    newState
+  }
+}
+
+class ColoringRdsaVertex(
+  override val id: Int,
+  val domain: Set[Int],
+  val optimizer: DecisionRule[Int, Int],
+  initialState: Int, dampingFactor: Double = 0.65) extends VertexColoringVertex(id, domain, optimizer, initialState) {
+
+  type Signal = (Int, Double)
+
+  var rank = 1 - dampingFactor
+
+  override def collect = {
+    val neighborhood: Map[Int, Int] = (mostRecentSignalMap map (x => (x._1, x._2._1))).seq.toMap.asInstanceOf[Map[Int, Int]]
+    val neighborhoodRanks: Map[Int, Double] = (mostRecentSignalMap map (x => (x._1, x._2._2))).seq.toMap.asInstanceOf[Map[Int, Double]]
+    val centralVariableAssignment = (id, state)
+    val centralVariableRank = rank
+    val currentConfig = RankedVertexColoringConfig(neighborhood, neighborhoodRanks, domain, centralVariableAssignment, centralVariableRank, dampingFactor)
+    val newState = optimizer.computeNewAssignment(currentConfig)
+    rank = currentConfig.centralVariableRank
     newState
   }
 }
