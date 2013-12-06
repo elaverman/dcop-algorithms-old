@@ -1,6 +1,9 @@
-package com.signalcollect.dcop
+package com.signalcollect.dcop.impl
 
-trait DefaultConfigurationModule[AgentId, Action] extends OptimizerModule[AgentId, Action] {
+import com.signalcollect.dcop.modules._
+
+trait DefaultConfigurationModule[AgentId, Action] extends ConfigurationModule[AgentId, Action] {
+  this: OptimizerModule[AgentId, Action] =>
 
   type Config = DefaultConfig
 

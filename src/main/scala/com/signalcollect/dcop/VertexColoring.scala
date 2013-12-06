@@ -23,6 +23,7 @@ package com.signalcollect.dcop
 import com.signalcollect.DataGraphVertex
 import com.signalcollect._
 import scala.util.Random
+import com.signalcollect.dcop.modules.OptimizerModule
 
 class VertexColoringVertex(
   override val id: Int,
@@ -35,9 +36,9 @@ class VertexColoringVertex(
   def collect = {
     val neighborhood: Map[Int, Int] = mostRecentSignalMap.seq.toMap.asInstanceOf[Map[Int, Int]]
     val centralVariableAssignment = (id, state)
-    val c = optimizer.factory.createConfig(neighborhood, domain, centralVariableAssignment)
-    if (optimizer.schedule.shouldConsiderMove(c)) {
-      optimizer.rule.computeMove(c)
+    val c = optimizer.createConfig(neighborhood, domain, centralVariableAssignment)
+    if (optimizer.shouldConsiderMove(c)) {
+      optimizer.computeMove(c)
     } else {
       state
     }
