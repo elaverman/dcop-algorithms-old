@@ -2,7 +2,7 @@ package com.signalcollect.dcop.impl
 
 import com.signalcollect.dcop.modules._
 
-trait VertexColoringUtilityFunctionModule[AgentId, Action] extends UtilityFunctionModule[AgentId, Action] {
+trait UtilityFunctions[AgentId, Action] extends UtilityFunctionModule[AgentId, Action] {
   this: ConfigurationModule[AgentId, Action] =>
 
   trait VertexColoringUtility extends UtilityFunction {

@@ -2,7 +2,7 @@ package com.signalcollect.dcop.impl
 
 import com.signalcollect.dcop.modules._
 
-trait MemoryLessTargetFunctionModule[AgentId, Action] extends TargetFunctionModule[AgentId, Action] {
+trait TargetFunctionsWithUtilityFunctions[AgentId, Action] extends TargetFunctionModule[AgentId, Action] {
   this: UtilityFunctionModule[AgentId, Action] with ConfigurationModule[AgentId, Action] =>
 
   trait MemoryLessTargetFunction extends TargetFunction {

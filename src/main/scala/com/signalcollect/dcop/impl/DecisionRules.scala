@@ -3,7 +3,7 @@ package com.signalcollect.dcop.impl
 import scala.util.Random
 import com.signalcollect.dcop.modules._
 
-trait ArgmaxADecisionRuleModule[AgentId, Action] extends DecisionRuleModule[AgentId, Action] {
+trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModule[AgentId, Action] {
   this: TargetFunctionModule[AgentId, Action] with ConfigurationModule[AgentId, Action] =>
 
   trait ArgmaxADecisionRule extends DecisionRule {
