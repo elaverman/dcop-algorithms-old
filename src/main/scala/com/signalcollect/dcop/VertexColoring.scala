@@ -27,7 +27,7 @@ import scala.util.Random
 class VertexColoringVertex(
   override val id: Int,
   val domain: Set[Int],
-  val optimizer: DecisionRule[Int, Int],
+  val optimizer: OptimizerModule[Int, Int],
   initialState: Int) extends DataGraphVertex(id, initialState) {
 
   type Signal = Int
@@ -35,44 +35,11 @@ class VertexColoringVertex(
   def collect = {
     val neighborhood: Map[Int, Int] = mostRecentSignalMap.seq.toMap.asInstanceOf[Map[Int, Int]]
     val centralVariableAssignment = (id, state)
-    val currentConfig = VertexColoringConfig(neighborhood, domain, centralVariableAssignment)
-    val newState = optimizer.computeNewAssignment(currentConfig)
-    newState
+    val c = optimizer.factory.createConfig(neighborhood, domain, centralVariableAssignment)
+    if (optimizer.schedule.shouldConsiderMove(c)) {
+      optimizer.rule.computeMove(c)
+    } else {
+      state
+    }
   }
 }
-
-class ColoringRdsaVertex(
-  override val id: Int,
-  val domain: Set[Int],
-  val optimizer: DecisionRule[Int, Int],
-  initialState: Int, dampingFactor: Double = 0.65) extends VertexColoringVertex(id, domain, optimizer, initialState) {
-
-  type Signal = (Int, Double)
-
-  var rank = 1 - dampingFactor
-
-  override def collect = {
-    val neighborhood: Map[Int, Int] = (mostRecentSignalMap map (x => (x._1, x._2._1))).seq.toMap.asInstanceOf[Map[Int, Int]]
-    val neighborhoodRanks: Map[Int, Double] = (mostRecentSignalMap map (x => (x._1, x._2._2))).seq.toMap.asInstanceOf[Map[Int, Double]]
-    val centralVariableAssignment = (id, state)
-    val centralVariableRank = rank
-    val currentConfig = RankedVertexColoringConfig(neighborhood, neighborhoodRanks, domain, centralVariableAssignment, centralVariableRank, dampingFactor)
-    val newState = optimizer.computeNewAssignment(currentConfig)
-    rank = currentConfig.centralVariableRank
-    newState
-  }
-}
-
-//object DsaATest extends App {
-//  val g = GraphBuilder.build
-//  val optimizer = VertexColoringDsaA(changeThreshold = 0.5)
-//  val domain = (0 to 1).toSet
-//  def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
-//  val v0 = new VertexColoringVertex(0, domain, optimizer, randomFromDomain)
-//  val v1 = new VertexColoringVertex(1, domain, optimizer, randomFromDomain)
-//  val v2 = new VertexColoringVertex(2, domain, optimizer, randomFromDomain)
-//  g.addVertex(v0)
-//  g.addVertex(v1)
-//  g.addVertex(v2)
-//  
-//}

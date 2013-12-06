@@ -33,8 +33,9 @@ class DsaSpec extends FlatSpec with ShouldMatchers with Checkers {
   "DsaA" should "correctly assign colors to a small test graph" in {
     check(
       (irrelevantParameter: Int) => {
+        println("It's alive!")
         val g = GraphBuilder.build
-        val optimizer = ColoringDsaA(changeProbability = 1.0)
+        val optimizer = new DsaVertexColoring(changeProbability = 1.0)
         val domain = (0 to 1).toSet
         def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
         val v0 = new VertexColoringVertex(0, domain, optimizer, randomFromDomain)
