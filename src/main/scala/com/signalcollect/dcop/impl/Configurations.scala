@@ -2,8 +2,10 @@ package com.signalcollect.dcop.impl
 
 import com.signalcollect.dcop.modules._
 
-trait Configurations[AgentId, Action] extends ConfigurationModule[AgentId, Action] {
+trait DefaultConfiguration[AgentId, Action] extends ConfigurationModule[AgentId, Action] {
   this: OptimizerModule[AgentId, Action] =>
+
+  type Config = DefaultConfig
 
   class DefaultConfigFactory extends ConfigFactory {
     def createConfig(neighborhood: Map[AgentId, Action],
