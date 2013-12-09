@@ -7,4 +7,5 @@ trait OptimizerModule[AgentId, Action]
   def createConfig: ConfigFactory
   def shouldConsiderMove: AdjustmentSchedule
   def computeMove: DecisionRule
+  def isLocalOptimum(c: Config): Boolean
 }
