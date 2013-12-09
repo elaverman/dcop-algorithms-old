@@ -3,11 +3,11 @@ package com.signalcollect.dcop.graph
 import com.signalcollect._
 import com.signalcollect.dcop.modules.OptimizerModule
 
-trait DcopConvergenceDetection[Id, State] {
-  this: DataGraphVertex[Id, State] =>
+trait DcopConvergenceDetection[Id, VertexState, AgentAction] {
+  this: DataGraphVertex[Id, VertexState] =>
 
-  def domain: Set[State]
-  val optimizer: OptimizerModule[Id, State]
+  def domain: Set[AgentAction]
+  val optimizer: OptimizerModule[Id, AgentAction]
 
   type Config = optimizer.Config
 
@@ -15,12 +15,7 @@ trait DcopConvergenceDetection[Id, State] {
     optimizer.isLocalOptimum(c)
   }
 
-  def currentConfig: optimizer.Config = {
-    val neighborhood: Map[Id, State] = mostRecentSignalMap.seq.toMap.asInstanceOf[Map[Id, State]]
-    val centralVariableAssignment = (id, state)
-    val c = optimizer.createConfig(neighborhood, domain, centralVariableAssignment)
-    c
-  }
+  def currentConfig: Config
 
   override def scoreSignal: Double = {
     if (edgesModifiedSinceSignalOperation) {
