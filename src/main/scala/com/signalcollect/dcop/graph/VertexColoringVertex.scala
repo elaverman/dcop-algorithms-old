@@ -18,11 +18,8 @@
  *  
  */
 
-package com.signalcollect.dcop
-
-import com.signalcollect.DataGraphVertex
+package com.signalcollect.dcop.graph
 import com.signalcollect._
-import scala.util.Random
 import com.signalcollect.dcop.modules.OptimizerModule
 
 class VertexColoringVertex(

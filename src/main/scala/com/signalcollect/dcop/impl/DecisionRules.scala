@@ -3,6 +3,19 @@ package com.signalcollect.dcop.impl
 import scala.util.Random
 import com.signalcollect.dcop.modules._
 
+
+trait DecisionRules[AgentId, Action] extends DecisionRuleModule[AgentId, Action] {
+  this: ConfigurationModule[AgentId, Action] =>
+
+    object RandomDecisionRule extends DecisionRule {
+       def computeMove(c: Config) = {
+         val randomMove: Action = c.domain.toSeq(Random.nextInt(c.domain.size))
+         randomMove
+       }
+    }
+}
+
+
 trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModule[AgentId, Action] {
   this: TargetFunctionModule[AgentId, Action] with ConfigurationModule[AgentId, Action] =>
 

@@ -10,3 +10,11 @@ case class DsaVertexColoring(changeProbability: Double)
   val shouldConsiderMove = new ParallelRandomAdjustmentSchedule(changeProbability)
   val computeMove = new ArgmaxADecisionRule with MemoryLessTargetFunction with VertexColoringUtility
 }
+
+
+case object RandomVertexColoring
+  extends DefaultSimpleDcopAlgorithm {
+  val createConfig = new DefaultConfigFactory
+  val shouldConsiderMove = new FloodAdjustmentSchedule
+  val computeMove = RandomDecisionRule
+}

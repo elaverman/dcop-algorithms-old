@@ -17,4 +17,9 @@ trait AdjustmentSchedules[AgentId, Action] extends AdjustmentScheduleModule[Agen
       Random.nextDouble <= changeProbability
     }
   }
+  
+  class FloodAdjustmentSchedule extends AdjustmentSchedule {
+    def shouldConsiderMove(c: Config) = true
+  }
+  
 }
