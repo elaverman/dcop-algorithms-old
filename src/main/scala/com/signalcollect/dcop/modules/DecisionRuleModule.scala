@@ -5,8 +5,9 @@ trait DecisionRuleModule[AgentId, Action] {
 
   type Utility = Double
 
+  val rule: DecisionRule
+  
   trait DecisionRule {
-    def apply(c: Config) = computeMove(c)
     def computeMove(c: Config): Action
     def isLocalOptimum(c: Config): Boolean
   }

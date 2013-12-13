@@ -6,16 +6,14 @@ import com.signalcollect.dcop.modules.OptimizerModule
 trait DcopConvergenceDetection[Id, VertexState, AgentAction] {
   this: DataGraphVertex[Id, VertexState] =>
 
-  def domain: Set[AgentAction]
+  protected def domain: Set[AgentAction]
   val optimizer: OptimizerModule[Id, AgentAction]
 
-  type Config = optimizer.Config
-
-  def isLocalOptimum(c: Config): Boolean = {
+  def isLocalOptimum(c: optimizer.Config): Boolean = {
     optimizer.isLocalOptimum(c)
   }
 
-  def currentConfig: Config
+  def currentConfig: optimizer.Config
 
   override def scoreSignal: Double = {
     if (edgesModifiedSinceSignalOperation) {

@@ -6,13 +6,13 @@ import com.signalcollect.dcop.impl._
 /**
  * Assumes that vertex state and agent action have the same type.
  */
-trait DefaultConfigCreation[Id, State] {
+trait SimpleConfigCreation[Id, State] {
   this: DataGraphVertex[Id, State] with DcopConvergenceDetection[Id, State, State] =>
-    
-  def currentConfig: Config = {
+
+  def currentConfig: optimizer.Config = {
     val neighborhood: Map[Id, State] = mostRecentSignalMap.seq.toMap.asInstanceOf[Map[Id, State]]
     val centralVariableAssignment = (id, state)
-    val c = optimizer.createConfig(neighborhood, domain, centralVariableAssignment)
+    val c = optimizer.createNewConfig(neighborhood, domain, centralVariableAssignment)
     c
   }
 }

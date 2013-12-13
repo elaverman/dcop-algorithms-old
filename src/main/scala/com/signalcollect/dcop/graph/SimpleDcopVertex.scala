@@ -24,11 +24,11 @@ import com.signalcollect.dcop.modules._
 
 class SimpleDcopVertex[Id, State](
   id: Id,
-  domain: Set[State],
-  optimizer: OptimizerModule[Id, State],
+  val domain: Set[State],
+  override val optimizer: OptimizerModule[Id, State],
   initialState: State,
   debug: Boolean = false)
   extends DcopVertex[Id, State, State](id, domain, optimizer, initialState, debug)
-  with DefaultConfigCreation[Id, State] {
-  def moveToState(m: State): State = m
+  with SimpleConfigCreation[Id, State] {
+  override def configToState(c: optimizer.Config): State = c.centralVariableValue
 }

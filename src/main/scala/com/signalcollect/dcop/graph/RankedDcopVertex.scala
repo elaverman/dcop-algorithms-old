@@ -21,14 +21,76 @@
 package com.signalcollect.dcop.graph
 import com.signalcollect._
 import com.signalcollect.dcop.modules._
+import com.signalcollect.dcop.impl._
 
-class RankedDcopVertex[Id, VertexState, AgentAction](
+class RankedVertexColoringEdge(targetId: Int) extends DefaultEdge(targetId) {
+  type Source = RankedDcopVertex[_, _]
+
+  def signal = {
+    val sourceState = source.state
+    (sourceState._1, sourceState._2 / source.edgeCount)
+  }
+}
+
+class RankedDcopVertex[Id, Action](
   id: Id,
-  domain: Set[State],
-  optimizer: OptimizerModule[Id, State],
-  initialState: State,
+  val domain: Set[Action],
+  override val optimizer: OptimizerModule[Id, Action] with RankedConfiguration[Id, Action],
+  initialAction: Action,
+  baseRank: Double = 0.15,
   debug: Boolean = false)
-  extends DcopVertex[Id, State, State](id, domain, optimizer, initialState, debug)
-  with DefaultConfigCreation[Id, State] {
-  def moveToState(m: State): State = m
+  extends DcopVertex[Id, (Action, Double), Action](id, domain, optimizer, (initialAction, baseRank), debug)
+  with RankedConfigCreation[Id, Action] {
+
+  def configToState(c: optimizer.Config): (Action, Double) = {
+    val move = c.centralVariableValue
+    (move, computeRankForMove(c))
+  }
+
+  def computeRankForMove(c: optimizer.Config): Double = {
+    val allies = c.neighborhood.filter(_._2 != c.centralVariableValue)
+    val allyRankSum = allies.keys.map(c.ranks).sum
+    val dampingFactor = 1.0 - baseRank
+    val newPageRank = baseRank + dampingFactor * allyRankSum
+    newPageRank
+  }
+
+  override def collect = {
+    val c = currentConfig
+    if (optimizer.shouldConsiderMove(c)) {
+      val move = optimizer.computeMove(c)
+      val newConfig = c.withCentralVariableAssignment(move)
+      val newState = configToState(newConfig)
+      if (debug) {
+        println(s"Vertex $id has changed its state from $state to $newState.")
+      }
+      newState
+    } else {
+      if (debug) {
+        if (isLocalOptimum(c)) {
+          println(s"Vertex $id has converged and stays at move $state.")
+        }
+        println(s"Vertex $id still has conflicts but stays at move $state anyway.")
+      }
+      val newRank = computeRankForMove(c)
+      (state._1, newRank)
+    }
+  }
+
+  override def scoreSignal: Double = {
+      if (edgesModifiedSinceSignalOperation) {
+        1
+      } else {
+        lastSignalState match {
+          case Some(oldState) =>
+            if (oldState._1 == state._1 && isLocalOptimum(currentConfig)) {
+              0
+            } else {
+              1
+            }
+          case noStateOrStateChanged => 1
+        }
+      }
+  }
+
 }
