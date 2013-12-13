@@ -98,7 +98,7 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
             true
         }
       },
-      minSuccessful(10))
+      minSuccessful(1))
   }
 
   "RankedDsaA" should "correctly assign colors to a 2x2 grid" in {
@@ -109,7 +109,7 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
           println(s"STARTING TEST RUN $runId")
           val g = GraphBuilder.build
           val optimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] = RankedDsaVertexColoring(changeProbability = 1.0)
-          val domain = (0 to 4).toSet
+          val domain = (0 until 4).toSet
           def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
           val debug = false
           val v0 = new RankedDcopVertex(0, domain, optimizer, randomFromDomain, debug = debug)
@@ -134,10 +134,14 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
           g.addEdge(v3.id, new RankedVertexColoringEdge(v2.id))
           g.execute
           val idStateMap = g.aggregate[Map[Int, (Int, Double)]](new IdStateMapAggregator[Int, (Int, Double)])
-          for (i <- Set(0, 1, 2, 3))
-            for (j <- Set(0, 1, 2, 3))
-              if (i != j)
-                assert(idStateMap(i)._1 != idStateMap(j)._1, s"Vertex $i and vertex $j have a color collision.")
+          for (i <- Set(0, 1, 2, 3)) {
+            for (j <- Set(0, 1, 2, 3)) {
+              if (i != j) {
+                assert(idStateMap(i)._1 != idStateMap(j)._1, s"Vertex $i with rank ${g.forVertexWithId(i, (x: RankedDcopVertex[Int, Int]) => x.state._2)}" +
+                  s"and vertex $j with rank ${g.forVertexWithId(j, (x: RankedDcopVertex[Int, Int]) => x.state._2)} have a color collision.")
+              }
+            }
+          }
           g.shutdown
           true
         } catch {
@@ -146,7 +150,7 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
             true
         }
       },
-      minSuccessful(10))
+      minSuccessful(1000))
   }
 
   "RankedDsaA" should "correctly assign colors to a random grid" in {
@@ -160,7 +164,7 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
           println(s"STARTING TEST RUN $runId")
           val g = GraphBuilder.build
           val optimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] = RankedDsaVertexColoring(changeProbability = 1.0)
-          val domain = (0 to 4).toSet
+          val domain = (0 to 3).toSet
           def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
           val debug = false
 
@@ -173,10 +177,12 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
 
           g.execute
           val idStateMap = g.aggregate[Map[Int, (Int, Double)]](new IdStateMapAggregator[Int, (Int, Double)])
-          for (i <- 0 until width)
-            for (j <- 0 until width)
-              if (i != j)
-                assert(idStateMap(i)._1 != idStateMap(j)._1, s"Vertex $i and vertex $j have a color collision.")
+          for (i <- 0 until width) {
+            for (j <- neighbours(i, width)) {
+              assert(idStateMap(i)._1 != idStateMap(j)._1, s"Vertex $i with rank ${g.forVertexWithId(i, (x: RankedDcopVertex[Int, Int]) => x.state._2)}" +
+                s"and vertex $j with rank ${g.forVertexWithId(j, (x: RankedDcopVertex[Int, Int]) => x.state._2)} have a color collision.")
+            }
+          }
           g.shutdown
           true
         } catch {
