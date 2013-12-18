@@ -15,6 +15,7 @@ trait TargetFunctionsWithUtilityFunctions[AgentId, Action] extends TargetFunctio
       val configUtilities = configurationCandidates.map(c => (c.centralVariableValue, computeUtility(c))).toMap
       configUtilities
     }
+
   }
 }
 
@@ -39,5 +40,6 @@ trait RankedTargetFunctions[AgentId, Action] extends TargetFunctionModule[AgentI
       })
       configUtilities.toMap
     }
+    
   }
 }

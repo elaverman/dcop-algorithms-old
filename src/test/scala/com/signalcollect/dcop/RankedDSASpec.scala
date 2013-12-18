@@ -38,7 +38,7 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
 
   implicit def arbEdgeIds[Set[Int]] = Arbitrary(outEdgeIds)
 
-  lazy val smallWidth = Gen.chooseNum(1, 40).map(Width(_))
+  lazy val smallWidth = Gen.chooseNum(1, 10).map(Width(_))
   implicit def arbSmallWidth[Width] = Arbitrary(smallWidth)
 
   // Returns all the neighboring cells of the cell with the given row/column
@@ -72,7 +72,7 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
         try {
           println(s"STARTING TEST RUN $runId")
           val g = GraphBuilder.build
-          val optimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] = RankedDsaVertexColoring(changeProbability = 1.0)
+          val optimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] = RankedDsaAVertexColoring(changeProbability = 1.0)
           val domain = (0 to 1).toSet
           def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
           val debug = false
@@ -108,7 +108,7 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
         try {
           println(s"STARTING TEST RUN $runId")
           val g = GraphBuilder.build
-          val optimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] = RankedDsaVertexColoring(changeProbability = 1.0)
+          val optimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] = RankedDsaAVertexColoring(changeProbability = 1.0)
           val domain = (0 until 4).toSet
           def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
           val debug = false
@@ -150,7 +150,7 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
             true
         }
       },
-      minSuccessful(1000))
+      minSuccessful(1))
   }
 
   "RankedDsaA" should "correctly assign colors to a random grid" in {
@@ -163,7 +163,7 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
           assert(width <= 40, s"Width $width is bigger than 40.")
           println(s"STARTING TEST RUN $runId")
           val g = GraphBuilder.build
-          val optimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] = RankedDsaVertexColoring(changeProbability = 1.0)
+          val optimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] = RankedDsaAVertexColoring(changeProbability = 1.0)
           val domain = (0 to 3).toSet
           def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
           val debug = false
@@ -179,8 +179,21 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
           val idStateMap = g.aggregate[Map[Int, (Int, Double)]](new IdStateMapAggregator[Int, (Int, Double)])
           for (i <- 0 until width) {
             for (j <- neighbours(i, width)) {
-              assert(idStateMap(i)._1 != idStateMap(j)._1, s"Vertex $i with rank ${g.forVertexWithId(i, (x: RankedDcopVertex[Int, Int]) => x.state._2)}" +
-                s"and vertex $j with rank ${g.forVertexWithId(j, (x: RankedDcopVertex[Int, Int]) => x.state._2)} have a color collision.")
+              //TODO: Add condition that it's in NE #of conflicts and NE target function
+              val iConfig = g.forVertexWithId(i, (x: RankedDcopVertex[Int, Int]) => x.currentConfig)
+              val jConfig = g.forVertexWithId(j, (x: RankedDcopVertex[Int, Int]) => x.currentConfig)
+              val iLocalOptimum = g.forVertexWithId(i, (x: RankedDcopVertex[Int, Int]) => x.optimizer.isLocalOptimum(x.currentConfig))
+              val jLocalOptimum = g.forVertexWithId(j, (x: RankedDcopVertex[Int, Int]) => x.optimizer.isLocalOptimum(x.currentConfig))
+              assert(idStateMap(i)._1 != idStateMap(j)._1 || ((iLocalOptimum) && (jLocalOptimum)),
+                s" \nGrid size: $width.\n " +
+                  s" Vertex $i" +
+                  s" with configuration: \n$iConfig" +
+                  s" with isLocalOptimum $iLocalOptimum" +
+                  s" with rank ${g.forVertexWithId(i, (x: RankedDcopVertex[Int, Int]) => x.state._2)}" +
+                  s" and \n Vertex $j" +
+                  s" with configuration: \n$jConfig" +
+                  s" with isLocalOptimum $jLocalOptimum" +
+                  s" with rank ${g.forVertexWithId(j, (x: RankedDcopVertex[Int, Int]) => x.state._2)} have a color collision.")
             }
           }
           g.shutdown
@@ -191,7 +204,7 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
             true
         }
       },
-      minSuccessful(100))
+      minSuccessful(10))
   }
 
   //TODO modify. Test was ported from the old project...

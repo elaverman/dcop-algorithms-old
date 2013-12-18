@@ -31,6 +31,16 @@ trait SimpleConfiguration[Id, Action] extends ConfigurationModule[Id, Action] {
     def withCentralVariableAssignment(value: Action): Config = {
       this.copy(centralVariableAssignment = (centralVariableAssignment._1, value))
     }
+
+    def computeExpectedNumberOfConflicts = {
+      val occupiedColors = neighborhood.values
+      val numberOfConflicts = occupiedColors.filter(_ == centralVariableValue).size
+      numberOfConflicts
+    }
+
+    override def toString = s"      neighborhood = $neighborhood.toString\n" +
+      s"      domain = $domain.toString\n" +
+      s"      centralVariableAssignment = $centralVariableAssignment.toString\n"
   }
 
 }
@@ -50,7 +60,7 @@ class RankedConfiguration[Id, Action] extends ConfigurationModule[Id, Action] {
      * parameters are wrong. :(
      *
      * ranks has to include the central variable rank.
-     * 
+     *
      * TODO: Assess if centralVariableRank could be removed from ranks.
      * TODO: Should reevaluate currentConfig function on RankedConfigCreation.
      */
@@ -71,6 +81,18 @@ class RankedConfiguration[Id, Action] extends ConfigurationModule[Id, Action] {
     def withCentralVariableAssignment(value: Action): Config = {
       this.copy(centralVariableAssignment = (centralVariableAssignment._1, value))
     }
+
+    def computeExpectedNumberOfConflicts = {
+      val occupiedColors = neighborhood.values
+      val numberOfConflicts = occupiedColors.filter(_ == centralVariableValue).size
+      numberOfConflicts
+    }
+
+    override def toString = s"      neighborhood = $neighborhood.toString\n" +
+      s"      ranks = $ranks.toString\n" +
+      s"      domain = $domain.toString\n" +
+      s"      centralVariableAssignment = $centralVariableAssignment.toString\n"
+
   }
 
 }

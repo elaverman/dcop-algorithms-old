@@ -14,5 +14,12 @@ trait UtilityFunctions[AgentId, Action] extends UtilityFunctionModule[AgentId, A
       neighborsInSync
     }
   }
-
+  
+  trait ConflictBasedVertexColoringUtility extends UtilityFunction {
+    def computeUtility(c: Config) = {
+      val occupiedColors = c.neighborhood.values
+      val numberOfConflicts = occupiedColors.filter(_ == c.centralVariableValue).size
+      - numberOfConflicts
+    }
+  }
 }

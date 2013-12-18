@@ -69,28 +69,29 @@ class RankedDcopVertex[Id, Action](
       if (debug) {
         if (isLocalOptimum(c)) {
           println(s"Vertex $id has converged and stays at move $state.")
+        } else {
+          println(s"Vertex $id still has conflicts but stays at move $state anyway.")
         }
-        println(s"Vertex $id still has conflicts but stays at move $state anyway.")
       }
-      val newRank = computeRankForMove(c)
-      (state._1, newRank)
+      configToState(c)
     }
   }
 
   override def scoreSignal: Double = {
-      if (edgesModifiedSinceSignalOperation) {
-        1
-      } else {
-        lastSignalState match {
-          case Some(oldState) =>
-            if (oldState._1 == state._1 && isLocalOptimum(currentConfig)) {
-              0
-            } else {
-              1
-            }
-          case noStateOrStateChanged => 1
-        }
+    if (edgesModifiedSinceSignalOperation) {
+      1
+    } else {
+      lastSignalState match {
+        case Some(oldState) =>
+          if (oldState._1 == state._1 && isLocalOptimum(currentConfig)) {
+            0
+          } else {
+            1
+          }
+        case noStateOrStateChanged => 
+          1
       }
+    }
   }
 
 }

@@ -32,7 +32,7 @@ import org.scalacheck.Arbitrary
 
 class DsaSpec extends FlatSpec with ShouldMatchers with Checkers {
 
-    lazy val smallWidth = Gen.chooseNum(1, 40).map(Width(_))
+  lazy val smallWidth = Gen.chooseNum(1, 10).map(Width(_))
   implicit def arbSmallWidth[Width] = Arbitrary(smallWidth)
 
   // Returns all the neighboring cells of the cell with the given row/column
@@ -56,13 +56,13 @@ class DsaSpec extends FlatSpec with ShouldMatchers with Checkers {
     potentialNeighbours(column, row).filter(coordinate => inGrid(coordinate._1, coordinate._2, width)) map
       (coordinate => (coordinate._2 * width + coordinate._1))
   }
-   var runId = 0
-  
+  var runId = 0
+
   "DsaA" should "correctly assign colors to a small test graph" in {
     check(
       (irrelevantParameter: Int) => {
         val g = GraphBuilder.build
-        val optimizer = DsaVertexColoring(changeProbability = 1.0)
+        val optimizer = DsaAVertexColoring(changeProbability = 1.0)
         val domain = (0 to 1).toSet
         def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
         val v0 = new SimpleDcopVertex(0, domain, optimizer, randomFromDomain, true)
@@ -81,17 +81,17 @@ class DsaSpec extends FlatSpec with ShouldMatchers with Checkers {
         assert(idStateMap(0) != idStateMap(2), "Vertex 0 and vertex 2 have a color collision.")
         true
       },
-      minSuccessful(20))
+      minSuccessful(1))
   }
-  
-    "RankedDsaA" should "correctly assign colors to a 2x2 grid" in {
+
+  "RankedDsaA" should "correctly assign colors to a 2x2 grid" in {
     check(
       (irrelevantParameter: Int) => {
         runId += 1
         try {
           println(s"STARTING TEST RUN $runId")
           val g = GraphBuilder.build
-          val optimizer = DsaVertexColoring(changeProbability = 1.0)
+          val optimizer = DsaAVertexColoring(changeProbability = 1.0)
           val domain = (0 until 4).toSet
           def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
           val debug = false
@@ -132,7 +132,7 @@ class DsaSpec extends FlatSpec with ShouldMatchers with Checkers {
             true
         }
       },
-      minSuccessful(1000))
+      minSuccessful(1))
   }
 
   "RankedDsaA" should "correctly assign colors to a random grid" in {
@@ -145,7 +145,7 @@ class DsaSpec extends FlatSpec with ShouldMatchers with Checkers {
           assert(width <= 40, s"Width $width is bigger than 40.")
           println(s"STARTING TEST RUN $runId")
           val g = GraphBuilder.build
-          val optimizer = DsaVertexColoring(changeProbability = 1.0)
+          val optimizer = DsaAVertexColoring(changeProbability = 1.0)
           val domain = (0 to 3).toSet
           def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
           val debug = false
@@ -161,7 +161,18 @@ class DsaSpec extends FlatSpec with ShouldMatchers with Checkers {
           val idStateMap = g.aggregate[Map[Int, Int]](new IdStateMapAggregator[Int, Int])
           for (i <- 0 until width) {
             for (j <- neighbours(i, width)) {
-              assert(idStateMap(i) != idStateMap(j), s"Vertex $i and vertex $j have a color collision.")
+              val iConfig = g.forVertexWithId(i, (x: SimpleDcopVertex[Int, Int]) => x.currentConfig)
+              val jConfig = g.forVertexWithId(j, (x: SimpleDcopVertex[Int, Int]) => x.currentConfig)
+              val iLocalOptimum = g.forVertexWithId(i, (x: SimpleDcopVertex[Int, Int]) => x.optimizer.isLocalOptimum(x.currentConfig))
+              val jLocalOptimum = g.forVertexWithId(j, (x: SimpleDcopVertex[Int, Int]) => x.optimizer.isLocalOptimum(x.currentConfig))
+              assert(idStateMap(i) != idStateMap(j) || ((iLocalOptimum) && (jLocalOptimum)),
+                s" \nGrid size: $width.\n " +
+                  s" Vertex $i" +
+                  s" with configuration: \n$iConfig" +
+                  s" with isLocalOptimum $iLocalOptimum" +
+                  s" and \n Vertex $j" +
+                  s" with configuration: \n$jConfig" +
+                  s" with isLocalOptimum $jLocalOptimum have a color collision and are not in Local Optima.")
             }
           }
           g.shutdown
@@ -172,7 +183,7 @@ class DsaSpec extends FlatSpec with ShouldMatchers with Checkers {
             true
         }
       },
-      minSuccessful(1))
+      minSuccessful(100))
   }
 }
 

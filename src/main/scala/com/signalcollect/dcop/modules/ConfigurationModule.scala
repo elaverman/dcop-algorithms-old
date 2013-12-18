@@ -24,5 +24,6 @@ trait ConfigurationModule[AgentId, Action] {
     def withCentralVariableAssignment(value: Action): Config
     def centralVariableAssignment: (AgentId, Action)
     def centralVariableValue = centralVariableAssignment._2
+    def computeExpectedNumberOfConflicts: Int
   }
 }

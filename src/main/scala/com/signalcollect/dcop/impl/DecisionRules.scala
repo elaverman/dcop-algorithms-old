@@ -48,4 +48,23 @@ trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModu
     }
 
   }
+
+  trait ArgmaxBDecisionRule extends ArgmaxADecisionRule {
+    this: TargetFunction =>
+
+    override def computeMove(c: Config) = {
+      val expectedUtilities: Map[Action, Utility] = computeExpectedUtilities(c)
+      val maxUtility = expectedUtilities.values.max
+      val maxUtilityMoves: Seq[Action] = expectedUtilities.filter(_._2 == maxUtility).map(_._1).toSeq
+      val numberOfMaxUtilityMoves = maxUtilityMoves.size
+      if ((isLocalOptimumGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) && ((numberOfMaxUtilityMoves > 1 && c.computeExpectedNumberOfConflicts == 0) || numberOfMaxUtilityMoves == 1)) {
+        c.centralVariableValue
+      } else {
+        val chosenMaxUtilityMove = maxUtilityMoves(Random.nextInt(maxUtilityMoves.size))
+        chosenMaxUtilityMove
+      }
+    }
+  }
+
+  
 }
