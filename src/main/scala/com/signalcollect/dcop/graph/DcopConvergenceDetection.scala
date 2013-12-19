@@ -9,8 +9,8 @@ trait DcopConvergenceDetection[Id, VertexState, AgentAction] {
   protected def domain: Set[AgentAction]
   val optimizer: OptimizerModule[Id, AgentAction]
 
-  def isLocalOptimum(c: optimizer.Config): Boolean = {
-    optimizer.isLocalOptimum(c)
+  def isConverged(c: optimizer.Config): Boolean = {
+    optimizer.isConverged(c)
   }
 
   def currentConfig: optimizer.Config
@@ -21,7 +21,7 @@ trait DcopConvergenceDetection[Id, VertexState, AgentAction] {
     } else {
       lastSignalState match {
         case Some(oldState) =>
-          if (oldState == state && isLocalOptimum(currentConfig)) {
+          if (oldState == state && isConverged(currentConfig)) {
             0
           } else {
             1

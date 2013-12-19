@@ -10,7 +10,7 @@ import com.signalcollect.configuration.ExecutionMode
 import com.signalcollect.interfaces.ModularAggregationOperation
 
 case class ColorPrinter(valuesInLine: Int) {
-  def shouldTerminate(f: java.io.FileWriter)(aggregate: Map[Int, Int]): Boolean = {
+  def shouldTerminate(f: java.io.FileWriter, g: java.io.FileWriter)(aggregate: Map[Int, Int]): Boolean = {
     println("Currently in printer object")
     val sorted = aggregate.toList.sortBy(x => x._1)
     sorted.foreach {
@@ -27,17 +27,25 @@ case class ColorPrinter(valuesInLine: Int) {
     }
     f.write("\n")
     println("****")
+    val numberOfConflicts = aggregate.map {
+      case (id, color) =>
+        val neighbors = DcopAlgorithmRun.neighbours(id, valuesInLine)
+        val conflictsForId = neighbors.map(aggregate(_)).filter(_ == color)
+        conflictsForId.size
+    }.sum / 2
+    g.write(numberOfConflicts + "\n")
+    println("____________")
     false
   }
 }
 
 class ColorPrintingGlobalTerminationCondition(
   f: java.io.FileWriter,
-  /*g: java.io.FileWriter,*/
+  g: java.io.FileWriter,
   startTime: Long,
   gridWidth: Int,
   aggregationOperation: IdStateMapAggregator[Int, Int],
-  aggregationInterval: Long) extends GlobalTerminationCondition[Map[Int, Int]](aggregationOperation, aggregationInterval, ColorPrinter(gridWidth).shouldTerminate(f))
+  aggregationInterval: Long) extends GlobalTerminationCondition[Map[Int, Int]](aggregationOperation, aggregationInterval, ColorPrinter(gridWidth).shouldTerminate(f, g))
   with Serializable
 
 object DcopAlgorithmRun extends App {
@@ -67,8 +75,8 @@ object DcopAlgorithmRun extends App {
   println("Starting.")
   val g = GraphBuilder.build
   //  val optimizer = DsaAVertexColoring(changeProbability = 1.0)
-//  val optimizer = DsaBVertexColoring(changeProbability = 1.0)
-    val optimizer = ConflictDsaBVertexColoring(changeProbability = 1.0)
+  //  val optimizer = DsaBVertexColoring(changeProbability = 1.0)
+  val optimizer = ConflictDsaBVertexColoring(changeProbability = 1.0)
   val domain = (0 to 3).toSet
   val width = 100
   def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
@@ -84,9 +92,9 @@ object DcopAlgorithmRun extends App {
   println("Preparing Execution configuration.")
 
   val out = new java.io.FileWriter("animation.txt")
-  val outTime = new java.io.FileWriter("resultsTime.txt")
+  val outConflicts = new java.io.FileWriter("resultsConflicts.txt")
   var startTime = System.nanoTime()
-  val terminationCondition = new ColorPrintingGlobalTerminationCondition(out, /* outTime,*/ startTime, width, aggregationOperation = new IdStateMapAggregator[Int, Int], aggregationInterval = 100L)
+  val terminationCondition = new ColorPrintingGlobalTerminationCondition(out, outConflicts, startTime, width, aggregationOperation = new IdStateMapAggregator[Int, Int], aggregationInterval = 100L)
 
   val executionConfigSync = ExecutionConfiguration(ExecutionMode.PureAsynchronous).withSignalThreshold(0.01).withGlobalTerminationCondition(terminationCondition).withTimeLimit(100000L) //(420000)
 
@@ -94,5 +102,8 @@ object DcopAlgorithmRun extends App {
   g.execute(executionConfigSync)
   println("Shutting down.")
   g.shutdown
+ 
+  out.close
+  outConflicts.close
 
 }

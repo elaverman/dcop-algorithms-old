@@ -67,7 +67,7 @@ class RankedDcopVertex[Id, Action](
       newState
     } else {
       if (debug) {
-        if (isLocalOptimum(c)) {
+        if (isConverged(c)) {
           println(s"Vertex $id has converged and stays at move $state.")
         } else {
           println(s"Vertex $id still has conflicts but stays at move $state anyway.")
@@ -83,7 +83,7 @@ class RankedDcopVertex[Id, Action](
     } else {
       lastSignalState match {
         case Some(oldState) =>
-          if (oldState._1 == state._1 && isLocalOptimum(currentConfig)) {
+          if (oldState._1 == state._1 && isConverged(currentConfig)) {
             0
           } else {
             1

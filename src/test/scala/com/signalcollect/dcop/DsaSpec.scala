@@ -163,8 +163,8 @@ class DsaSpec extends FlatSpec with ShouldMatchers with Checkers {
             for (j <- neighbours(i, width)) {
               val iConfig = g.forVertexWithId(i, (x: SimpleDcopVertex[Int, Int]) => x.currentConfig)
               val jConfig = g.forVertexWithId(j, (x: SimpleDcopVertex[Int, Int]) => x.currentConfig)
-              val iLocalOptimum = g.forVertexWithId(i, (x: SimpleDcopVertex[Int, Int]) => x.optimizer.isLocalOptimum(x.currentConfig))
-              val jLocalOptimum = g.forVertexWithId(j, (x: SimpleDcopVertex[Int, Int]) => x.optimizer.isLocalOptimum(x.currentConfig))
+              val iLocalOptimum = g.forVertexWithId(i, (x: SimpleDcopVertex[Int, Int]) => x.optimizer.isConverged(x.currentConfig))
+              val jLocalOptimum = g.forVertexWithId(j, (x: SimpleDcopVertex[Int, Int]) => x.optimizer.isConverged(x.currentConfig))
               assert(idStateMap(i) != idStateMap(j) || ((iLocalOptimum) && (jLocalOptimum)),
                 s" \nGrid size: $width.\n " +
                   s" Vertex $i" +

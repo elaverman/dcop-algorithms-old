@@ -17,23 +17,10 @@ trait DecisionRules[AgentId, Action] extends DecisionRuleModule[AgentId, Action]
 trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModule[AgentId, Action] {
   this: TargetFunctionModule[AgentId, Action] with ConfigurationModule[AgentId, Action] =>
 
-  trait ArgmaxADecisionRule extends DecisionRule {
+  trait NashEquilibriumConvergence extends DecisionRule {
     this: TargetFunction =>
 
-    def computeMove(c: Config) = {
-      val expectedUtilities: Map[Action, Utility] = computeExpectedUtilities(c)
-      val maxUtility = expectedUtilities.values.max
-      if (isLocalOptimumGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) {
-        c.centralVariableValue
-      } else {
-        val maxUtilityMoves: Seq[Action] = expectedUtilities.filter(_._2 == maxUtility).map(_._1).toSeq
-        val chosenMaxUtilityMove = maxUtilityMoves(Random.nextInt(maxUtilityMoves.size))
-        chosenMaxUtilityMove
-      }
-    }
-
-    // TODO: move to special DecisionRule trait with a default implementation.
-    protected def isLocalOptimumGivenUtilitiesAndMaxUtility(
+    override protected def isConvergedGivenUtilitiesAndMaxUtility(
       c: Config,
       expectedUtilities: Map[Action, Utility],
       maxUtility: Utility): Boolean = {
@@ -41,10 +28,52 @@ trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModu
       maxUtility == currentUtility
     }
 
-    def isLocalOptimum(c: Config): Boolean = {
+    override def isConverged(c: Config): Boolean = {
       val expectedUtilities: Map[Action, Utility] = computeExpectedUtilities(c)
       val maxUtility = expectedUtilities.values.max
-      isLocalOptimumGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)
+      isConvergedGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)
+    }
+  }
+
+  /**
+   * Main use for hard constraints, where you have negative utility
+   * for violating constraints and reach 0 utility only when no constraints are violated.
+   * One example is: ConflictBasedVertexColoringUtility
+   */
+  trait ZeroUtilityConvergence extends DecisionRule {
+    this: TargetFunction =>
+
+    override protected def isConvergedGivenUtilitiesAndMaxUtility(
+      c: Config,
+      expectedUtilities: Map[Action, Utility],
+      maxUtility: Utility): Boolean = {
+      val currentUtility = expectedUtilities(c.centralVariableValue)
+      currentUtility == 0
+    }
+
+    /**
+     * No delegation between isConverged and isConvergedGivenUtilitiesAndMaxUtility
+     */
+    override def isConverged(c: Config): Boolean = {
+      val expectedUtilities: Map[Action, Utility] = computeExpectedUtilities(c)
+      val currentUtility = expectedUtilities(c.centralVariableValue)
+      currentUtility == 0
+    }
+  }
+
+  trait ArgmaxADecisionRule extends DecisionRule {
+    this: TargetFunction =>
+
+    def computeMove(c: Config) = {
+      val expectedUtilities: Map[Action, Utility] = computeExpectedUtilities(c)
+      val maxUtility = expectedUtilities.values.max
+      if (isConvergedGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) {
+        c.centralVariableValue
+      } else {
+        val maxUtilityMoves: Seq[Action] = expectedUtilities.filter(_._2 == maxUtility).map(_._1).toSeq
+        val chosenMaxUtilityMove = maxUtilityMoves(Random.nextInt(maxUtilityMoves.size))
+        chosenMaxUtilityMove
+      }
     }
 
   }
@@ -57,7 +86,7 @@ trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModu
       val maxUtility = expectedUtilities.values.max
       val maxUtilityMoves: Seq[Action] = expectedUtilities.filter(_._2 == maxUtility).map(_._1).toSeq
       val numberOfMaxUtilityMoves = maxUtilityMoves.size
-      if ((isLocalOptimumGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) && ((numberOfMaxUtilityMoves > 1 && c.computeExpectedNumberOfConflicts == 0) || numberOfMaxUtilityMoves == 1)) {
+      if ((isConvergedGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) && ((numberOfMaxUtilityMoves > 1 && c.computeExpectedNumberOfConflicts == 0) || numberOfMaxUtilityMoves == 1)) {
         c.centralVariableValue
       } else {
         val chosenMaxUtilityMove = maxUtilityMoves(Random.nextInt(maxUtilityMoves.size))
@@ -66,5 +95,4 @@ trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModu
     }
   }
 
-  
 }

@@ -28,7 +28,7 @@ abstract class DcopVertex[Id, VertexState, Action](
       newState
     } else {
       if (debug) {
-        if (isLocalOptimum(c)) {
+        if (isConverged(c)) {
           println(s"Vertex $id has converged and stays at move $state.")
         }
         println(s"Vertex $id still has conflicts but stays at move $state anyway.")

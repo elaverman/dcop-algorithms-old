@@ -182,8 +182,8 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
               //TODO: Add condition that it's in NE #of conflicts and NE target function
               val iConfig = g.forVertexWithId(i, (x: RankedDcopVertex[Int, Int]) => x.currentConfig)
               val jConfig = g.forVertexWithId(j, (x: RankedDcopVertex[Int, Int]) => x.currentConfig)
-              val iLocalOptimum = g.forVertexWithId(i, (x: RankedDcopVertex[Int, Int]) => x.optimizer.isLocalOptimum(x.currentConfig))
-              val jLocalOptimum = g.forVertexWithId(j, (x: RankedDcopVertex[Int, Int]) => x.optimizer.isLocalOptimum(x.currentConfig))
+              val iLocalOptimum = g.forVertexWithId(i, (x: RankedDcopVertex[Int, Int]) => x.optimizer.isConverged(x.currentConfig))
+              val jLocalOptimum = g.forVertexWithId(j, (x: RankedDcopVertex[Int, Int]) => x.optimizer.isConverged(x.currentConfig))
               assert(idStateMap(i)._1 != idStateMap(j)._1 || ((iLocalOptimum) && (jLocalOptimum)),
                 s" \nGrid size: $width.\n " +
                   s" Vertex $i" +

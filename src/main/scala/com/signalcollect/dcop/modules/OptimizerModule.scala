@@ -11,5 +11,5 @@ trait OptimizerModule[AgentId, Action]
 
   def computeMove(c: Config) = rule.computeMove(c)
 
-  def isLocalOptimum(c: Config) = rule.isLocalOptimum(c)
+  def isConverged(c: Config) = rule.isConverged(c)
 }
