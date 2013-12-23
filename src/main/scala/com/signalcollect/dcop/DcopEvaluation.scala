@@ -23,7 +23,7 @@ object DcopEvaluation extends App {
     for (domain <- domains) {
       for (width <- widths) {
         for (executionMode <- executionModes) {
-          val executionConfig = ExecutionConfiguration(ExecutionMode.PureAsynchronous).withSignalThreshold(0.01).withTimeLimit(100000L) //(420000)
+          val executionConfig = ExecutionConfiguration(executionMode).withSignalThreshold(0.01).withTimeLimit(100000L) //(420000)
           GridDcopAlgorithmRun(optimizer, domain, width, executionConfig, runNumber)
         }
       }
