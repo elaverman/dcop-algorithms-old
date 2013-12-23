@@ -71,12 +71,13 @@ case class Grid(valuesInLine: Int) {
   }
 }
 
-case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], width: Int, runNumber: Int) {
+case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], width: Int, executionConfig: ExecutionConfiguration, runNumber: Int) {
 
   println("Starting.")
   val g = GraphBuilder.build
 
   def randomFromDomain = domain.toSeq(Random.nextInt(domain.size))
+  def zeroInitialized = 0
   val debug = false
 
   val grid = Grid(width)
@@ -86,7 +87,7 @@ case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[
     case rankedOptimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] =>
       println("Ranked Optimizer")
       for (i <- 0 until width * width)
-        g.addVertex(new RankedDcopVertex(i, domain, rankedOptimizer, randomFromDomain, debug = debug))
+        g.addVertex(new RankedDcopVertex(i, domain, rankedOptimizer, zeroInitialized, debug = debug))
       for (i <- 0 until width * width)
         for (n <- grid.computeNeighbours(i))
           g.addEdge(i, new RankedVertexColoringEdge(n))
@@ -94,23 +95,21 @@ case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[
     case simpleOptimizer: OptimizerModule[Int, Int] =>
       println("Simple Optimizer")
       for (i <- 0 until width * width)
-        g.addVertex(new SimpleDcopVertex(i, domain, simpleOptimizer, randomFromDomain, debug = debug))
+        g.addVertex(new SimpleDcopVertex(i, domain, simpleOptimizer, zeroInitialized, debug = debug))
       for (i <- 0 until width * width)
         for (n <- grid.computeNeighbours(i))
           g.addEdge(i, new StateForwarderEdge(n))
   }
   println("Preparing Execution configuration.")
 
-  //TODO: modify output file names
-  val out = new java.io.FileWriter(s"animation$runNumber.txt")
-  val outConflicts = new java.io.FileWriter(s"conflicts$runNumber.txt")
+  val out = new java.io.FileWriter(s"animation${optimizer}Run$runNumber.txt")
+  val outConflicts = new java.io.FileWriter(s"conflicts${optimizer}Run$runNumber.txt")
   var startTime = System.nanoTime()
   val terminationCondition = new ColorPrintingGlobalTerminationCondition(out, outConflicts, startTime, width, aggregationOperation = new IdStateMapAggregator[Int, Int], aggregationInterval = 100L, grid = grid)
 
-  val executionConfigSync = ExecutionConfiguration(ExecutionMode.PureAsynchronous).withSignalThreshold(0.01).withGlobalTerminationCondition(terminationCondition).withTimeLimit(100000L) //(420000)
 
   println("Executing.")
-  g.execute(executionConfigSync)
+  g.execute(executionConfig.withGlobalTerminationCondition(terminationCondition))
   println("Shutting down.")
   g.shutdown
 
