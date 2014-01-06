@@ -71,7 +71,7 @@ case class Grid(valuesInLine: Int) {
   }
 }
 
-case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], width: Int, executionConfig: ExecutionConfiguration, runNumber: Int) {
+case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], width: Int, executionConfig: ExecutionConfiguration, runNumber: Int, aggregationInterval: Int) {
 
   println("Starting.")
   val g = GraphBuilder.build
@@ -82,6 +82,7 @@ case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[
 
   val grid = Grid(width)
 
+  println(optimizer)
   optimizer match {
     
     case rankedOptimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] =>
@@ -101,11 +102,12 @@ case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[
           g.addEdge(i, new StateForwarderEdge(n))
   }
   println("Preparing Execution configuration.")
-
-  val out = new java.io.FileWriter(s"animation${optimizer}Run$runNumber.txt")
-  val outConflicts = new java.io.FileWriter(s"conflicts${optimizer}Run$runNumber.txt")
+  println(executionConfig.executionMode)
+  
+  val outAnimation = new java.io.FileWriter(s"output/animation${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
+  val outConflicts = new java.io.FileWriter(s"output/conflicts${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
   var startTime = System.nanoTime()
-  val terminationCondition = new ColorPrintingGlobalTerminationCondition(out, outConflicts, startTime, width, aggregationOperation = new IdStateMapAggregator[Int, Int], aggregationInterval = 100L, grid = grid)
+  val terminationCondition = new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, startTime, width, aggregationOperation = new IdStateMapAggregator[Int, Int], aggregationInterval = aggregationInterval, grid = grid)
 
 
   println("Executing.")
@@ -113,7 +115,7 @@ case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[
   println("Shutting down.")
   g.shutdown
 
-  out.close
+  outAnimation.close
   outConflicts.close
 
 }
