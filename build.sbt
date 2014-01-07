@@ -18,10 +18,15 @@ resolvers += "Scala-Tools Repository" at "https://oss.sonatype.org/content/group
 
 resolvers += "Sonatype Snapshots Repository" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
+excludedJars in assembly <<= (fullClasspath in assembly) map { cp => 
+  cp filter {_.data.getName == "minlog-1.2.jar"}
+}
+
 /** Dependencies */
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-library" % "2.10.3"  % "compile",
   "junit" % "junit" % "4.8.2"  % "test",
+  "com.google.collections" % "google-collections" % "1.0",
   "org.specs2" % "classycle" % "1.4.1" % "test",
   "org.mockito" % "mockito-all" % "1.9.0"  % "test",
   "org.specs2" %% "specs2" % "2.3.3"  % "test",

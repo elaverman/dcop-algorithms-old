@@ -150,7 +150,7 @@ class RankedDsaSpec extends FlatSpec with ShouldMatchers with Checkers with Easy
             true
         }
       },
-      minSuccessful(1))
+      minSuccessful(10))
   }
 
   "RankedDsaA" should "correctly assign colors to a random grid" in {

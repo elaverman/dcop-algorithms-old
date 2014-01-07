@@ -132,7 +132,7 @@ class DsaSpec extends FlatSpec with ShouldMatchers with Checkers {
             true
         }
       },
-      minSuccessful(1))
+      minSuccessful(10))
   }
 
   "RankedDsaA" should "correctly assign colors to a random grid" in {
@@ -183,7 +183,7 @@ class DsaSpec extends FlatSpec with ShouldMatchers with Checkers {
             true
         }
       },
-      minSuccessful(100))
+      minSuccessful(10))
   }
 }
 
