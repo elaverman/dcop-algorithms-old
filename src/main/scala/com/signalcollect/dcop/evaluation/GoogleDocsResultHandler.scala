@@ -18,7 +18,7 @@
  *  
  */
 
-package com.signalcollect.dcop
+package com.signalcollect.dcop.evaluation
 
 import java.net.URL
 import scala.collection.JavaConversions._
@@ -27,6 +27,7 @@ import com.google.gdata.data._
 import com.google.gdata.data.spreadsheet._
 import com.signalcollect.nodeprovisioning.torque._
 import com.google.gdata.util.InvalidEntryException
+import com.google.gdata.data.spreadsheet.SpreadsheetFeed
 
 class GoogleDocsResultHandler(username: String, password: String, spreadsheetName: String, worksheetName: String)
   extends Function1[Map[String, String], Unit]

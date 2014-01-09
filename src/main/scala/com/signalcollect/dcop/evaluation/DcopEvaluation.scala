@@ -1,10 +1,11 @@
-package com.signalcollect.dcop
+package com.signalcollect.dcop.evaluation
 
 import com.signalcollect.ExecutionConfiguration
 import com.signalcollect.configuration.ExecutionMode
 import com.signalcollect.nodeprovisioning.torque._
 import java.io.File
 import scala.io.Source
+import com.signalcollect.dcop._
 
 object DcopEvaluation extends App {
 
@@ -20,7 +21,7 @@ object DcopEvaluation extends App {
   val assemblyFile = new File(assemblyPath)
   val kraken = new TorqueHost(
     jobSubmitter = new TorqueJobSubmitter(username = System.getProperty("user.name"), hostname = "kraken.ifi.uzh.ch"),
-    localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0/bin/", priority = TorquePriority.fast)
+    localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/", priority = TorquePriority.fast)
   val localHost = new LocalHost
   val googleDocs = new GoogleDocsResultHandler(args(0), args(1), "optimizerEvaluations", "data")
 

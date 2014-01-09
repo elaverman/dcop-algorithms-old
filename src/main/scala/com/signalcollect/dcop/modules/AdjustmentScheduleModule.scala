@@ -5,7 +5,7 @@ trait AdjustmentScheduleModule[AgentId, Action] {
 
   val schedule: AdjustmentSchedule
 
-  trait AdjustmentSchedule {
+  trait AdjustmentSchedule extends Serializable {
     def shouldConsiderMove(c: Config): Boolean
   }
 }

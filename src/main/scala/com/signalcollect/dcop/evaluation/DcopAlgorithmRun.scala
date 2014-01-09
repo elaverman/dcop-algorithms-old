@@ -1,14 +1,12 @@
-package com.signalcollect.dcop
+package com.signalcollect.dcop.evaluation
 
-import com.signalcollect.interfaces.AggregationOperation
 import com.signalcollect.dcop.graph._
-import com.signalcollect.dcop.impl.RankedConfiguration
 import com.signalcollect.dcop.modules.OptimizerModule
 import scala.util.Random
 import com.signalcollect._
-import com.signalcollect.configuration.ExecutionMode
-import com.signalcollect.interfaces.ModularAggregationOperation
 import java.util.Date
+import com.signalcollect.dcop._
+import com.signalcollect.dcop.impl.RankedConfiguration
 
 case class Printer(grid: Grid) {
 

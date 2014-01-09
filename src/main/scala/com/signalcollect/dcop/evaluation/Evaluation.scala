@@ -18,7 +18,7 @@
  *  
  */
 
-package com.signalcollect.dcop
+package com.signalcollect.dcop.evaluation
 
 import com.signalcollect.nodeprovisioning.torque._
 import scala.util.Random

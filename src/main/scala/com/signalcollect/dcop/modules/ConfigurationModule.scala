@@ -1,6 +1,6 @@
 package com.signalcollect.dcop.modules
 
-trait ConfigurationModule[AgentId, Action] {
+trait ConfigurationModule[AgentId, Action] extends Serializable {
   this: OptimizerModule[AgentId, Action] =>
 
   type Config <: Configuration
@@ -8,7 +8,7 @@ trait ConfigurationModule[AgentId, Action] {
 
   val factory: Factory
 
-  trait ConfigFactory {
+  trait ConfigFactory extends Serializable {
     /**
      * Implementations need to offer a function to create
      * a configuration. In order to be able to create configurations with different
@@ -18,7 +18,7 @@ trait ConfigurationModule[AgentId, Action] {
     def createNewConfig(params: Any*): Config
   }
 
-  trait Configuration {
+  trait Configuration extends Serializable {
     def neighborhood: Map[AgentId, Action]
     def domain: Set[Action]
     def withCentralVariableAssignment(value: Action): Config
