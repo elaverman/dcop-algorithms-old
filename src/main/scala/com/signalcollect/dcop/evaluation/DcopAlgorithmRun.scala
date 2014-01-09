@@ -8,24 +8,59 @@ import java.util.Date
 import com.signalcollect.dcop._
 import com.signalcollect.dcop.impl.RankedConfiguration
 
-case class Printer(grid: Grid) {
+case class ColorPrinter[State](grid: Grid) {
 
-  def printAnimation(outAnimation: java.io.FileWriter)(aggregate: Map[Int, Int]) = {
+  def printAnimation(outAnimation: java.io.FileWriter, outRanks: java.io.FileWriter, outIndConflicts: java.io.FileWriter)(aggregate: Map[Int, State]) = {
     val sorted = aggregate.toList.sortBy(x => x._1)
     sorted.foreach {
-      case (id, color) =>
+      case (id, (color, rank)) =>
         outAnimation.write(color.toString)
+        if (outRanks != null)
+          outRanks.write(rank.toString)
+        val neighbors = grid.computeNeighbours(id)
+        val neighborStates = neighbors.map(aggregate(_)).asInstanceOf[Iterable[(Int, Double)]]
+        val conflictsForId = neighborStates.filter(x => x._1 == color)
+        outIndConflicts.write(conflictsForId.size.toString)
+
         if ((id + 1) % grid.valuesInLine == 0) {
           outAnimation.write("\n")
+          if (outRanks != null)
+            outRanks.write("\n")
+          outIndConflicts.write("\n")
         } else {
           outAnimation.write(",")
+          if (outRanks != null)
+            outRanks.write(",")
+          outIndConflicts.write(",")
+        }
+      case (id, color) =>
+        outAnimation.write(color.toString)
+        //TODO: refactor this
+        val neighbors = grid.computeNeighbours(id)
+        val conflictsForId = neighbors.map(aggregate(_)).filter(_ == color)
+        outIndConflicts.write(conflictsForId.size.toString)
+
+        if ((id + 1) % grid.valuesInLine == 0) {
+          outAnimation.write("\n")
+          outIndConflicts.write("\n")
+        } else {
+          outAnimation.write(",")
+          outIndConflicts.write(",")
         }
     }
     outAnimation.write("\n")
+    if (outRanks != null)
+      outRanks.write("\n")
+    outIndConflicts.write("\n")
   }
 
-  def countConflicts(aggregate: Map[Int, Int]): Int = {
+  def countConflicts(aggregate: Map[Int, State]): Int = {
     val numberOfConflicts = aggregate.map {
+      case (id, (color, rank)) =>
+        val neighbors = grid.computeNeighbours(id)
+        val neighborStates = neighbors.map(aggregate(_)).asInstanceOf[Iterable[(Int, Double)]]
+        val conflictsForId = neighborStates.filter(x => x._1 == color)
+        conflictsForId.size
       case (id, color) =>
         val neighbors = grid.computeNeighbours(id)
         val conflictsForId = neighbors.map(aggregate(_)).filter(_ == color)
@@ -34,16 +69,17 @@ case class Printer(grid: Grid) {
     numberOfConflicts
   }
 
-  def printNumberOfConflicts(outConflicts: java.io.FileWriter)(aggregate: Map[Int, Int]) = {
+  def printNumberOfConflicts(outConflicts: java.io.FileWriter)(aggregate: Map[Int, State]) = {
     outConflicts.write(countConflicts(aggregate) + "\n")
   }
 
-  def shouldTerminate(outAnimation: java.io.FileWriter, outConflicts: java.io.FileWriter)(aggregate: Map[Int, Int]): Boolean = {
+  def shouldTerminate(outAnimation: java.io.FileWriter, outConflicts: java.io.FileWriter, outRanks: java.io.FileWriter, outIndConflicts: java.io.FileWriter)(aggregate: Map[Int, State]): Boolean = {
     print("*")
-    printAnimation(outAnimation)(aggregate)
+    printAnimation(outAnimation, outRanks, outIndConflicts)(aggregate)
     //    println("****")
     printNumberOfConflicts(outConflicts)(aggregate)
     //    println("____________")
+
     false
   }
 }
@@ -51,11 +87,24 @@ case class Printer(grid: Grid) {
 class ColorPrintingGlobalTerminationCondition(
   outAnimation: java.io.FileWriter,
   outConflicts: java.io.FileWriter,
+  outIndConflicts: java.io.FileWriter,
   startTime: Long,
   gridWidth: Int,
   aggregationOperation: IdStateMapAggregator[Int, Int],
   aggregationInterval: Long,
-  grid: Grid) extends GlobalTerminationCondition[Map[Int, Int]](aggregationOperation, aggregationInterval, Printer(grid).shouldTerminate(outAnimation, outConflicts))
+  grid: Grid) extends GlobalTerminationCondition[Map[Int, Int]](aggregationOperation, aggregationInterval, ColorPrinter(grid).shouldTerminate(outAnimation, outConflicts, null, outIndConflicts))
+  with Serializable
+
+class ColorRankPrintingGlobalTerminationCondition(
+  outAnimation: java.io.FileWriter,
+  outConflicts: java.io.FileWriter,
+  outRanks: java.io.FileWriter,
+  outIndConflicts: java.io.FileWriter,
+  startTime: Long,
+  gridWidth: Int,
+  aggregationOperation: IdStateMapAggregator[Int, (Int, Double)],
+  aggregationInterval: Long,
+  grid: Grid) extends GlobalTerminationCondition[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(grid).shouldTerminate(outAnimation, outConflicts, outRanks, outIndConflicts))
   with Serializable
 
 case class Grid(valuesInLine: Int) {
@@ -125,6 +174,8 @@ case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[
 
     val outAnimation = new java.io.FileWriter(s"output/animation${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
     val outConflicts = new java.io.FileWriter(s"output/conflicts${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
+    val outIndConflicts = new java.io.FileWriter(s"output/indConflicts${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
+    var outRanks: java.io.FileWriter = null
 
     println(optimizer.toString)
     var finalResults = List[Map[String, String]]()
@@ -136,11 +187,22 @@ case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[
     val date: Date = new Date
     val startTime = System.nanoTime()
 
-    val terminationCondition = new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, startTime, width, aggregationOperation = new IdStateMapAggregator[Int, Int], aggregationInterval = aggregationInterval, grid = grid)
+    val terminationCondition = if (!isOptimizerRanked)
+      new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, outIndConflicts, startTime, width, aggregationOperation = new IdStateMapAggregator[Int, Int], aggregationInterval = aggregationInterval, grid = grid)
+    else {
+      outRanks = new java.io.FileWriter(s"output/ranks${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
+      new ColorRankPrintingGlobalTerminationCondition(outAnimation, outConflicts, outRanks, outIndConflicts, startTime, width, aggregationOperation = new IdStateMapAggregator[Int, (Int, Double)], aggregationInterval = aggregationInterval, grid = grid)
+    }
+
+    val idStateMapAggregator = if (!isOptimizerRanked)
+      IdStateMapAggregator[Int, Int]
+    else {
+      IdStateMapAggregator[Int, (Int, Double)]
+    }
+
     val stats = g.execute(executionConfig.withGlobalTerminationCondition(terminationCondition))
 
-    
- //   stats.aggregatedWorkerStatistics.numberOfOutgoingEdges
+    //   stats.aggregatedWorkerStatistics.numberOfOutgoingEdges
     val finishTime = System.nanoTime
     val executionTime = roundToMillisecondFraction(finishTime - startTime)
     runResult += s"evaluationDescription" -> evaluationDescription //
@@ -152,7 +214,7 @@ case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[
     runResult += s"startTime" -> startTime.toString //
     runResult += s"endTime" -> finishTime.toString //
     runResult += s"graphStructure" -> s"Grid" //
-    runResult += s"conflictCount" -> Printer(grid).countConflicts(g.aggregate(IdStateMapAggregator[Int, Int])).toString //
+    runResult += s"conflictCount" -> ColorPrinter(grid).countConflicts(g.aggregate(idStateMapAggregator)).toString //
     runResult += s"optimizer" -> optimizer.toString //
     runResult += s"domainSize" -> domain.size.toString //
     runResult += s"graphSize" -> (width * width).toString //
@@ -164,12 +226,15 @@ case class GridDcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[
     runResult += s"run" -> runNumber.toString
     runResult += s"aggregationInterval" -> aggregationInterval.toString
 
-    println("\nNumber of conflicts at the end: " + Printer(grid).countConflicts(g.aggregate(IdStateMapAggregator[Int, Int])))
+    println("\nNumber of conflicts at the end: " + ColorPrinter(grid).countConflicts(g.aggregate(idStateMapAggregator)))
     println("Shutting down.")
     g.shutdown
 
     outAnimation.close
     outConflicts.close
+    if (outRanks != null)
+      outRanks.close
+    outIndConflicts.close
 
     runResult :: finalResults
 

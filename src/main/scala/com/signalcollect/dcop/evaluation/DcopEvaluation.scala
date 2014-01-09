@@ -21,7 +21,7 @@ object DcopEvaluation extends App {
   val assemblyFile = new File(assemblyPath)
   val kraken = new TorqueHost(
     jobSubmitter = new TorqueJobSubmitter(username = System.getProperty("user.name"), hostname = "kraken.ifi.uzh.ch"),
-    localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/", priority = TorquePriority.fast)
+    localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/", priority = TorquePriority.superfast)
   val localHost = new LocalHost
   val googleDocs = new GoogleDocsResultHandler(args(0), args(1), "optimizerEvaluations", "data")
 
@@ -39,18 +39,21 @@ object DcopEvaluation extends App {
   }
 
   /*********/
-  def evalName = s"First eval."
+  def evalName = s"RankedDsaB vs ConflictDsaB 2.0."
   def runs = 1
-  var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(googleDocs)
-//    var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(googleDocs)
+//  var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(googleDocs)
+    var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(googleDocs)
   /*********/
 
-  //  val optimizer = DsaAVertexColoring(changeProbability = 1.0)
-  //  val optimizer = DsaBVertexColoring(changeProbability = 1.0)
   val optimizers = List(
-    ConflictDsaBVertexColoring(changeProbability = 0.9),
-    ConflictDsaBVertexColoring(changeProbability = 0.7),
-    ConflictDsaBVertexColoring(changeProbability = 0.5))
+//    ConflictDsaBVertexColoring(changeProbability = 0.9),
+//    ConflictDsaBVertexColoring(changeProbability = 0.7),
+//    ConflictDsaBVertexColoring(changeProbability = 0.5),
+//    RankedDsaBVertexColoring(changeProbability = 0.9),
+//    RankedDsaBVertexColoring(changeProbability = 0.7),
+    NoRankConflictDsaBVertexColoring(changeProbability = 0.5),
+    RankedConflictDsaBVertexColoring(changeProbability = 0.5)
+  )
   val domains = List(
     (0 to 3).toSet)
   val widths = List(
