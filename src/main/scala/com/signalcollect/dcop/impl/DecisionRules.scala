@@ -12,6 +12,7 @@ trait DecisionRules[AgentId, Action] extends DecisionRuleModule[AgentId, Action]
   //         randomMove
   //       }
   //    }
+
 }
 
 trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModule[AgentId, Action] {
@@ -35,6 +36,19 @@ trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModu
     }
   }
 
+    /**
+   * Is converged only when there are no more conflicts. Not based on the target or utility function.
+   */
+  trait ZeroConflictConvergence extends DecisionRule {
+
+    /**
+     * No delegation between isConverged and isConvergedGivenUtilitiesAndMaxUtility
+     */
+    override def isConverged(c: Config): Boolean = {
+      c.computeExpectedNumberOfConflicts == 0
+    }
+  }
+  
   /**
    * Main use for hard constraints, where you have negative utility
    * for violating constraints and reach 0 utility only when no constraints are violated.
@@ -86,7 +100,10 @@ trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModu
       val maxUtility = expectedUtilities.values.max
       val maxUtilityMoves: Seq[Action] = expectedUtilities.filter(_._2 == maxUtility).map(_._1).toSeq
       val numberOfMaxUtilityMoves = maxUtilityMoves.size
-      if ((isConvergedGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) && ((numberOfMaxUtilityMoves > 1 && c.computeExpectedNumberOfConflicts == 0) || numberOfMaxUtilityMoves == 1)) {
+      //If we are converged already don't stir the boat
+      if ((isConvergedGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) &&
+        ((numberOfMaxUtilityMoves > 1 && c.computeExpectedNumberOfConflicts == 0)
+          || numberOfMaxUtilityMoves == 1)) {
         c.centralVariableValue
       } else {
         val chosenMaxUtilityMove = maxUtilityMoves(Random.nextInt(maxUtilityMoves.size))

@@ -51,8 +51,11 @@ object DcopEvaluation extends App {
 //    ConflictDsaBVertexColoring(changeProbability = 0.5),
 //    RankedDsaBVertexColoring(changeProbability = 0.9),
 //    RankedDsaBVertexColoring(changeProbability = 0.7),
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.5),
-    RankedConflictDsaBVertexColoring(changeProbability = 0.5)
+//    RankedDsaBVertexColoring(changeProbability = 1.0)
+    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
+    RankedConflictDsaBVertexColoring(changeProbability = 0.7)
+//    NoRankConflictDsaAVertexColoring(changeProbability = 1.0),
+//    RankedConflictDsaAVertexColoring(changeProbability = 1.0)
   )
   val domains = List(
     (0 to 3).toSet)
@@ -60,7 +63,7 @@ object DcopEvaluation extends App {
     100)
 
   val execModesAggrIntervAndTermLimits = List(
-    (ExecutionMode.Synchronous, 5, 100) //,
+    (ExecutionMode.Synchronous, 5, 200) //,
     //(ExecutionMode.PureAsynchronous, 100, 100000L) //420000L)
     )
 

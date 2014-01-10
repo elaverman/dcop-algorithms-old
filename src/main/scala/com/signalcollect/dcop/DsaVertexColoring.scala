@@ -18,12 +18,19 @@ case class DsaBVertexColoring(changeProbability: Double)
   override def toString = "DsaBVertexColoringChangeProbability" + changeProbability
 }
 
-case class ConflictDsaBVertexColoring(changeProbability: Double)
-  extends SimpleDcopAlgorithm {
-  val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
-  val rule = new ArgmaxBDecisionRule with ZeroUtilityConvergence with MemoryLessTargetFunction with ConflictBasedVertexColoringUtility
-  override def toString = "ConflictDsaBVertexColoringChangeProbability" + changeProbability
-}
+//case class ConflictDsaBVertexColoring(changeProbability: Double)
+//  extends SimpleDcopAlgorithm {
+//  val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
+//  val rule = new ArgmaxBDecisionRule with ZeroUtilityConvergence with MemoryLessTargetFunction with ConflictBasedVertexColoringUtility
+//  override def toString = "ConflictDsaBVertexColoringChangeProbability" + changeProbability
+//}
+
+//case class ConflictDsaAVertexColoring(changeProbability: Double)
+//  extends SimpleDcopAlgorithm {
+//  val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
+//  val rule = new ArgmaxADecisionRule with ZeroUtilityConvergence with MemoryLessTargetFunction with ConflictBasedVertexColoringUtility
+//  override def toString = "ConflictDsaAVertexColoringChangeProbability" + changeProbability
+//}
 
 case class RankedDsaAVertexColoring(changeProbability: Double)
   extends RankedDcopAlgorithm {
@@ -42,13 +49,27 @@ case class RankedDsaBVertexColoring(changeProbability: Double)
 case class RankedConflictDsaBVertexColoring(changeProbability: Double)
   extends RankedDcopAlgorithm {
   val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
-  val rule = new ArgmaxBDecisionRule with ZeroUtilityConvergence with RankWeightedTargetFunction
+  val rule = new ArgmaxBDecisionRule with ZeroConflictConvergence with RankWeightedTargetFunction
   override def toString = "RankedConflictDsaBVertexColoringChangeProbability" + changeProbability
 }
 
-case class NoRankConflictDsaBVertexColoring(changeProbability: Double)
-  extends RankedDcopAlgorithm with TargetFunctionsWithUtilityFunctions[Int, Int]{
+case class RankedConflictDsaAVertexColoring(changeProbability: Double)
+  extends RankedDcopAlgorithm {
   val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
-  val rule = new ArgmaxBDecisionRule with ZeroUtilityConvergence with MemoryLessTargetFunction with ConflictBasedVertexColoringUtility
+  val rule = new ArgmaxADecisionRule with ZeroConflictConvergence with RankWeightedTargetFunction
+  override def toString = "RankedConflictDsaAVertexColoringChangeProbability" + changeProbability
+}
+
+case class NoRankConflictDsaBVertexColoring(changeProbability: Double)
+  extends RankedDcopAlgorithm with TargetFunctionsWithUtilityFunctions[Int, Int]{ //the TargetFunctionsWithUtilityFunctions enables to add with MemoryLessTargetFunction and ConflictBasedVertexColoringUtility
+  val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
+  val rule = new ArgmaxBDecisionRule with ZeroConflictConvergence with MemoryLessTargetFunction with ConflictBasedVertexColoringUtility
   override def toString = "NoRankConflictDsaBVertexColoringChangeProbability" + changeProbability
+}
+
+case class NoRankConflictDsaAVertexColoring(changeProbability: Double)
+  extends RankedDcopAlgorithm with TargetFunctionsWithUtilityFunctions[Int, Int]{ //the TargetFunctionsWithUtilityFunctions enables to add with MemoryLessTargetFunction and ConflictBasedVertexColoringUtility
+  val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
+  val rule = new ArgmaxADecisionRule with ZeroConflictConvergence with MemoryLessTargetFunction with ConflictBasedVertexColoringUtility
+  override def toString = "NoRankConflictDsaAVertexColoringChangeProbability" + changeProbability
 }

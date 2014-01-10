@@ -29,8 +29,8 @@ trait RankedTargetFunctions[AgentId, Action] extends TargetFunctionModule[AgentI
       } yield c.withCentralVariableAssignment(assignment)
       val configUtilities = configurationCandidates.map(configuration => {
         val (allies, opponents) = configuration.neighborhood.partition(_._2 != configuration.centralVariableValue)
-        val allyRanks = allies.keys.map(c.ranks).sum
-        val opponentRanks = opponents.keys.map(c.ranks).sum
+        val allyRanks = allies.keys.map(c.ranks(_)).sum
+        val opponentRanks = opponents.keys.map(c.ranks(_)).sum
         val expectedUtility = allyRanks - opponentRanks
         val expectedMoveUtility = (configuration.centralVariableValue, expectedUtility)
         //if (configuration.centralVariableAssignment._1 == 2) {

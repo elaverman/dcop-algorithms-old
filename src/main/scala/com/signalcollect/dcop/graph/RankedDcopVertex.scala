@@ -77,13 +77,30 @@ class RankedDcopVertex[Id, Action](
     }
   }
 
-  override def scoreSignal: Double = {
+//  override def scoreSignal: Double = {
+//    if (edgesModifiedSinceSignalOperation) {
+//      1
+//    } else {
+//      lastSignalState match {
+//        case Some(oldState) =>
+//          if (oldState._1 == state._1 && isConverged(currentConfig)) {
+//            0
+//          } else {
+//            1
+//          }
+//        case noStateOrStateChanged => 
+//          1
+//      }
+//    }
+//  }
+  
+    override def scoreSignal: Double = {
     if (edgesModifiedSinceSignalOperation) {
       1
     } else {
       lastSignalState match {
         case Some(oldState) =>
-          if (oldState._1 == state._1 && isConverged(currentConfig)) {
+          if (oldState == state && isConverged(currentConfig)) {
             0
           } else {
             1
