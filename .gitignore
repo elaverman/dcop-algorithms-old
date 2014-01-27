@@ -6,5 +6,9 @@ project/project/
 project/scala*/
 target/*
 output/*
+krakenOutput/*
+krakenOutput100by100/*
 
 *.config
+
+

@@ -74,7 +74,7 @@ case class ColorPrinter[State](grid: Grid) {
   }
 
   def shouldTerminate(outAnimation: java.io.FileWriter, outConflicts: java.io.FileWriter, outRanks: java.io.FileWriter, outIndConflicts: java.io.FileWriter)(aggregate: Map[Int, State]): Boolean = {
-    print("*")
+    print("*"+countConflicts(aggregate))
     printAnimation(outAnimation, outRanks, outIndConflicts)(aggregate)
     //    println("****")
     printNumberOfConflicts(outConflicts)(aggregate)

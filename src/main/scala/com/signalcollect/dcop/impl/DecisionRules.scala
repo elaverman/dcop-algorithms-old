@@ -36,7 +36,7 @@ trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModu
     }
   }
 
-    /**
+  /**
    * Is converged only when there are no more conflicts. Not based on the target or utility function.
    */
   trait ZeroConflictConvergence extends DecisionRule {
@@ -48,7 +48,7 @@ trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModu
       c.computeExpectedNumberOfConflicts == 0
     }
   }
-  
+
   /**
    * Main use for hard constraints, where you have negative utility
    * for violating constraints and reach 0 utility only when no constraints are violated.
@@ -94,20 +94,61 @@ trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModu
 
   trait ArgmaxBDecisionRule extends ArgmaxADecisionRule {
     this: TargetFunction =>
-
+    //TODO: Rewrite conditions for computeMove like in the Exploration version
     override def computeMove(c: Config) = {
       val expectedUtilities: Map[Action, Utility] = computeExpectedUtilities(c)
       val maxUtility = expectedUtilities.values.max
       val maxUtilityMoves: Seq[Action] = expectedUtilities.filter(_._2 == maxUtility).map(_._1).toSeq
       val numberOfMaxUtilityMoves = maxUtilityMoves.size
       //If we are converged already don't stir the boat
+      //      if ((isConvergedGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) &&
+      //        ((numberOfMaxUtilityMoves > 1 && c.computeExpectedNumberOfConflicts == 0)
+      //          || numberOfMaxUtilityMoves == 1)) {
+      //        c.centralVariableValue
+
+      //If we are converged already don't stir the boat
+      // Attention! If isConverged no longer depends on the utility so 
+      // the maxUtility move may not be the current move anymore...
       if ((isConvergedGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) &&
-        ((numberOfMaxUtilityMoves > 1 && c.computeExpectedNumberOfConflicts == 0)
-          || numberOfMaxUtilityMoves == 1)) {
+        (maxUtilityMoves.contains(c.centralVariableValue)) &&
+        (c.computeExpectedNumberOfConflicts == 0)) {
         c.centralVariableValue
       } else {
         val chosenMaxUtilityMove = maxUtilityMoves(Random.nextInt(maxUtilityMoves.size))
         chosenMaxUtilityMove
+      }
+    }
+  }
+
+  trait ExplorerArgmaxBDecisionRule extends ArgmaxADecisionRule {
+    this: TargetFunction =>
+
+    def expl: Double
+
+    override def computeMove(c: Config) = {
+      val expectedUtilities: Map[Action, Utility] = computeExpectedUtilities(c)
+      val maxUtility = expectedUtilities.values.max
+      val maxUtilityMoves: Seq[Action] = expectedUtilities.filter(_._2 == maxUtility).map(_._1).toSeq
+      val numberOfMaxUtilityMoves = maxUtilityMoves.size
+
+      def hasNoConflictsAtNashEquilibrium =
+        (maxUtilityMoves.contains(c.centralVariableValue)) &&
+          (c.computeExpectedNumberOfConflicts == 0)
+
+      def hasConflictsAtNashEquilibrium =
+        (maxUtilityMoves.contains(c.centralVariableValue)) &&
+          (c.computeExpectedNumberOfConflicts > 0)
+
+      if (hasNoConflictsAtNashEquilibrium) {
+        c.centralVariableValue
+      } else { // If there are still conflicts we might explore with very low probability
+        if (hasConflictsAtNashEquilibrium && (Random.nextDouble < expl)) { //we added that maxDelta ==0
+          val exploringMove = c.domain.toSeq(Random.nextInt(c.domain.size))
+          exploringMove
+        } else { // We randomly choose one of the solutions that give us the maximum
+          val chosenMaxUtilityMove = maxUtilityMoves(Random.nextInt(maxUtilityMoves.size))
+          chosenMaxUtilityMove
+        }
       }
     }
   }
