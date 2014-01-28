@@ -6,6 +6,7 @@ import com.signalcollect.nodeprovisioning.torque._
 import java.io.File
 import scala.io.Source
 import com.signalcollect.dcop._
+import scala.util.Random
 
 object DcopEvaluation extends App {
 
@@ -38,11 +39,15 @@ object DcopEvaluation extends App {
     }
   }
 
+  def randomFromDomain(domain: Set[Int]) = domain.toSeq(Random.nextInt(domain.size))
+  def zeroInitialized(domain: Set[Int]) = 0
+  val debug = false
+
   /*********/
-  def evalName = s"smallInvertRankedChangeProbabilityEvaluation"
-  def runs = 3
+  def evalName = s"adoptEvaluation"
+  def runs = 1
   var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(googleDocs)
-  //  var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(googleDocs)
+  //    var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(googleDocs)
   /*********/
 
   val optimizers: List[DcopAlgorithm[Int, Int]] = List(
@@ -58,31 +63,32 @@ object DcopEvaluation extends App {
     //    RankedConflictExplorerDsaBVertexColoring(changeProbability = 0.9, explore = 0.01),
     //    RankedConflictExplorerDsaBVertexColoring(changeProbability = 0.9, explore = 0.1),
     //    RankedConflictExplorerDsaBVertexColoring(changeProbability = 0.9, explore = 0.3),
-    //new
+    //new for Ranked inertia
     //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
     //    RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
-    //    RankedConflictDsaBVertexColoring(changeProbability = 0.8),
+    NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
+    RankedConflictDsaBVertexColoring(changeProbability = 0.8),
     //    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
     //    RankedConflictDsaBVertexColoring(changeProbability = 0.9),
-    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.95),
-    //    RankedConflictDsaBVertexColoring(changeProbability = 0.95),
+    NoRankConflictDsaBVertexColoring(changeProbability = 0.95),
+    RankedConflictDsaBVertexColoring(changeProbability = 0.95),
+    //new Ranked inertia  
     //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
     //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
-    //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
-    //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
+    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
+    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
     //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
     //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
-    //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
-    //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97)
-    //new
-    //    NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
-    //    NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
-    //    NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9),
-    //    NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97)
-    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
+    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
+    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
+    //new: Inverted Ranks inertia
+    //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
+    NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
+    //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9),
+    NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97),
+    //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
     RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
-    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9),
+    //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9)
     RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97))
 
   val domains = List(
@@ -95,16 +101,25 @@ object DcopEvaluation extends App {
     (ExecutionMode.Synchronous, 1, 300) //30, 3600) //5, 800),
     )
 
+  //TODO: 2 lists of settings for grids and adopt etc. & combine them with optimizers 
+  //  case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean)
+  //  case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialValue: (Set[Int]) => Int, debug: Boolean, width: Int)
+
+  val adoptGraphList = new java.io.File("adoptInput").listFiles.filter(_.getName.startsWith("Problem-GraphColor-40")).map(_.getName)
+
   for (runNumber <- (0 until runs)) {
     for (optimizer <- optimizers) {
       for (domain <- domains) {
-        for (width <- widths) {
+        val evaluationGraphs = List( //Grid(optimizer, domain, zeroInitialized, debug, 8)
+        ) ++
+          adoptGraphList.map(x => AdoptGraph(optimizer, x, zeroInitialized, debug))
+        for (evaluationGraph <- evaluationGraphs) {
           for (executionMat <- execModesAggrIntervAndTermLimits) {
             val executionConfig = executionMat._1 match {
               case ExecutionMode.Synchronous => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withStepsLimit(executionMat._3)
               case _ => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withTimeLimit(executionMat._3)
             }
-            evaluation = evaluation.addEvaluationRun(GridDcopAlgorithmRun(optimizer, domain, width, executionConfig, runNumber, executionMat._2, getRevision, evalName).runAlgorithm)
+            evaluation = evaluation.addEvaluationRun(DcopAlgorithmRun(optimizer, domain, evaluationGraph, executionConfig, runNumber, executionMat._2, getRevision, evalName).runAlgorithm)
           }
         }
       }
