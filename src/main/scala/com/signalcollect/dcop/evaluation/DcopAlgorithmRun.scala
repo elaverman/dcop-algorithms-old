@@ -10,7 +10,7 @@ import com.signalcollect.dcop.impl.RankedConfiguration
 import java.io.FileWriter
 import java.io.File
 
-case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], evaluationGraph: EvaluationGraph, executionConfig: ExecutionConfiguration, runNumber: Int, aggregationInterval: Int, revision: String, evaluationDescription: String) {
+case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[Int], */evaluationGraphParameters: EvaluationGraphParameters, executionConfig: ExecutionConfiguration, runNumber: Int, aggregationInterval: Int, revision: String, evaluationDescription: String) {
 
   def roundToMillisecondFraction(nanoseconds: Long): Double = {
     ((nanoseconds / 100000.0).round) / 10.0
@@ -18,7 +18,11 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int]
 
   def runAlgorithm(): List[Map[String, String]] = {
     println("Starting.")
-   // val g = GraphBuilder.build
+
+    val evaluationGraph = evaluationGraphParameters match {
+      case gridParameters: GridParameters => Grid(optimizer, gridParameters.domain, gridParameters.initialValue, gridParameters.debug, gridParameters.width)
+      case adoptGraphParameters: AdoptGraphParameters => AdoptGraph(optimizer, adoptGraphParameters.adoptFileName, adoptGraphParameters.initialValue, adoptGraphParameters.debug)
+    }
 
     println(optimizer)
 
@@ -37,7 +41,7 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int]
     println("Preparing Execution configuration.")
     println(executionConfig.executionMode)
 
-    val graphDirectoryFolder = new File("output/"+evaluationGraph.toString())
+    val graphDirectoryFolder = new File("output/" + evaluationGraph.toString())
     if (!graphDirectoryFolder.exists)
       graphDirectoryFolder.mkdir
     val outAnimation = new FileWriter(s"output/${evaluationGraph}/animation${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
@@ -84,7 +88,10 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int]
     runResult += s"graphStructure" -> evaluationGraph.toString //
     runResult += s"conflictCount" -> ColorPrinter(evaluationGraph).countConflicts(evaluationGraph.graph.aggregate(idStateMapAggregator)).toString //
     runResult += s"optimizer" -> optimizer.toString //
-    runResult += s"domainSize" -> domain.size.toString //
+    evaluationGraph match {
+      case grid: Grid => runResult += s"domainSize" -> grid.domain.size.toString //
+      case other => 
+    }
     runResult += s"graphSize" -> evaluationGraph.size.toString //
     runResult += s"executionMode" -> executionConfig.executionMode.toString //
     runResult += s"signalThreshold" -> executionConfig.signalThreshold.toString // 

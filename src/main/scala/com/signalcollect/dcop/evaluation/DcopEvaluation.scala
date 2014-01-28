@@ -44,10 +44,10 @@ object DcopEvaluation extends App {
   val debug = false
 
   /*********/
-  def evalName = s"adoptEvaluation"
-  def runs = 1
-  var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(googleDocs)
-  //    var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(googleDocs)
+  def evalName = s"adopt40Evaluation"
+  def runs = 3
+    var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(googleDocs)
+//  var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(googleDocs)
   /*********/
 
   val optimizers: List[DcopAlgorithm[Int, Int]] = List(
@@ -91,10 +91,11 @@ object DcopEvaluation extends App {
     //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9)
     RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97))
 
-  val domains = List(
-    (0 to 3).toSet)
-  val widths = List(
-    10)
+    //TODO: Delete. They should be included in the GridGraphParameters
+//  val domains = List(
+//    (0 to 3).toSet)
+//  val widths = List(
+//    10)
 
   val execModesAggrIntervAndTermLimits = List(
     //   (ExecutionMode.PureAsynchronous, 30000, 3600000), //100, 100000) //420000L)
@@ -105,22 +106,20 @@ object DcopEvaluation extends App {
   //  case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean)
   //  case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialValue: (Set[Int]) => Int, debug: Boolean, width: Int)
 
-  val adoptGraphList = new java.io.File("adoptInput").listFiles.filter(_.getName.startsWith("Problem-GraphColor-40")).map(_.getName)
+  val adoptGraphNamesList = new java.io.File("adoptInput").listFiles.filter(_.getName.startsWith("Problem-GraphColor-40")).map(_.getName)
 
   for (runNumber <- (0 until runs)) {
     for (optimizer <- optimizers) {
-      for (domain <- domains) {
-        val evaluationGraphs = List( //Grid(optimizer, domain, zeroInitialized, debug, 8)
-        ) ++
-          adoptGraphList.map(x => AdoptGraph(optimizer, x, zeroInitialized, debug))
-        for (evaluationGraph <- evaluationGraphs) {
-          for (executionMat <- execModesAggrIntervAndTermLimits) {
-            val executionConfig = executionMat._1 match {
-              case ExecutionMode.Synchronous => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withStepsLimit(executionMat._3)
-              case _ => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withTimeLimit(executionMat._3)
-            }
-            evaluation = evaluation.addEvaluationRun(DcopAlgorithmRun(optimizer, domain, evaluationGraph, executionConfig, runNumber, executionMat._2, getRevision, evalName).runAlgorithm)
+      val evaluationGraphs = List( //GridGraphParameters(domain, zeroInitialized, debug, 8)
+      ) ++
+        adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug))
+      for (evaluationGraph <- evaluationGraphs) {
+        for (executionMat <- execModesAggrIntervAndTermLimits) {
+          val executionConfig = executionMat._1 match {
+            case ExecutionMode.Synchronous => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withStepsLimit(executionMat._3)
+            case _ => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withTimeLimit(executionMat._3)
           }
+          evaluation = evaluation.addEvaluationRun(DcopAlgorithmRun(optimizer, evaluationGraph, executionConfig, runNumber, executionMat._2, getRevision, evalName).runAlgorithm)
         }
       }
     }
