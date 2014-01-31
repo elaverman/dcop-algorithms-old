@@ -20,7 +20,7 @@ trait TargetFunctionsWithUtilityFunctions[AgentId, Action] extends TargetFunctio
 }
 
 trait RankedTargetFunctions[AgentId, Action] extends TargetFunctionModule[AgentId, Action] {
-  this: RankedConfiguration[AgentId, Action] =>
+  this: UtilityFunctionModule[AgentId, Action] with RankedConfiguration[AgentId, Action] =>
 
   trait RankWeightedTargetFunction extends TargetFunction {
     def computeExpectedUtilities(c: Config) = {
@@ -40,6 +40,34 @@ trait RankedTargetFunctions[AgentId, Action] extends TargetFunctionModule[AgentI
       })
       configUtilities.toMap
     }
-    
   }
+
+  /**
+   * Same as RankWeightedTargetFunction, but when it reaches a NE it behaves like the MemoryLessTargetFunction
+   */
+  trait DynamicRankWeightedTargetFunction extends RankWeightedTargetFunction {
+    this: UtilityFunction =>
+
+    def isAtRankedNashEquilibrium(c: Config): Boolean = {
+      val expectedUtilities = computeRankedExpectedUtilities(c)
+      val maxUtility = expectedUtilities.values.max
+      val currentUtility = expectedUtilities(c.centralVariableValue)
+      maxUtility == currentUtility
+    }
+      
+    def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
+    
+    override def computeExpectedUtilities(c: Config) = {
+      if (!isAtRankedNashEquilibrium(c)) {
+        computeRankedExpectedUtilities(c)
+      } else {
+        val configurationCandidates: Set[Config] = for {
+          assignment <- c.domain
+        } yield c.withCentralVariableAssignment(assignment)
+        val configUtilities = configurationCandidates.map(c => (c.centralVariableValue, computeUtility(c))).toMap
+        configUtilities
+      }
+    }
+  }
+
 }

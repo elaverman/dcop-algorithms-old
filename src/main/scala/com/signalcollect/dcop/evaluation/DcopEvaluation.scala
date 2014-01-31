@@ -22,7 +22,7 @@ object DcopEvaluation extends App {
   val assemblyFile = new File(assemblyPath)
   val kraken = new TorqueHost(
     jobSubmitter = new TorqueJobSubmitter(username = System.getProperty("user.name"), hostname = "kraken.ifi.uzh.ch"),
-    localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/", priority = TorquePriority.superfast)
+    localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/", priority = TorquePriority.slow)
   val localHost = new LocalHost
   val googleDocs = new GoogleDocsResultHandler(args(0), args(1), "optimizerEvaluations", "data")
 
@@ -44,7 +44,7 @@ object DcopEvaluation extends App {
   val debug = false
 
   /*********/
-  def evalName = s"adopt40Evaluation"
+  def evalName = s"adopt40DynamicEvaluation"
   def runs = 3
     var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(googleDocs)
 //  var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(googleDocs)
@@ -66,30 +66,35 @@ object DcopEvaluation extends App {
     //new for Ranked inertia
     //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
     //    RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
-    RankedConflictDsaBVertexColoring(changeProbability = 0.8),
+ //   NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
+ //   RankedConflictDsaBVertexColoring(changeProbability = 0.8),
     //    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
     //    RankedConflictDsaBVertexColoring(changeProbability = 0.9),
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.95),
-    RankedConflictDsaBVertexColoring(changeProbability = 0.95),
+  //  NoRankConflictDsaBVertexColoring(changeProbability = 0.95),
+  //  RankedConflictDsaBVertexColoring(changeProbability = 0.95),
     //new Ranked inertia  
     //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
     //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
-    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
-    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
+  //  NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
+   // RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
     //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
     //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
-    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
-    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
+  //  NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
+  //  RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
     //new: Inverted Ranks inertia
     //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
-    NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
+  //  NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
     //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9),
-    NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97),
+ //   NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97),
     //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
-    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
+ //   RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
     //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9)
-    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97))
+  //  RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97))
+      NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.8),
+      NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.97),
+      DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6),
+      DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
+      DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.95))
 
     //TODO: Delete. They should be included in the GridGraphParameters
 //  val domains = List(
@@ -106,7 +111,7 @@ object DcopEvaluation extends App {
   //  case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean)
   //  case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialValue: (Set[Int]) => Int, debug: Boolean, width: Int)
 
-  val adoptGraphNamesList = new java.io.File("adoptInput").listFiles.filter(x => (x.getName.startsWith("Problem-GraphColor"))&&(!x.getName.startsWith("Problem-GraphColor-40"))).map(_.getName)
+  val adoptGraphNamesList = new java.io.File("adoptInput").listFiles.filter(x => (x.getName.startsWith("Problem-GraphColor-40"))).map(_.getName)
 
   for (runNumber <- (0 until runs)) {
     for (optimizer <- optimizers) {
