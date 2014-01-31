@@ -106,7 +106,7 @@ object DcopEvaluation extends App {
   //  case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean)
   //  case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialValue: (Set[Int]) => Int, debug: Boolean, width: Int)
 
-  val adoptGraphNamesList = new java.io.File("adoptInput").listFiles.filter(_.getName.startsWith("Problem-GraphColor-40")).map(_.getName)
+  val adoptGraphNamesList = new java.io.File("adoptInput").listFiles.filter(x => (x.getName.startsWith("Problem-GraphColor"))&&(!x.getName.startsWith("Problem-GraphColor-40"))).map(_.getName)
 
   for (runNumber <- (0 until runs)) {
     for (optimizer <- optimizers) {
