@@ -16,6 +16,8 @@ abstract class EvaluationGraph(optimizer: DcopAlgorithm[Int, Int]) {
   def graph: Graph[Any, Any]
   def computeNeighbours(id: Int): Iterable[Int]
   def size: Int
+  def maxUtility: Int //for now = number of possible satisfied constraints
+  def domainForVertex(id: Int): Set[Int]
 }
 
 case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialValue: (Set[Int]) => Int, debug: Boolean, width: Int) extends EvaluationGraph(optimizer) {
@@ -26,11 +28,14 @@ case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialVal
 
     case rankedOptimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] =>
       println("Ranked Optimizer")
-      for (i <- 0 until width * width)
+      for (i <- 0 until width * width) {
         g.addVertex(new RankedDcopVertex(i, domain, rankedOptimizer, initialValue(domain), debug = debug))
-      for (i <- 0 until width * width)
-        for (n <- computeNeighbours(i))
+      }
+      for (i <- 0 until width * width) {
+        for (n <- computeNeighbours(i)) {
           g.addEdge(i, new RankedVertexColoringEdge(n))
+        }
+      }
 
     case simpleOptimizer: OptimizerModule[Int, Int] =>
       println("Simple Optimizer")
@@ -64,6 +69,10 @@ case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialVal
   def graph = g
 
   def size = width * width
+
+  def maxUtility = (width - 2) * (width - 2) * 8 + (width - 2) * 20 + 12
+  
+  def domainForVertex(id: Int) = domain
 
   override def toString = "Grid" + size.toString
 }
@@ -103,9 +112,9 @@ case class ConstraintGraphData(possibleValues: Map[Int, Set[Int]], neighbours: M
 
 case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends EvaluationGraph(optimizer) {
 
-  val textLines = Source.fromFile("adoptInput/"+adoptFileName).getLines.toList
+  val textLines = Source.fromFile("adoptInput/" + adoptFileName).getLines.toList
   val constraintGraphData = getFromText(textLines)
-
+  
   val constraintGraph =
     buildConstraintGraphFromData(constraintGraphData, ranked = true, optimizer)
 
@@ -187,6 +196,10 @@ case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String,
   def computeNeighbours(id: Int) = constraintGraphData.neighbours.getOrElse(id, List())
 
   def size = constraintGraphData.neighbours.size
+  
+  def maxUtility = constraintGraphData.neighbours.map(x => x._2.size).sum
+  
+  def domainForVertex(id: Int) = constraintGraphData.possibleValues.getOrElse(id, Set())
 
   override def toString = adoptFileName
 

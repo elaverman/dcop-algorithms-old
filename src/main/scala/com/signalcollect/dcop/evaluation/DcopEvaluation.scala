@@ -44,10 +44,10 @@ object DcopEvaluation extends App {
   val debug = false
 
   /*********/
-  def evalName = s"adopt40DynamicEvaluation"
-  def runs = 3
-    var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(googleDocs)
-//  var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(googleDocs)
+  def evalName = s"smallGridDynamicEvaluation"
+  def runs = 1
+//    var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(googleDocs)
+  var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(googleDocs)
   /*********/
 
   val optimizers: List[DcopAlgorithm[Int, Int]] = List(
@@ -66,7 +66,7 @@ object DcopEvaluation extends App {
     //new for Ranked inertia
     //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
     //    RankedConflictDsaBVertexColoring(changeProbability = 0.7),
- //   NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
+    NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
  //   RankedConflictDsaBVertexColoring(changeProbability = 0.8),
     //    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
     //    RankedConflictDsaBVertexColoring(changeProbability = 0.9),
@@ -90,18 +90,13 @@ object DcopEvaluation extends App {
  //   RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
     //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9)
   //  RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97))
-      NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.8),
-      NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.97),
-      DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6),
-      DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
-      DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.95))
+//      NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.8),
+     // NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.97),
+      DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6))
+   //   DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
+   //   DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.95))
 
-    //TODO: Delete. They should be included in the GridGraphParameters
-//  val domains = List(
-//    (0 to 3).toSet)
-//  val widths = List(
-//    10)
-
+      
   val execModesAggrIntervAndTermLimits = List(
     //   (ExecutionMode.PureAsynchronous, 30000, 3600000), //100, 100000) //420000L)
     (ExecutionMode.Synchronous, 1, 300) //30, 3600) //5, 800),
@@ -115,9 +110,9 @@ object DcopEvaluation extends App {
 
   for (runNumber <- (0 until runs)) {
     for (optimizer <- optimizers) {
-      val evaluationGraphs = List( //GridGraphParameters(domain, zeroInitialized, debug, 8)
-      ) ++
-        adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug))
+      val evaluationGraphs = List( GridParameters((0 to 3).toSet, zeroInitialized, debug, 8)
+      )// ++
+       // adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug))
       for (evaluationGraph <- evaluationGraphs) {
         for (executionMat <- execModesAggrIntervAndTermLimits) {
           val executionConfig = executionMat._1 match {

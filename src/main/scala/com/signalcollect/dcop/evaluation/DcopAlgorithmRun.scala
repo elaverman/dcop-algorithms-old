@@ -10,7 +10,7 @@ import com.signalcollect.dcop.impl.RankedConfiguration
 import java.io.FileWriter
 import java.io.File
 
-case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[Int], */evaluationGraphParameters: EvaluationGraphParameters, executionConfig: ExecutionConfiguration, runNumber: Int, aggregationInterval: Int, revision: String, evaluationDescription: String) {
+case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[Int], */ evaluationGraphParameters: EvaluationGraphParameters, executionConfig: ExecutionConfiguration, runNumber: Int, aggregationInterval: Int, revision: String, evaluationDescription: String) {
 
   def roundToMillisecondFraction(nanoseconds: Long): Double = {
     ((nanoseconds / 100000.0).round) / 10.0
@@ -47,6 +47,7 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     val outAnimation = new FileWriter(s"output/${evaluationGraph}/animation${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
     val outConflicts = new FileWriter(s"output/${evaluationGraph}/conflicts${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
     val outIndConflicts = new FileWriter(s"output/${evaluationGraph}/indConflicts${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
+    val outLocMinima = new FileWriter(s"output/${evaluationGraph}/locMinima${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
     var outRanks: FileWriter = null
 
     println(optimizer.toString)
@@ -58,12 +59,13 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
 
     val date: Date = new Date
     val startTime = System.nanoTime()
-
+    var extraStats = RunStats(None, evaluationGraph.maxUtility, None)
+    
     val terminationCondition = if (!computeRanks)
-      new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, outIndConflicts, startTime, aggregationOperation = new IdStateMapAggregator[Int, Int], aggregationInterval = aggregationInterval, evaluationGraph = evaluationGraph)
+      new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperation = new IdStateMapAggregator[Int, Int], aggregationInterval = aggregationInterval, evaluationGraph = evaluationGraph)
     else {
       outRanks = new java.io.FileWriter(s"output/${evaluationGraph}/ranks${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
-      new ColorRankPrintingGlobalTerminationCondition(outAnimation, outConflicts, Some(outRanks), outIndConflicts, startTime, aggregationOperation = new IdStateMapAggregator[Int, (Int, Double)], aggregationInterval = aggregationInterval, evaluationGraph = evaluationGraph)
+      new ColorRankPrintingGlobalTerminationCondition(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperation = new IdStateMapAggregator[Int, (Int, Double)], aggregationInterval = aggregationInterval, evaluationGraph = evaluationGraph)
     }
 
     val idStateMapAggregator = if (!computeRanks)
@@ -77,6 +79,7 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     //   stats.aggregatedWorkerStatistics.numberOfOutgoingEdges
     val finishTime = System.nanoTime
     val executionTime = roundToMillisecondFraction(finishTime - startTime)
+    val conflictCount = ColorPrinter(evaluationGraph).countConflicts(evaluationGraph.graph.aggregate(idStateMapAggregator))
     runResult += s"evaluationDescription" -> evaluationDescription //
     runResult += s"isOptimizerRanked" -> computeRanks.toString
     runResult += s"revision" -> revision
@@ -86,11 +89,14 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     runResult += s"startTime" -> startTime.toString //
     runResult += s"endTime" -> finishTime.toString //
     runResult += s"graphStructure" -> evaluationGraph.toString //
-    runResult += s"conflictCount" -> ColorPrinter(evaluationGraph).countConflicts(evaluationGraph.graph.aggregate(idStateMapAggregator)).toString //
+    runResult += s"conflictCount" -> conflictCount.toString //
     runResult += s"optimizer" -> optimizer.toString //
+    runResult += s"endUtilityRatio" -> ((evaluationGraph.maxUtility - conflictCount) / evaluationGraph.maxUtility).toString
+    runResult += s"isOptimal" -> (if (conflictCount == 0) "1" else "0")
+    //TODO: add extraStats and add them and the 2 above in the google spreadheet
     evaluationGraph match {
       case grid: Grid => runResult += s"domainSize" -> grid.domain.size.toString //
-      case other => 
+      case other =>
     }
     runResult += s"graphSize" -> evaluationGraph.size.toString //
     runResult += s"executionMode" -> executionConfig.executionMode.toString //
@@ -107,6 +113,7 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
 
     outAnimation.close
     outConflicts.close
+    outLocMinima.close
     if (outRanks != null)
       outRanks.close
     outIndConflicts.close

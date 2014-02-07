@@ -11,6 +11,9 @@ import java.io.FileWriter
 
 case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
 
+  var iteration = 1
+  var firstLocMinimum = 30000
+
   def printAnimation(outAnimation: FileWriter, outRanks: Option[FileWriter], outIndConflicts: FileWriter)(aggregate: Map[Int, State]) = {
     val sorted = aggregate.toList.sortBy(x => x._1)
 
@@ -85,6 +88,7 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
     }
   }
 
+  //TODO: Attention, this computes the number of conflicts. The conflicts are only counted once for every constraint. 
   def countConflicts(aggregate: Map[Int, State]): Int = {
     val numberOfConflicts = aggregate.map {
       case (id, (color, rank)) =>
@@ -100,16 +104,51 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
     numberOfConflicts
   }
 
+  //Computes if it is in (actual) LocalMinimum (i.e. not according to beliefs - the target function) 
+  def countLocMinima(aggregate: Map[Int, State]): Int = {
+    val numberOfLocMinima = aggregate.map {
+      case (id, (color, rank)) =>
+        val neighbors = evaluationGraph.computeNeighbours(id)
+        val neighborStates = neighbors.map(aggregate(_)).asInstanceOf[Iterable[(Int, Double)]]
+        val conflictsForId = neighborStates.filter(x => x._1 == color)
+        val minPossibleConflicts = evaluationGraph.domainForVertex(id).map(col => (neighborStates.filter(x => x._1 == col)).size).min
+        //TODO: here to compute min number of conflicts given neighbor states and check if conflictsForId.size is equal to that
+        if (conflictsForId.size == minPossibleConflicts) 1 else 0
+      case (id, color) =>
+        val neighbors = evaluationGraph.computeNeighbours(id)
+        val conflictsForId = neighbors.map(aggregate(_)).filter(_ == color)
+        val minPossibleConflicts = evaluationGraph.domainForVertex(id).map(col => (neighbors.filter(_ == col)).size).min
+        //TODO: here to compute min number of conflicts given neighbor states and check if conflictsForId.size is equal to that
+        if (conflictsForId.size == minPossibleConflicts) 1 else 0
+    }.sum
+    numberOfLocMinima
+  }
+
   def printNumberOfConflicts(outConflicts: FileWriter)(aggregate: Map[Int, State]) = {
     outConflicts.write(countConflicts(aggregate) + "\n")
   }
 
-  def shouldTerminate(outAnimation: FileWriter, outConflicts: FileWriter, outRanks: Option[FileWriter], outIndConflicts: FileWriter)(aggregate: Map[Int, State]): Boolean = {
+  def printNumberOfLocalMinima(outLocMinima: FileWriter)(aggregate: Map[Int, State]) = {
+    outLocMinima.write(countLocMinima(aggregate) + "\n")
+  }
+
+  def changeTimeToFirstLocOptimum(stats: RunStats)(aggregate: Map[Int, State]) = {
+    if (countLocMinima(aggregate) == evaluationGraph.size) {
+      stats.timeToFirstLocOptimum = stats.timeToFirstLocOptimum match {
+        case None => Some(iteration)
+        case Some(timeStamp) => if (timeStamp > iteration) {Some(iteration); throw new Exception("the time stamp should not be bigger")} else Some(timeStamp)
+      } 
+    }
+  }
+
+  def shouldTerminate(outAnimation: FileWriter, outConflicts: FileWriter, outRanks: Option[FileWriter], outIndConflicts: FileWriter, outLocMinima: FileWriter, stats: RunStats)(aggregate: Map[Int, State]): Boolean = {
     print("*" + countConflicts(aggregate))
     printAnimation(outAnimation, outRanks, outIndConflicts)(aggregate)
-    //    println("****")
     printNumberOfConflicts(outConflicts)(aggregate)
-    //    println("____________")
+    printNumberOfLocalMinima(outLocMinima)(aggregate)
+    changeTimeToFirstLocOptimum(stats)(aggregate)
+    //TODO: compute sum/avg (globalutility/optimalglobalutility)
+    iteration += 1
     false
   }
 }
@@ -118,11 +157,13 @@ class ColorPrintingGlobalTerminationCondition(
   outAnimation: FileWriter,
   outConflicts: FileWriter,
   outIndConflicts: FileWriter,
+  outLocMinima: FileWriter,
+  stats: RunStats,
   startTime: Long,
   //  gridWidth: Int,
   aggregationOperation: IdStateMapAggregator[Int, Int],
   aggregationInterval: Long,
-  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition[Map[Int, Int]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts))
+  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition[Map[Int, Int]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats))
   with Serializable
 
 class ColorRankPrintingGlobalTerminationCondition(
@@ -130,10 +171,12 @@ class ColorRankPrintingGlobalTerminationCondition(
   outConflicts: FileWriter,
   outRanks: Option[FileWriter],
   outIndConflicts: FileWriter,
+  outLocMinima: FileWriter,
+  stats: RunStats,
   startTime: Long,
   //  gridWidth: Int,
   aggregationOperation: IdStateMapAggregator[Int, (Int, Double)],
   aggregationInterval: Long,
-  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, outRanks, outIndConflicts))
+  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, outRanks, outIndConflicts, outLocMinima, stats))
   with Serializable
 
