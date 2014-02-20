@@ -32,5 +32,7 @@ libraryDependencies ++= Seq(
   "org.specs2" %% "specs2" % "2.3.3"  % "test",
   "org.scalacheck" %% "scalacheck" % "1.11.0" % "test",
   "org.scalatest" %% "scalatest" % "2.0.1-SNAP" % "test",
-  "org.easymock" % "easymock" % "3.2" % "test"
+  "org.easymock" % "easymock" % "3.2" % "test",
+  "com.typesafe.slick" %% "slick" % "2.0.0",
+  "org.slf4j" % "slf4j-nop" % "1.6.4"
 )

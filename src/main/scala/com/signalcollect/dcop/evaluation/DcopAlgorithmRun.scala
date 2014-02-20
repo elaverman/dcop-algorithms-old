@@ -60,7 +60,7 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     val date: Date = new Date
     val startTime = System.nanoTime()
     var extraStats = RunStats(None, evaluationGraph.maxUtility, None)
-    
+
     val terminationCondition = if (!computeRanks)
       new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperation = new IdStateMapAggregator[Int, Int], aggregationInterval = aggregationInterval, evaluationGraph = evaluationGraph)
     else {
@@ -79,33 +79,50 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     //   stats.aggregatedWorkerStatistics.numberOfOutgoingEdges
     val finishTime = System.nanoTime
     val executionTime = roundToMillisecondFraction(finishTime - startTime)
+
     val conflictCount = ColorPrinter(evaluationGraph).countConflicts(evaluationGraph.graph.aggregate(idStateMapAggregator))
-    runResult += s"evaluationDescription" -> evaluationDescription //
-    runResult += s"isOptimizerRanked" -> computeRanks.toString
-    runResult += s"revision" -> revision
-    runResult += s"computationTimeInMilliseconds" -> executionTime.toString //
-    runResult += s"executionHostname" -> java.net.InetAddress.getLocalHost.getHostName //
-    runResult += s"date" -> date.toString //
-    runResult += s"startTime" -> startTime.toString //
-    runResult += s"endTime" -> finishTime.toString //
-    runResult += s"graphStructure" -> evaluationGraph.toString //
-    runResult += s"conflictCount" -> conflictCount.toString //
-    runResult += s"optimizer" -> optimizer.toString //
-    runResult += s"endUtilityRatio" -> ((evaluationGraph.maxUtility - conflictCount) / evaluationGraph.maxUtility).toString
-    runResult += s"isOptimal" -> (if (conflictCount == 0) "1" else "0")
-    //TODO: add extraStats and add them and the 2 above in the google spreadheet
-    evaluationGraph match {
-      case grid: Grid => runResult += s"domainSize" -> grid.domain.size.toString //
-      case other =>
+    
+    val utility = (evaluationGraph.maxUtility - conflictCount * 2).toDouble
+    val domainSize = evaluationGraph match {
+      case grid: Grid => grid.domain.size
+      case other => -1
     }
+    
+    val avgGlobalUtilityRatio = extraStats.avgGlobalVsOpt.getOrElse(-1)
+    val endUtilityRatio = (evaluationGraph.maxUtility - conflictCount * 2).toDouble / evaluationGraph.maxUtility
+    val isOptimal = if (conflictCount == 0) 1 else 0
+    val timeToFirstLocOptimum = extraStats.timeToFirstLocOptimum.getOrElse(-1)
+    val messagesPerVertexPerStep = stats.aggregatedWorkerStatistics.signalMessagesReceived.toDouble / (evaluationGraph.size.toDouble * executionConfig.stepsLimit.getOrElse(1.toLong))
+    runResult += s"evaluationDescription" -> evaluationDescription //
+    runResult += s"optimizer" -> optimizer.toString //
+    runResult += s"utility" -> utility.toString
+    runResult += s"domainSize" -> domainSize.toString
     runResult += s"graphSize" -> evaluationGraph.size.toString //
     runResult += s"executionMode" -> executionConfig.executionMode.toString //
+    runResult += s"conflictCount" -> conflictCount.toString //
+    runResult += s"avgGlobalUtilityRatio" -> avgGlobalUtilityRatio.toString // Measure (1)
+    runResult += s"endUtilityRatio" -> endUtilityRatio.toString // Measure (2)
+    runResult += s"isOptimal" -> isOptimal.toString // Measure (3)
+    runResult += s"timeToFirstLocOptimum" -> timeToFirstLocOptimum.toString // Measure (4)
+    runResult += s"messagesPerVertexPerStep" -> messagesPerVertexPerStep.toString // Measure (5)
+    runResult += s"isOptimizerRanked" -> computeRanks.toString
+    runResult += s"revision" -> revision
+    runResult += s"aggregationInterval" -> aggregationInterval.toString
+    runResult += s"run" -> runNumber.toString
+    runResult += s"stepsLimit" -> executionConfig.stepsLimit.toString
+    runResult += s"timeLimit" -> executionConfig.timeLimit.toString
+    runResult += s"graphStructure" -> evaluationGraph.toString //
+
+    runResult += s"computationTimeInMilliseconds" -> executionTime.toString //
+    runResult += s"date" -> date.toString //
+    runResult += s"executionHostname" -> java.net.InetAddress.getLocalHost.getHostName //
+
     runResult += s"signalThreshold" -> executionConfig.signalThreshold.toString // 
     runResult += s"collectThreshold" -> executionConfig.collectThreshold.toString //
-    runResult += s"timeLimit" -> executionConfig.timeLimit.toString
-    runResult += s"stepsLimit" -> executionConfig.stepsLimit.toString
-    runResult += s"run" -> runNumber.toString
-    runResult += s"aggregationInterval" -> aggregationInterval.toString
+
+    // runResult += s"startTime" -> startTime.toString //
+    // runResult += s"endTime" -> finishTime.toString //
+
 
     println("\nNumber of conflicts at the end: " + ColorPrinter(evaluationGraph).countConflicts(evaluationGraph.graph.aggregate(idStateMapAggregator)))
     println("Shutting down.")

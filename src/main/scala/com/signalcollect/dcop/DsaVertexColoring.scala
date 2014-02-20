@@ -18,12 +18,12 @@ case class DsaBVertexColoring(changeProbability: Double)
   override def toString = "DsaBVertexColoringChangeProbability" + changeProbability
 }
 
-//case class ConflictDsaBVertexColoring(changeProbability: Double)
-//  extends SimpleDcopAlgorithm {
-//  val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
-//  val rule = new ArgmaxBDecisionRule with ZeroUtilityConvergence with MemoryLessTargetFunction with ConflictBasedVertexColoringUtility
-//  override def toString = "ConflictDsaBVertexColoringChangeProbability" + changeProbability
-//}
+case class ConflictDsaBVertexColoring(changeProbability: Double)
+  extends SimpleDcopAlgorithm {
+  val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
+  val rule = new ArgmaxBDecisionRule with ZeroUtilityConvergence with MemoryLessTargetFunction with ConflictBasedVertexColoringUtility
+  override def toString = "ConflictDsaBVertexColoringChangeProbability" + changeProbability
+}
 
 //case class ConflictDsaAVertexColoring(changeProbability: Double)
 //  extends SimpleDcopAlgorithm {
