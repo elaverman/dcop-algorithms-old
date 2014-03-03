@@ -24,6 +24,7 @@ import java.net.URL
 import scala.collection.JavaConversions._
 import scala.slick.driver.MySQLDriver.simple._
 import com.signalcollect.nodeprovisioning.torque._
+import java.net.InetAddress
 
 class AllResults(tag: Tag) extends Table[RowType](tag, "AllResults") {
   // def result_id = column[Int]("result_id", O.PrimaryKey, O.AutoInc, O.NotNull) // INT NOT NULL AUTO_INCREMENT,
@@ -46,7 +47,7 @@ class AllResults(tag: Tag) extends Table[RowType](tag, "AllResults") {
   def stepsLimit = column[String]("stepsLimit")
   //timeLimit VARCHAR(20),
   def graphStructure = column[String]("graphStructure")
-  def jobId = column[String]("jobId")
+  def jobId = column[String]("jobId")//, O.PrimaryKey)
   def computationTimeInMilliseconds = column[Double]("computationTimeInMilliseconds")
   def date = column[String]("date")
   def executionHostname = column[String]("executionHostname")
@@ -55,6 +56,8 @@ class AllResults(tag: Tag) extends Table[RowType](tag, "AllResults") {
     avgGlobalUtilityRatio, endUtilityRatio, isOptimal, timeToFirstLocOptimum, messagesPerVertexPerStep,
     revision, aggregationInterval, run, stepsLimit, graphStructure, jobId, computationTimeInMilliseconds,
     date, executionHostname)
+    
+  def pk = primaryKey("pk_composite", (evaluationDescription, jobId))
 
 }
 
@@ -102,8 +105,14 @@ class MySqlResultHandler(username: String, password: String, ipAddress: String)
       dataGraphStructure, dataJobId, dataComputationTimeInMilliseconds,
       dataDate, dataExecutionHostName)
 
+    //    val address = InetAddress.getByName(ipAddress)
+    //    val realIp = address.getHostAddress
+    //    
+    //    println(s"Ip address for $ipAddress is $realIp")
+
     Database.forURL(s"jdbc:mysql://$ipAddress/optimizers_db", user = username, password = password, driver = "com.mysql.jdbc.Driver") withSession {
       implicit session =>
+//         allResults.ddl.create
         actionWithExponentialRetry(() => allResults += runResultMySql)
     }
 

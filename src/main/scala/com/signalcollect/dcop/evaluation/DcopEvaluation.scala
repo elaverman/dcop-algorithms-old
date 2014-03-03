@@ -47,8 +47,8 @@ object DcopEvaluation extends App {
   val debug = false
 
   /*********/
-  def evalName = s"adopt40Evaluation"
-  def runs = 1
+  def evalName = s"Adopt40"
+  def runs = 10
   var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(mySql)
   //  var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
   /*********/
@@ -73,37 +73,37 @@ object DcopEvaluation extends App {
     NoRankConflictDsaBVertexColoring(changeProbability = 0.6),
     NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
     NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.9))
-  //   RankedConflictDsaBVertexColoring(changeProbability = 0.8),
-  //    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
-  //    RankedConflictDsaBVertexColoring(changeProbability = 0.9),
-  //  NoRankConflictDsaBVertexColoring(changeProbability = 0.95),
-  //  RankedConflictDsaBVertexColoring(changeProbability = 0.95),
-  //new Ranked inertia  
-  //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
-  //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
-  //  NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
-  // RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
-  //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
-  //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
-  //  NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
-  //  RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
-  //new: Inverted Ranks inertia
-  //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
-  //  NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
-  //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9),
-  //   NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97),
-  //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
-  //   RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
-  //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9)
-  //  RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97))
-  //      NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.8),
-  // NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.97),
-  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.5),
-  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6),
-  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
-  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.8),
-  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.9))
+    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
+    //   RankedConflictDsaBVertexColoring(changeProbability = 0.8),
+    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
+    //    RankedConflictDsaBVertexColoring(changeProbability = 0.9),
+    //  NoRankConflictDsaBVertexColoring(changeProbability = 0.95),
+    //  RankedConflictDsaBVertexColoring(changeProbability = 0.95),
+    //new Ranked inertia  
+    //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
+    //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
+    //  NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
+    // RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
+    //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
+    //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
+    //  NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
+    //  RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
+    //new: Inverted Ranks inertia
+    //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
+    //  NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
+    //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9),
+    //   NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97),
+    //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
+    //   RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
+    //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9)
+    //  RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97))
+    //      NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.8),
+    // NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.97),
+    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.5),
+    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6),
+    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
+    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.8),
+    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.9))
   //   DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
   //   DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.95))
 
@@ -120,8 +120,8 @@ object DcopEvaluation extends App {
 
   for (runNumber <- (0 until runs)) {
     for (optimizer <- optimizers) {
-      val evaluationGraphs = List(GridParameters((0 to 3).toSet, zeroInitialized, debug, 8)) // ++
-      //adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug))
+      val evaluationGraphs = //List(GridParameters((0 to 3).toSet, zeroInitialized, debug, 8)) // ++
+        adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug))
       for (evaluationGraph <- evaluationGraphs) {
         for (executionMat <- execModesAggrIntervAndTermLimits) {
           val executionConfig = executionMat._1 match {

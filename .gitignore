@@ -9,13 +9,6 @@ output/*
 krakenOutput/*
 krakenOutput100by100/*
 adoptInput/*
+dimacsInput/*
 
 *.config
-
-
-
-
-
-src/main/scala/com/signalcollect/dcop/evaluation/ConnectionTest.scala
-
-src/main/scala/com/signalcollect/dcop/evaluation/MySQLAccess.scala

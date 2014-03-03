@@ -8,6 +8,9 @@ import java.util.Date
 import com.signalcollect.dcop._
 import com.signalcollect.dcop.impl.RankedConfiguration
 import java.io.FileWriter
+import com.signalcollect.dcop.graphstructures.Grid
+import com.signalcollect.dcop.graphstructures.EvaluationGraph
+import com.signalcollect.dcop.graphstructures.AdoptGraph
 
 case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
 //TODO: Implement methods for handling non-ranked

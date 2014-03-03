@@ -9,6 +9,8 @@ import com.signalcollect.dcop._
 import com.signalcollect.dcop.impl.RankedConfiguration
 import java.io.FileWriter
 import java.io.File
+import com.signalcollect.dcop.graphstructures.Grid
+import com.signalcollect.dcop.graphstructures.AdoptGraph
 
 case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[Int], */ evaluationGraphParameters: EvaluationGraphParameters, executionConfig: ExecutionConfiguration, runNumber: Int, aggregationInterval: Int, revision: String, evaluationDescription: String) {
 
