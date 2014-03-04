@@ -2,9 +2,9 @@ package com.signalcollect.dcop.graphstructures
 
 import com.signalcollect.dcop.DcopAlgorithm
 
-case class DimacsGraph(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], dimacsFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends EvaluationGraph(optimizer) {
+case class DimacsGraph(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], dimacsFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer) {
 
-  val constraintGraphData = getConstraintGraphData(DimacsParser.parse(new java.io.File(dimacsFileName)))
+  val constraintGraphData = getConstraintGraphData(DimacsParser.parse(new java.io.File("dimacsInput/" + dimacsFileName)))
 
   val constraintGraph =
     constraintGraphData.buildConstraintGraphFromData(ranked = true, optimizer, initialValue, debug)

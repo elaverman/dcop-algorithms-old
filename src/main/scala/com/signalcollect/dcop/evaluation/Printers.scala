@@ -11,6 +11,7 @@ import java.io.FileWriter
 import com.signalcollect.dcop.graphstructures.Grid
 import com.signalcollect.dcop.graphstructures.EvaluationGraph
 import com.signalcollect.dcop.graphstructures.AdoptGraph
+import com.signalcollect.dcop.graphstructures.ConstraintEvaluationGraph
 
 case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
 //TODO: Implement methods for handling non-ranked
@@ -61,27 +62,28 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
           writeGridVertexAfterEntryToFile(grid.width - 1, outRanks.get)
         }
 
-      case adoptGraph: AdoptGraph =>
-        def writeAdoptGraphVertexEntryToFile(id: Int, value: Any, file: FileWriter) {
+      case constraintEvaluationGraph: ConstraintEvaluationGraph =>
+        def writeCeGraphVertexEntryToFile(id: Int, value: Any, file: FileWriter) {
           file.write(s"($id,$value)")
         }
 
-        def writeAdoptGraphVertexEntries(id: Int, color: Int, rank: Option[Double]) {
-          val neighbors = adoptGraph.computeNeighbours(id)
+        def writeCeGraphVertexEntries(id: Int, color: Int, rank: Option[Double]) {
+          val neighbors = constraintEvaluationGraph.computeNeighbours(id)
           val neighborStates = neighbors.map(aggregate(_)).asInstanceOf[Iterable[(Int, Double)]]
           val conflictsForId = neighborStates.filter(x => x._1 == color)
-          writeAdoptGraphVertexEntryToFile(id, color, outAnimation)
-          writeAdoptGraphVertexEntryToFile(id, conflictsForId.size, outIndConflicts)
+          writeCeGraphVertexEntryToFile(id, color, outAnimation)
+          writeCeGraphVertexEntryToFile(id, conflictsForId.size, outIndConflicts)
           if (outRanks.isDefined) {
             assert(rank.isDefined, "An outRanks FileWriter can only be passed in if all vertices have ranks defined.")
-            writeAdoptGraphVertexEntryToFile(id, rank.get, outRanks.get)
+            writeCeGraphVertexEntryToFile(id, rank.get, outRanks.get)
           }
         }
-        sorted.foreach {
+        sorted.
+        foreach {
           case (id: Int, (color: Int, rank: Double)) =>
-            writeAdoptGraphVertexEntries(id, color, Some(rank))
+            writeCeGraphVertexEntries(id, color, Some(rank))
           case (id: Int, color: Int) =>
-            writeAdoptGraphVertexEntries(id, color, None)
+            writeCeGraphVertexEntries(id, color, None)
         }
         outAnimation.write("\n")
         outIndConflicts.write("\n")

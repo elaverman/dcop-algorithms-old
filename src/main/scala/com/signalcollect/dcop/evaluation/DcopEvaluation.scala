@@ -47,10 +47,10 @@ object DcopEvaluation extends App {
   val debug = false
 
   /*********/
-  def evalName = s"Adopt40"
+  def evalName = s"Dimacs"
   def runs = 10
   var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(mySql)
-  //  var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
+  //    var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
   /*********/
 
   val optimizers: List[DcopAlgorithm[Int, Int]] = List(
@@ -117,11 +117,13 @@ object DcopEvaluation extends App {
   //  case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialValue: (Set[Int]) => Int, debug: Boolean, width: Int)
 
   val adoptGraphNamesList = new java.io.File("adoptInput").listFiles.filter(x => (x.getName.startsWith("Problem-GraphColor-40"))).map(_.getName)
+  val dimacsGraphNamesList = new java.io.File("dimacsInput").listFiles.filter(x => (x.getName.endsWith(".col"))).map(_.getName)
 
   for (runNumber <- (0 until runs)) {
     for (optimizer <- optimizers) {
       val evaluationGraphs = //List(GridParameters((0 to 3).toSet, zeroInitialized, debug, 8)) // ++
-        adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug))
+        // adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug)) // ++
+        dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug))
       for (evaluationGraph <- evaluationGraphs) {
         for (executionMat <- execModesAggrIntervAndTermLimits) {
           val executionConfig = executionMat._1 match {

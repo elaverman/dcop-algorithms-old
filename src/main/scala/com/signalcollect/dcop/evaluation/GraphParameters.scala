@@ -23,3 +23,7 @@ case class GridParameters(val domain: Set[Int], initValue: (Set[Int]) => Int, va
 case class AdoptGraphParameters(adoptFileName: String, initValue: (Set[Int]) => Int, val debug: Boolean) extends EvaluationGraphParameters {
   def initialValue = initValue
 }
+
+case class DimacsGraphParameters(dimacsFileName: String, val domain: Set[Int], initValue: (Set[Int]) => Int, val debug: Boolean) extends EvaluationGraphParameters {
+  def initialValue = initValue
+}

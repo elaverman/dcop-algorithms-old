@@ -12,7 +12,7 @@ import scala.Array.canBuildFrom
 import com.signalcollect.dcop.impl.RankedConfiguration
 import com.signalcollect.Graph
 
-case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends EvaluationGraph(optimizer) {
+case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer) {
 
   val textLines = Source.fromFile("adoptInput/" + adoptFileName).getLines.toList
   val constraintGraphData = getFromText(textLines)

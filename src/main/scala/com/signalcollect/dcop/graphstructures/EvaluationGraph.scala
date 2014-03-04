@@ -10,3 +10,7 @@ abstract class EvaluationGraph(optimizer: DcopAlgorithm[Int, Int]) {
   def maxUtility: Int //for now = number of possible satisfied constraints
   def domainForVertex(id: Int): Set[Int]
 }
+
+
+abstract class ConstraintEvaluationGraph(optimizer: DcopAlgorithm[Int, Int]) extends 
+	EvaluationGraph(optimizer)

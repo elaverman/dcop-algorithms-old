@@ -11,6 +11,7 @@ import java.io.FileWriter
 import java.io.File
 import com.signalcollect.dcop.graphstructures.Grid
 import com.signalcollect.dcop.graphstructures.AdoptGraph
+import com.signalcollect.dcop.graphstructures.DimacsGraph
 
 case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[Int], */ evaluationGraphParameters: EvaluationGraphParameters, executionConfig: ExecutionConfiguration, runNumber: Int, aggregationInterval: Int, revision: String, evaluationDescription: String) {
 
@@ -24,6 +25,7 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     val evaluationGraph = evaluationGraphParameters match {
       case gridParameters: GridParameters => Grid(optimizer, gridParameters.domain, gridParameters.initialValue, gridParameters.debug, gridParameters.width)
       case adoptGraphParameters: AdoptGraphParameters => AdoptGraph(optimizer, adoptGraphParameters.adoptFileName, adoptGraphParameters.initialValue, adoptGraphParameters.debug)
+      case dimacsGraphParameters: DimacsGraphParameters => DimacsGraph(optimizer, dimacsGraphParameters.domain, dimacsGraphParameters.dimacsFileName, dimacsGraphParameters.initialValue, dimacsGraphParameters.debug)
     }
 
     println(optimizer)
@@ -87,6 +89,7 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     val utility = (evaluationGraph.maxUtility - conflictCount * 2).toDouble
     val domainSize = evaluationGraph match {
       case grid: Grid => grid.domain.size
+      case dimacsGraph: DimacsGraph => dimacsGraph.domain.size
       case other => -1
     }
     
