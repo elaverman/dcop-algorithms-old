@@ -47,7 +47,7 @@ object DcopEvaluation extends App {
   val debug = false
 
   /*********/
-  def evalName = s"Dimacs"
+  def evalName = s"Dimacs4Colors"
   def runs = 10
   var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(mySql)
   //    var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
@@ -69,11 +69,11 @@ object DcopEvaluation extends App {
     //new for Ranked inertia
     //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
     //    RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.5),
+    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.5),
     NoRankConflictDsaBVertexColoring(changeProbability = 0.6),
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
+    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
+    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
+    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
     //   RankedConflictDsaBVertexColoring(changeProbability = 0.8),
     //    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
     //    RankedConflictDsaBVertexColoring(changeProbability = 0.9),
@@ -99,17 +99,18 @@ object DcopEvaluation extends App {
     //  RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97))
     //      NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.8),
     // NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.97),
-    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.5),
-    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6),
-    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
-    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.8),
-    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.9))
+    //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.5),
+    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6))
+  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
+  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.8),
+  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.9))
   //   DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
   //   DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.95))
 
   val execModesAggrIntervAndTermLimits = List(
     //   (ExecutionMode.PureAsynchronous, 30000, 3600000), //100, 100000) //420000L)
-    (ExecutionMode.Synchronous, 1, 100) //30, 3600) //5, 800),
+    (ExecutionMode.Synchronous, 10, 10000),
+    (ExecutionMode.Synchronous, 1, 1000) //30, 3600) //5, 800),
     )
 
   //TODO: 2 lists of settings for grids and adopt etc. & combine them with optimizers 
@@ -117,13 +118,15 @@ object DcopEvaluation extends App {
   //  case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialValue: (Set[Int]) => Int, debug: Boolean, width: Int)
 
   val adoptGraphNamesList = new java.io.File("adoptInput").listFiles.filter(x => (x.getName.startsWith("Problem-GraphColor-40"))).map(_.getName)
-  val dimacsGraphNamesList = new java.io.File("dimacsInput").listFiles.filter(x => (x.getName.endsWith(".col"))).map(_.getName)
+  val dimacsGraphNamesList = new java.io.File("dimacsInput").listFiles.filter(x => (x.getName.endsWith("flat1000_76_0.col"))).map(_.getName)
 
   for (runNumber <- (0 until runs)) {
     for (optimizer <- optimizers) {
       val evaluationGraphs = //List(GridParameters((0 to 3).toSet, zeroInitialized, debug, 8)) // ++
         // adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug)) // ++
-        dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug))
+        dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug)) ++
+          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 75).toSet, zeroInitialized, debug)) ++
+          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 100).toSet, zeroInitialized, debug))
       for (evaluationGraph <- evaluationGraphs) {
         for (executionMat <- execModesAggrIntervAndTermLimits) {
           val executionConfig = executionMat._1 match {

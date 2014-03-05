@@ -48,10 +48,10 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     val graphDirectoryFolder = new File("output/" + evaluationGraph.toString())
     if (!graphDirectoryFolder.exists)
       graphDirectoryFolder.mkdir
-    val outAnimation = new FileWriter(s"output/${evaluationGraph}/animation${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
-    val outConflicts = new FileWriter(s"output/${evaluationGraph}/conflicts${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
-    val outIndConflicts = new FileWriter(s"output/${evaluationGraph}/indConflicts${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
-    val outLocMinima = new FileWriter(s"output/${evaluationGraph}/locMinima${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
+    val outAnimation = new FileWriter(s"output/${evaluationGraph}/animation${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}Run$runNumber.txt")
+    val outConflicts = new FileWriter(s"output/${evaluationGraph}/conflicts${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}Run$runNumber.txt")
+    val outIndConflicts = new FileWriter(s"output/${evaluationGraph}/indConflicts${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}Run$runNumber.txt")
+    val outLocMinima = new FileWriter(s"output/${evaluationGraph}/locMinima${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}Run$runNumber.txt")
     var outRanks: FileWriter = null
 
     println(optimizer.toString)
@@ -68,7 +68,7 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     val terminationCondition = if (!computeRanks)
       new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperation = new IdStateMapAggregator[Int, Int], aggregationInterval = aggregationInterval, evaluationGraph = evaluationGraph)
     else {
-      outRanks = new java.io.FileWriter(s"output/${evaluationGraph}/ranks${optimizer}${executionConfig.executionMode}Run$runNumber.txt")
+      outRanks = new java.io.FileWriter(s"output/${evaluationGraph}/ranks${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}Run$runNumber.txt")
       new ColorRankPrintingGlobalTerminationCondition(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperation = new IdStateMapAggregator[Int, (Int, Double)], aggregationInterval = aggregationInterval, evaluationGraph = evaluationGraph)
     }
 
