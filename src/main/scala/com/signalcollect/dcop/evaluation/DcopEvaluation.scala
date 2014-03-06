@@ -47,8 +47,8 @@ object DcopEvaluation extends App {
   val debug = false
 
   /*********/
-  def evalName = s"Dimacs4Colors"
-  def runs = 10
+  def evalName = s"Dimacsflat1000_76"
+  def runs = 1
   var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(mySql)
   //    var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
   /*********/
