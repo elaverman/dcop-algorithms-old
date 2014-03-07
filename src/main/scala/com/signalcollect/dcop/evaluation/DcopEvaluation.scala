@@ -47,7 +47,7 @@ object DcopEvaluation extends App {
   val debug = false
 
   /*********/
-  def evalName = s"Dimacsflat1000_76"
+  def evalName = s"Dimacsflat1000_76-rep"
   def runs = 1
   var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(mySql)
   //    var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
@@ -109,8 +109,7 @@ object DcopEvaluation extends App {
 
   val execModesAggrIntervAndTermLimits = List(
     //   (ExecutionMode.PureAsynchronous, 30000, 3600000), //100, 100000) //420000L)
-    (ExecutionMode.Synchronous, 10, 10000),
-    (ExecutionMode.Synchronous, 1, 1000) //30, 3600) //5, 800),
+    (ExecutionMode.Synchronous, 1, 500) //30, 3600) //5, 800),
     )
 
   //TODO: 2 lists of settings for grids and adopt etc. & combine them with optimizers 
@@ -126,7 +125,7 @@ object DcopEvaluation extends App {
         // adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug)) // ++
         dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug)) ++
           dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 75).toSet, zeroInitialized, debug)) ++
-          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 100).toSet, zeroInitialized, debug))
+          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 99).toSet, zeroInitialized, debug))
       for (evaluationGraph <- evaluationGraphs) {
         for (executionMat <- execModesAggrIntervAndTermLimits) {
           val executionConfig = executionMat._1 match {
