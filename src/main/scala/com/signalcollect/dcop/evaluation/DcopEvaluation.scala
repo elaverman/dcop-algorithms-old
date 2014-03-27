@@ -24,6 +24,11 @@ object DcopEvaluation extends App {
   val assemblyFile = new File(assemblyPath)
   val kraken = new TorqueHost(
     jobSubmitter = new TorqueJobSubmitter(username = System.getProperty("user.name"), hostname = "kraken.ifi.uzh.ch"),
+    coresPerNode = 23,
+    localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/", priority = TorquePriority.slow)
+  val gru = new TorqueHost(
+    jobSubmitter = new TorqueJobSubmitter(username = System.getProperty("user.name"), hostname = "gru.ifi.uzh.ch"),
+    coresPerNode = 23,
     localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/", priority = TorquePriority.slow)
   val localHost = new LocalHost
   val googleDocs = new GoogleDocsResultHandler(args(0), args(1), "optimizerEvaluations", "Ranked")
@@ -47,10 +52,10 @@ object DcopEvaluation extends App {
   val debug = false
 
   /*********/
-  def evalName = s"Dimacsflat1000_76-rep"
+  def evalName = s"gru"
   def runs = 1
-  var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(mySql)
-  //    var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
+//  var evaluation = new Evaluation(evaluationName = evalName, executionHost = gru).addResultHandler(mySql)
+      var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
   /*********/
 
   val optimizers: List[DcopAlgorithm[Int, Int]] = List(
@@ -109,7 +114,7 @@ object DcopEvaluation extends App {
 
   val execModesAggrIntervAndTermLimits = List(
     //   (ExecutionMode.PureAsynchronous, 30000, 3600000), //100, 100000) //420000L)
-    (ExecutionMode.Synchronous, 1, 500) //30, 3600) //5, 800),
+    (ExecutionMode.Synchronous, 50, 500) //30, 3600) //5, 800),
     )
 
   //TODO: 2 lists of settings for grids and adopt etc. & combine them with optimizers 
@@ -121,11 +126,11 @@ object DcopEvaluation extends App {
 
   for (runNumber <- (0 until runs)) {
     for (optimizer <- optimizers) {
-      val evaluationGraphs = //List(GridParameters((0 to 3).toSet, zeroInitialized, debug, 8)) // ++
+      val evaluationGraphs = List(GridParameters((0 to 9).toSet, zeroInitialized, debug, 1000)) // ++
         // adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug)) // ++
-        dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug)) ++
-          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 75).toSet, zeroInitialized, debug)) ++
-          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 99).toSet, zeroInitialized, debug))
+//        dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug)) ++
+//          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 75).toSet, zeroInitialized, debug)) ++
+//          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 99).toSet, zeroInitialized, debug))
       for (evaluationGraph <- evaluationGraphs) {
         for (executionMat <- execModesAggrIntervAndTermLimits) {
           val executionConfig = executionMat._1 match {

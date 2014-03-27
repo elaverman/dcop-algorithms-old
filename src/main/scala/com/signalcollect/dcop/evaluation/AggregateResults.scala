@@ -56,7 +56,6 @@ object AggregateResults extends App {
       }
     }
   }
-  println("bla2")
 
   for (i <- 0 until fileTypes.size) {
     for (j <- 1 to 300) {

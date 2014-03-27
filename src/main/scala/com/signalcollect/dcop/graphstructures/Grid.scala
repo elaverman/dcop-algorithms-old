@@ -18,7 +18,7 @@ case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialVal
   optimizer match {
 
     case rankedOptimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] =>
-      println("Ranked Optimizer")
+      println("Ranked Optimizer for Grid of width " + width)
       for (i <- 0 until width * width) {
         g.addVertex(new RankedDcopVertex(i, domain, rankedOptimizer, initialValue(domain), debug = debug))
       }
@@ -29,7 +29,7 @@ case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialVal
       }
 
     case simpleOptimizer: OptimizerModule[Int, Int] =>
-      println("Simple Optimizer")
+      println("Simple Optimizer for Grid of width " + width)
       for (i <- 0 until width * width)
         g.addVertex(new SimpleDcopVertex(i, domain, simpleOptimizer, initialValue(domain), debug = debug))
       for (i <- 0 until width * width)

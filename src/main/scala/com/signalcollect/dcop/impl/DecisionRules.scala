@@ -153,4 +153,12 @@ trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModu
     }
   }
 
+//  trait SimulatedAnnealing extends ArgmaxADecisionRule {
+//    this: TargetFunction =>
+//      
+//    override def computeMove(c: Config) = {
+//
+//    }
+//  }
+
 }

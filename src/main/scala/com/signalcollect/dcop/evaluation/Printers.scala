@@ -169,10 +169,16 @@ class ColorPrintingGlobalTerminationCondition(
   outLocMinima: FileWriter,
   stats: RunStats,
   startTime: Long,
-  aggregationOperation: IdStateMapAggregator[Int, Int],
-  aggregationInterval: Long,
-  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition[Map[Int, Int]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
-  with Serializable
+  aggregationOperationParam: IdStateMapAggregator[Int, Int],
+  aggregationIntervalParam: Long,
+  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition//[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
+  with Serializable {
+  type ResultType = Map[Int, Int]
+  
+  def aggregationOperation = aggregationOperationParam
+  override def aggregationInterval = aggregationIntervalParam
+  def shouldTerminate(r: Map[Int, Int]) = ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
+}
 
 class ColorRankPrintingGlobalTerminationCondition(
   outAnimation: FileWriter,
@@ -183,8 +189,14 @@ class ColorRankPrintingGlobalTerminationCondition(
   stats: RunStats,
   startTime: Long,
   //  gridWidth: Int,
-  aggregationOperation: IdStateMapAggregator[Int, (Int, Double)],
-  aggregationInterval: Long,
-  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, outRanks, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
-  with Serializable
+  aggregationOperationParam: IdStateMapAggregator[Int, (Int, Double)],
+  aggregationIntervalParam: Long,
+  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition//[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, outRanks, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
+  with Serializable {
+  type ResultType = Map[Int, (Int, Double)]
+  
+  def aggregationOperation = aggregationOperationParam
+  override def aggregationInterval = aggregationIntervalParam
+  def shouldTerminate(r: Map[Int, (Int, Double)]) = ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
+}
 
