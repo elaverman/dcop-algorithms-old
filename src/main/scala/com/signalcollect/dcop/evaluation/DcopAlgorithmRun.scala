@@ -80,6 +80,8 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
       IdStateMapAggregator[Int, (Int, Double)]
     }
 
+    val initialAggregate = evaluationGraph.graph.aggregate(idStateMapAggregator)
+    ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, evaluationGraph.maxUtility)(initialAggregate)
     val stats = evaluationGraph.graph.execute(executionConfig.withGlobalTerminationCondition(terminationCondition))
 
     //   stats.aggregatedWorkerStatistics.numberOfOutgoingEdges
