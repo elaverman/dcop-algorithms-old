@@ -32,6 +32,11 @@ case class ConflictDsaBVertexColoring(changeProbability: Double)
 //  override def toString = "ConflictDsaAVertexColoringChangeProbability" + changeProbability
 //}
 
+/**
+ * Ranked, RankedConflict, NoRankConflict, DynamicRankedConflict
+ */
+
+
 case class RankedDsaAVertexColoring(changeProbability: Double)
   extends RankedDcopAlgorithm {
   val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
