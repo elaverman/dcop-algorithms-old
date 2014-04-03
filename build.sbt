@@ -10,7 +10,7 @@ fork in run := true
 
 organization := "com.signalcollect"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.10.4"
 
 resolvers += "Typesafe Snapshot Repository" at "http://repo.typesafe.com/typesafe/snapshots/"
 
@@ -24,7 +24,7 @@ excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
 
 /** Dependencies */
 libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-library" % "2.10.3"  % "compile",
+  "org.scala-lang" % "scala-library" % "2.10.4”  % "compile",
   "junit" % "junit" % "4.8.2"  % "test",
   "com.google.collections" % "google-collections" % "1.0",
   "org.specs2" % "classycle" % "1.4.1" % "test",

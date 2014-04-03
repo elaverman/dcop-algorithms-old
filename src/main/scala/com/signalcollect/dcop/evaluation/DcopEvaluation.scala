@@ -25,7 +25,7 @@ object DcopEvaluation extends App {
   val kraken = new TorqueHost(
     jobSubmitter = new TorqueJobSubmitter(username = System.getProperty("user.name"), hostname = "kraken.ifi.uzh.ch"),
     coresPerNode = 23,
-    localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/", priority = TorquePriority.slow)
+    localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/", priority = TorquePriority.fast)
   val gru = new TorqueHost(
     jobSubmitter = new TorqueJobSubmitter(username = System.getProperty("user.name"), hostname = "gru.ifi.uzh.ch"),
     coresPerNode = 23,
@@ -54,69 +54,77 @@ object DcopEvaluation extends App {
   /*********/
   def evalName = s"Adopt40 pure"
   def runs = 10
-//  var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(mySql)
-      var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
+  var evaluation = new Evaluation(evaluationName = evalName, executionHost = kraken).addResultHandler(mySql)
+  //      var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
   /*********/
 
-      
-    val optimizers: List[DcopAlgorithm[Int, Int]] = List(   
-      NoRankConflictDsaBVertexColoring(changeProbability = 0.6),
-      RankedConflictDsaBVertexColoring(changeProbability = 0.6),
-      DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6))
-      
-//  val optimizers: List[DcopAlgorithm[Int, Int]] = List(
-//    //    ConflictDsaBVertexColoring(changeProbability = 0.9),
-//    //        ConflictDsaBVertexColoring(changeProbability = 0.8),
-//    //    ConflictDsaBVertexColoring(changeProbability = 0.5),
-//    //    RankedDsaBVertexColoring(changeProbability = 0.9),
-//    //    RankedDsaBVertexColoring(changeProbability = 0.7),
-//    //    RankedDsaBVertexColoring(changeProbability = 1.0)
-//    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
-//    //    RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-//    //    NoRankConflictExplorerDsaBVertexColoring(changeProbability = 0.9, explore = 0.01), //NoRankConflictExplorerDsaBVertexColoring(changeProbability = 0.7, explore = 0.05) 
-//    //    RankedConflictExplorerDsaBVertexColoring(changeProbability = 0.9, explore = 0.01),
-//    //    RankedConflictExplorerDsaBVertexColoring(changeProbability = 0.9, explore = 0.1),
-//    //    RankedConflictExplorerDsaBVertexColoring(changeProbability = 0.9, explore = 0.3),
-//    //new for Ranked inertia
-//    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
-//    //    RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-//    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.5),
-//    NoRankConflictDsaBVertexColoring(changeProbability = 0.6),
-//    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
-//    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
-//    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
-//    //   RankedConflictDsaBVertexColoring(changeProbability = 0.8),
-//    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
-//    //    RankedConflictDsaBVertexColoring(changeProbability = 0.9),
-//    //  NoRankConflictDsaBVertexColoring(changeProbability = 0.95),
-//    //  RankedConflictDsaBVertexColoring(changeProbability = 0.95),
-//    //new Ranked inertia  
-//    //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
-//    //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
-//    //  NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
-//    // RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
-//    //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
-//    //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
-//    //  NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
-//    //  RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
-//    //new: Inverted Ranks inertia
-//    //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
-//    //  NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
-//    //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9),
-//    //   NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97),
-//    //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
-//    //   RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
-//    //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9)
-//    //  RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97))
-//    //      NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.8),
-//    // NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.97),
-//    //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.5),
-//    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6))
-//  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
-//  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.8),
-//  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.9))
-//  //   DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
-//  //   DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.95))
+  val optimizers: List[DcopAlgorithm[Int, Int]] = List(
+//    NoRankConflictDsaBVertexColoring(changeProbability = 0.5),
+//    RankedConflictDsaBVertexColoring(changeProbability = 0.5),
+//    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.5),
+//    NoRankConflictDsaBVertexColoring(changeProbability = 0.4),
+//    RankedConflictDsaBVertexColoring(changeProbability = 0.4),
+//    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.4),
+//    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
+//    RankedConflictDsaBVertexColoring(changeProbability = 0.7),
+//    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
+    NoRankConflictDsaBVertexColoring(changeProbability = 0.6),
+    RankedConflictDsaBVertexColoring(changeProbability = 0.6),
+    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6))
+
+  //  val optimizers: List[DcopAlgorithm[Int, Int]] = List(
+  //    //    ConflictDsaBVertexColoring(changeProbability = 0.9),
+  //    //        ConflictDsaBVertexColoring(changeProbability = 0.8),
+  //    //    ConflictDsaBVertexColoring(changeProbability = 0.5),
+  //    //    RankedDsaBVertexColoring(changeProbability = 0.9),
+  //    //    RankedDsaBVertexColoring(changeProbability = 0.7),
+  //    //    RankedDsaBVertexColoring(changeProbability = 1.0)
+  //    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
+  //    //    RankedConflictDsaBVertexColoring(changeProbability = 0.7),
+  //    //    NoRankConflictExplorerDsaBVertexColoring(changeProbability = 0.9, explore = 0.01), //NoRankConflictExplorerDsaBVertexColoring(changeProbability = 0.7, explore = 0.05) 
+  //    //    RankedConflictExplorerDsaBVertexColoring(changeProbability = 0.9, explore = 0.01),
+  //    //    RankedConflictExplorerDsaBVertexColoring(changeProbability = 0.9, explore = 0.1),
+  //    //    RankedConflictExplorerDsaBVertexColoring(changeProbability = 0.9, explore = 0.3),
+  //    //new for Ranked inertia
+  //    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
+  //    //    RankedConflictDsaBVertexColoring(changeProbability = 0.7),
+  //    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.5),
+  //    NoRankConflictDsaBVertexColoring(changeProbability = 0.6),
+  //    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
+  //    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
+  //    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
+  //    //   RankedConflictDsaBVertexColoring(changeProbability = 0.8),
+  //    //    NoRankConflictDsaBVertexColoring(changeProbability = 0.9),
+  //    //    RankedConflictDsaBVertexColoring(changeProbability = 0.9),
+  //    //  NoRankConflictDsaBVertexColoring(changeProbability = 0.95),
+  //    //  RankedConflictDsaBVertexColoring(changeProbability = 0.95),
+  //    //new Ranked inertia  
+  //    //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
+  //    //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.7),
+  //    //  NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
+  //    // RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.8),
+  //    //    NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
+  //    //    RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.9),
+  //    //  NoRankConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
+  //    //  RankedConflictDsaBVertexColoringWithRankedChangeProbability(relativeChangeProbability = 0.97),
+  //    //new: Inverted Ranks inertia
+  //    //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
+  //    //  NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
+  //    //        NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9),
+  //    //   NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97),
+  //    //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.7),
+  //    //   RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.8),
+  //    //    RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.9)
+  //    //  RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability = 0.97))
+  //    //      NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.8),
+  //    // NoRankConflictDsaBVertexColoringWithDynamicRankedChangeProbability(relativeChangeProbability = 0.97),
+  //    //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.5),
+  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6))
+  //  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
+  //  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.8),
+  //  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.9))
+  //  //   DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
+  //  //   DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.95))
 
   val execModesAggrIntervAndTermLimits = List(
     //   (ExecutionMode.PureAsynchronous, 30000, 3600000), //100, 100000) //420000L)
@@ -133,10 +141,10 @@ object DcopEvaluation extends App {
   for (runNumber <- (0 until runs)) {
     for (optimizer <- optimizers) {
       val evaluationGraphs = //List(GridParameters((0 to 9).toSet, zeroInitialized, debug, 1000)) // ++
-         adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug)) // ++
-//        dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug)) ++
-//          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 75).toSet, zeroInitialized, debug)) ++
-//          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 99).toSet, zeroInitialized, debug))
+        adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug)) // ++
+      //        dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug)) ++
+      //          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 75).toSet, zeroInitialized, debug)) ++
+      //          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 99).toSet, zeroInitialized, debug))
       for (evaluationGraph <- evaluationGraphs) {
         for (executionMat <- execModesAggrIntervAndTermLimits) {
           val executionConfig = executionMat._1 match {
