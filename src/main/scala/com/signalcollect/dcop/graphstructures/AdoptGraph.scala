@@ -12,13 +12,13 @@ import scala.Array.canBuildFrom
 import com.signalcollect.dcop.impl.RankedConfiguration
 import com.signalcollect.Graph
 
-case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer) {
+object AdoptGraphUtilities {
 
-  val textLines = Source.fromFile("adoptInput/" + adoptFileName).getLines.toList
-  val constraintGraphData = getFromText(textLines)
-
-  val constraintGraph =
-    constraintGraphData.buildConstraintGraphFromData(ranked = true, optimizer, initialValue, debug)
+  def parseAdoptFile(fileName: String): ConstraintGraphData = {
+    val textLines = Source.fromFile("adoptInput/" + fileName).getLines.toList
+    val constraintGraphData = getFromText(textLines)
+    constraintGraphData
+  }
 
   def getFromText(textLines: List[String]): ConstraintGraphData = {
     textLines match {
@@ -58,7 +58,15 @@ case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String,
     }
   }
 
+}
 
+trait BaseAdoptGraph {
+
+  def constraintGraphData: ConstraintGraphData
+
+  def constraintGraph: Graph[Any, Any]
+
+  def adoptFileName: String
 
   def graph = constraintGraph
 
@@ -71,5 +79,21 @@ case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String,
   def domainForVertex(id: Int) = constraintGraphData.possibleValues.getOrElse(id, Set())
 
   override def toString = adoptFileName
+}
+
+case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer) with BaseAdoptGraph {
+
+  val constraintGraphData = AdoptGraphUtilities.parseAdoptFile(adoptFileName)
+
+  val constraintGraph = constraintGraphData.buildConstraintGraphFromData(optimizer, initialValue, debug)
+
+}
+
+case class MixedAdoptGraph(optimizer1: DcopAlgorithm[Int, Int], optimizer2: DcopAlgorithm[Int, Int], proportion: Double, adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer1) with BaseAdoptGraph {
+
+  val constraintGraphData = AdoptGraphUtilities.parseAdoptFile(adoptFileName)
+
+  val constraintGraph =
+    constraintGraphData.buildMixedConstraintGraphFromData(optimizer1, optimizer2, proportion, initialValue, debug)
 
 }

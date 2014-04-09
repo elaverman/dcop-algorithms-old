@@ -9,6 +9,7 @@ import com.signalcollect.dcop.graph.RankedVertexColoringEdge
 import com.signalcollect.dcop.graph.SimpleDcopVertex
 import com.signalcollect.StateForwarderEdge
 import com.signalcollect.Graph
+import scala.util.Random
 
 //TODO new format Map[Int, List[Int]]
 case class ConstraintGraphData(possibleValues: Map[Int, Set[Int]], neighbours: Map[Int, Set[Int]]) {
@@ -41,8 +42,8 @@ case class ConstraintGraphData(possibleValues: Map[Int, Set[Int]], neighbours: M
       "\n Possible values of variables = " + possibleValues.map(x => x._1 + "-> [" + x._2.mkString(" ") + "]").mkString("; ") +
       "\n Constraints: \n" + neighbours.mkString("\n")
   }
-  
-    def buildConstraintGraphFromData(ranked: Boolean, optimizer: DcopAlgorithm[Int, Int], initialValue: (Set[Int]) => Int, debug: Boolean): Graph[Any, Any] = {
+
+  def buildConstraintGraphFromData(optimizer: DcopAlgorithm[Int, Int], initialValue: (Set[Int]) => Int, debug: Boolean): Graph[Any, Any] = {
     val graph = new GraphBuilder[Any, Any].build
 
     optimizer match {
@@ -76,4 +77,59 @@ case class ConstraintGraphData(possibleValues: Map[Int, Set[Int]], neighbours: M
     }
     graph
   }
+
+  def buildMixedConstraintGraphFromData(optimizer1: DcopAlgorithm[Int, Int], optimizer2: DcopAlgorithm[Int, Int], proportion: Double, initialValue: (Set[Int]) => Int, debug: Boolean): Graph[Any, Any] = {
+    val graph = new GraphBuilder[Any, Any].build
+
+    optimizer1 match {
+
+      case rankedOptimizer1: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] => {
+        optimizer2 match {
+          case rankedOptimizer2: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] =>
+            println(s"Ranked Optimizer 1 $proportion and Optimizer 2 ${1 - proportion}.")
+
+            for (id <- ids) {
+              val domain = possibleValues(id)
+              if (Random.nextDouble <= proportion)
+                graph.addVertex(new RankedDcopVertex(id, domain, rankedOptimizer1, initialValue(domain), debug = debug))
+              else
+                graph.addVertex(new RankedDcopVertex(id, domain, rankedOptimizer2, initialValue(domain), debug = debug))
+            }
+
+            for (id1 <- ids) {
+              for (id2 <- neighbours(id1)) {
+                graph.addEdge(id1, new RankedVertexColoringEdge(id2))
+              }
+            }
+
+          case other => throw new Error("Graph not built. The optimizers are not both ranked.")
+        }
+      }
+
+      case simpleOptimizer1: OptimizerModule[Int, Int] => {
+        optimizer2 match {
+          case simpleOptimizer2: OptimizerModule[Int, Int] =>
+            println(s"Simple Optimizer1 $proportion and Optimizer 2 ${1 - proportion}.")
+
+            for (id <- ids) {
+              val domain = possibleValues(id)
+              if (Random.nextDouble <= proportion)
+                graph.addVertex(new SimpleDcopVertex(id, domain, simpleOptimizer1, initialValue(domain), debug = debug))
+              else
+                graph.addVertex(new SimpleDcopVertex(id, domain, simpleOptimizer2, initialValue(domain), debug = debug))
+            }
+
+            for (id1 <- ids) {
+              for (id2 <- neighbours(id1)) {
+                graph.addEdge(id1, new StateForwarderEdge(id2))
+              }
+            }
+
+          case other => throw new Error("Graph not built. The optimizers are not both simple.")
+        }
+      }
+    }
+    graph
+  }
+
 }

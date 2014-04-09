@@ -14,7 +14,7 @@ import com.signalcollect.dcop.graphstructures.AdoptGraph
 import com.signalcollect.dcop.graphstructures.ConstraintEvaluationGraph
 
 case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
-//TODO: Implement methods for handling non-ranked
+  //TODO: Implement methods for handling non-ranked
   var iteration = 1
   var firstLocMinimum = 30000
   var sumOfGlobalUtilities: Long = 0
@@ -79,12 +79,12 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
           }
         }
         sorted.
-        foreach {
-          case (id: Int, (color: Int, rank: Double)) =>
-            writeCeGraphVertexEntries(id, color, Some(rank))
-          case (id: Int, color: Int) =>
-            writeCeGraphVertexEntries(id, color, None)
-        }
+          foreach {
+            case (id: Int, (color: Int, rank: Double)) =>
+              writeCeGraphVertexEntries(id, color, Some(rank))
+            case (id: Int, color: Int) =>
+              writeCeGraphVertexEntries(id, color, None)
+          }
         outAnimation.write("\n")
         outIndConflicts.write("\n")
         if (outRanks.isDefined) {
@@ -110,6 +110,7 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
     numberOfConflicts
   }
 
+  //TODO: Something might be wrong here. In the stats reported to the database, it is always 1.0.
   //Computes if it is in (actual) LocalMinimum (i.e. not according to beliefs - the target function) 
   def countLocMinima(aggregate: Map[Int, State]): Long = {
     val numberOfLocMinima = aggregate.map {
@@ -138,6 +139,7 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
     outLocMinima.write(countLocMinima(aggregate) + "\n")
   }
 
+  //TODO: Something might be wrong here. In the stats reported to the database, it is always 1.0.
   def changeTimeToFirstLocOptimum(stats: RunStats)(aggregate: Map[Int, State]) = {
     if (countLocMinima(aggregate) == evaluationGraph.size) {
       stats.timeToFirstLocOptimum = stats.timeToFirstLocOptimum match {
@@ -149,7 +151,7 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
 
   def shouldTerminate(outAnimation: FileWriter, outConflicts: FileWriter, outRanks: Option[FileWriter], outIndConflicts: FileWriter, outLocMinima: FileWriter, stats: RunStats, maxUtility: Int)(aggregate: Map[Int, State]): Boolean = {
     print("*" + countConflicts(aggregate))
-//    printAnimation(outAnimation, outRanks, outIndConflicts)(aggregate)
+    //    printAnimation(outAnimation, outRanks, outIndConflicts)(aggregate)
     printNumberOfConflicts(outConflicts)(aggregate)
     printNumberOfLocalMinima(outLocMinima)(aggregate)
 
@@ -171,10 +173,10 @@ class ColorPrintingGlobalTerminationCondition(
   startTime: Long,
   aggregationOperationParam: IdStateMapAggregator[Int, Int],
   aggregationIntervalParam: Long,
-  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition//[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
+  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition //[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
   with Serializable {
   type ResultType = Map[Int, Int]
-  
+
   def aggregationOperation = aggregationOperationParam
   override def aggregationInterval = aggregationIntervalParam
   def shouldTerminate(r: Map[Int, Int]) = ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
@@ -191,10 +193,10 @@ class ColorRankPrintingGlobalTerminationCondition(
   //  gridWidth: Int,
   aggregationOperationParam: IdStateMapAggregator[Int, (Int, Double)],
   aggregationIntervalParam: Long,
-  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition//[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, outRanks, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
+  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition //[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, outRanks, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
   with Serializable {
   type ResultType = Map[Int, (Int, Double)]
-  
+
   def aggregationOperation = aggregationOperationParam
   override def aggregationInterval = aggregationIntervalParam
   def shouldTerminate(r: Map[Int, (Int, Double)]) = ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)

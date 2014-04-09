@@ -7,7 +7,7 @@ case class DimacsGraph(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], dim
   val constraintGraphData = getConstraintGraphData(DimacsParser.parse(new java.io.File("dimacsInput/" + dimacsFileName)))
 
   val constraintGraph =
-    constraintGraphData.buildConstraintGraphFromData(ranked = true, optimizer, initialValue, debug)
+    constraintGraphData.buildConstraintGraphFromData(optimizer, initialValue, debug)
 
   //TODO: v Ask Philip about this next function
   //Attention: ConstraintGraphData assumes vertex ids from 0, while the Dimacs format assumes them from 1

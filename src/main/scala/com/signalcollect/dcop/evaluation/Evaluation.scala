@@ -25,19 +25,20 @@ import scala.util.Random
 
 case class Evaluation(
   evaluationName: String,
+  evaluationNumber: Int = 0,
   executionHost: ExecutionHost = new LocalHost,
   evaluationRuns: List[() => List[Map[String, String]]] = List(),
   resultHandlers: List[Map[String, String] => Unit] = List(println(_)),
   extraStats: Map[String, String] = Map()) {
-  def addEvaluationRun(evaluationRun: () => List[Map[String, String]]) = Evaluation(evaluationName, executionHost, evaluationRun :: evaluationRuns, resultHandlers, extraStats)
-  def addResultHandler(resultHandler: Map[String, String] => Unit) = Evaluation(evaluationName, executionHost, evaluationRuns, resultHandler :: resultHandlers, extraStats)
-  def addExtraStats(stats: Map[String, String]) = Evaluation(evaluationName, executionHost, evaluationRuns, resultHandlers, extraStats ++ stats)
+  def addEvaluationRun(evaluationRun: () => List[Map[String, String]]) = Evaluation(evaluationName, evaluationNumber, executionHost, evaluationRun :: evaluationRuns, resultHandlers, extraStats)
+  def addResultHandler(resultHandler: Map[String, String] => Unit) = Evaluation(evaluationName, evaluationNumber, executionHost, evaluationRuns, resultHandler :: resultHandlers, extraStats)
+  def addExtraStats(stats: Map[String, String]) = Evaluation(evaluationName, evaluationNumber, executionHost, evaluationRuns, resultHandlers, extraStats ++ stats)
   def execute {
 
     val jobs = (evaluationRuns zip (1 to evaluationRuns.size)) map { runTuple =>
       val evaluationRun = runTuple._1
-      val jobId = runTuple._2
-      //val jobId = jobNumber * 100 + evaluationNumber % 100
+      val jobNumber = runTuple._2
+      val jobId = jobNumber * 100 + evaluationNumber % 100
       val jobFunction = () => {
         println(s"Job $jobId is being executed ...")
         val stats = evaluationRun() // Execute evaluation.

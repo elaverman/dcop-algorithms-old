@@ -8,7 +8,11 @@ target/*
 output/*
 krakenOutput/*
 krakenOutput100by100/*
+krakenOutputArch/*
 adoptInput/*
 dimacsInput/*
 
 *.config
+
+
+
