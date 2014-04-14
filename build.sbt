@@ -6,8 +6,6 @@ name := "optimizers"
 
 version := "1.0-SNAPSHOT"
 
-fork in run := true
-
 organization := "com.signalcollect"
 
 scalaVersion := "2.10.4"
@@ -17,6 +15,8 @@ resolvers += "Typesafe Snapshot Repository" at "http://repo.typesafe.com/typesaf
 resolvers += "Scala-Tools Repository" at "https://oss.sonatype.org/content/groups/scala-tools/"
 
 resolvers += "Sonatype Snapshots Repository" at "https://oss.sonatype.org/content/repositories/snapshots/"
+
+parallelExecution in Test := false
 
 excludedJars in assembly <<= (fullClasspath in assembly) map { cp => 
   cp filter {_.data.getName == "minlog-1.2.jar"}

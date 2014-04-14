@@ -70,7 +70,7 @@ trait BaseAdoptGraph {
 
   def graph = constraintGraph
 
-  def computeNeighbours(id: Int) = constraintGraphData.neighbours.getOrElse(id, List())
+  def computeNeighbours(id: Int): Set[Int] = constraintGraphData.neighbours.getOrElse(id, Set())
 
   def size = constraintGraphData.neighbours.size
 

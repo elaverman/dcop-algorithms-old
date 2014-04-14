@@ -19,91 +19,95 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
   var firstLocMinimum = 30000
   var sumOfGlobalUtilities: Long = 0
 
-  def printAnimation(outAnimation: FileWriter, outRanks: Option[FileWriter], outIndConflicts: FileWriter)(aggregate: Map[Int, State]) = {
-    val sorted = aggregate.toList.sortBy(x => x._1)
-
-    evaluationGraph match {
-      case grid: Grid =>
-
-        def writeGridVertexAfterEntryToFile(id: Int, file: FileWriter) {
-          if ((id + 1) % grid.width == 0) {
-            file.write("\n")
-          } else {
-            file.write(",")
-          }
-        }
-
-        def writeGridVertexEntryToFile(id: Int, value: Any, file: FileWriter) {
-          file.write(value.toString)
-          writeGridVertexAfterEntryToFile(id, file)
-        }
-
-        def writeGridVertexEntries(id: Int, color: Int, rank: Option[Double]) {
-          val neighbors = grid.computeNeighbours(id)
-          val neighborStates = neighbors.map(aggregate(_)).asInstanceOf[Iterable[(Int, Double)]]
-          val conflictsForId = neighborStates.filter(x => x._1 == color)
-          writeGridVertexEntryToFile(id, color, outAnimation)
-          writeGridVertexEntryToFile(id, conflictsForId.size, outIndConflicts)
-          if (outRanks.isDefined) {
-            assert(rank.isDefined, "An outRanks FileWriter can only be passed in if all vertices have ranks defined.")
-            writeGridVertexEntryToFile(id, rank.get, outRanks.get)
-          }
-        }
-
-        sorted.foreach {
-          case (id: Int, (color: Int, rank: Double)) =>
-            writeGridVertexEntries(id, color, Some(rank))
-          case (id: Int, color: Int) =>
-            writeGridVertexEntries(id, color, None)
-        }
-        writeGridVertexAfterEntryToFile(grid.width - 1, outAnimation)
-        writeGridVertexAfterEntryToFile(grid.width - 1, outIndConflicts)
-        if (outRanks.isDefined) {
-          writeGridVertexAfterEntryToFile(grid.width - 1, outRanks.get)
-        }
-
-      case constraintEvaluationGraph: ConstraintEvaluationGraph =>
-        def writeCeGraphVertexEntryToFile(id: Int, value: Any, file: FileWriter) {
-          file.write(s"($id,$value)")
-        }
-
-        def writeCeGraphVertexEntries(id: Int, color: Int, rank: Option[Double]) {
-          val neighbors = constraintEvaluationGraph.computeNeighbours(id)
-          val neighborStates = neighbors.map(aggregate(_)).asInstanceOf[Iterable[(Int, Double)]]
-          val conflictsForId = neighborStates.filter(x => x._1 == color)
-          writeCeGraphVertexEntryToFile(id, color, outAnimation)
-          writeCeGraphVertexEntryToFile(id, conflictsForId.size, outIndConflicts)
-          if (outRanks.isDefined) {
-            assert(rank.isDefined, "An outRanks FileWriter can only be passed in if all vertices have ranks defined.")
-            writeCeGraphVertexEntryToFile(id, rank.get, outRanks.get)
-          }
-        }
-        sorted.
-          foreach {
-            case (id: Int, (color: Int, rank: Double)) =>
-              writeCeGraphVertexEntries(id, color, Some(rank))
-            case (id: Int, color: Int) =>
-              writeCeGraphVertexEntries(id, color, None)
-          }
-        outAnimation.write("\n")
-        outIndConflicts.write("\n")
-        if (outRanks.isDefined) {
-          outRanks.get.write("\n")
-        }
-
-    }
-  }
+//  def printAnimation(outAnimation: FileWriter, outRanks: Option[FileWriter], outIndConflicts: FileWriter)(aggregate: Map[Int, State]) = {
+//
+//    val sorted = aggregate.toList.sortBy(x => x._1)
+//
+//    evaluationGraph match {
+//      case grid: Grid =>
+//
+//        def writeGridVertexAfterEntryToFile(id: Int, file: FileWriter) {
+//          if ((id + 1) % grid.width == 0) {
+//            file.write("\n")
+//          } else {
+//            file.write(",")
+//          }
+//        }
+//
+//        def writeGridVertexEntryToFile(id: Int, value: Any, file: FileWriter) {
+//          file.write(value.toString)
+//          writeGridVertexAfterEntryToFile(id, file)
+//        }
+//
+//        def writeGridVertexEntries(id: Int, color: Int, rank: Option[Double]) {
+//          val neighbors = grid.computeNeighbours(id).toList
+//          val neighborStates = neighbors.map(aggregate(_)).asInstanceOf[Iterable[(Int, Double)]]
+//          val conflictsForId = neighborStates.filter(x => x._1 == color)
+//          writeGridVertexEntryToFile(id, color, outAnimation)
+//          writeGridVertexEntryToFile(id, conflictsForId.size, outIndConflicts)
+//          if (outRanks.isDefined) {
+//            assert(rank.isDefined, "An outRanks FileWriter can only be passed in if all vertices have ranks defined.")
+//            writeGridVertexEntryToFile(id, rank.get, outRanks.get)
+//          }
+//        }
+//
+//        sorted.foreach {
+//          case (id: Int, (color: Int, rank: Double)) =>
+//            writeGridVertexEntries(id, color, Some(rank))
+//          case (id: Int, color: Int) =>
+//            writeGridVertexEntries(id, color, None)
+//        }
+//        writeGridVertexAfterEntryToFile(grid.width - 1, outAnimation)
+//        writeGridVertexAfterEntryToFile(grid.width - 1, outIndConflicts)
+//        if (outRanks.isDefined) {
+//          writeGridVertexAfterEntryToFile(grid.width - 1, outRanks.get)
+//        }
+//
+//      case constraintEvaluationGraph: ConstraintEvaluationGraph =>
+//        def writeCeGraphVertexEntryToFile(id: Int, value: Any, file: FileWriter) {
+//          file.write(s"($id,$value)")
+//        }
+//
+//        def writeCeGraphVertexEntries(id: Int, color: Int, rank: Option[Double]) {
+//          val neighbors = constraintEvaluationGraph.computeNeighbours(id).toList
+//          val neighborStates = neighbors.map(aggregate(_)).asInstanceOf[Iterable[(Int, Double)]]
+//          val conflictsForId = neighborStates.filter(x => x._1 == color)
+//          writeCeGraphVertexEntryToFile(id, color, outAnimation)
+//          writeCeGraphVertexEntryToFile(id, conflictsForId.size, outIndConflicts)
+//          if (outRanks.isDefined) {
+//            assert(rank.isDefined, "An outRanks FileWriter can only be passed in if all vertices have ranks defined.")
+//            writeCeGraphVertexEntryToFile(id, rank.get, outRanks.get)
+//          }
+//        }
+//        sorted.
+//          foreach {
+//            case (id: Int, (color: Int, rank: Double)) =>
+//              writeCeGraphVertexEntries(id, color, Some(rank))
+//            case (id: Int, color: Int) =>
+//              writeCeGraphVertexEntries(id, color, None)
+//          }
+//        outAnimation.write("\n")
+//        outIndConflicts.write("\n")
+//        if (outRanks.isDefined) {
+//          outRanks.get.write("\n")
+//        }
+//
+//    }
+//  }
 
   //TODO: Attention, this computes the number of conflicts. The conflicts are only counted once for every constraint. 
   def countConflicts(aggregate: Map[Int, State]): Long = {
     val numberOfConflicts = aggregate.map {
       case (id, (color, rank)) =>
-        val neighbors = evaluationGraph.computeNeighbours(id)
-        val neighborStates = neighbors.map(aggregate(_)).asInstanceOf[Iterable[(Int, Double)]]
+        val neighbors = evaluationGraph.computeNeighbours(id).toList
+        val nbStates = neighbors.map(n => aggregate(n))
+        val neighborStates = nbStates.asInstanceOf[Iterable[(Int, Double)]]
+
         val conflictsForId = neighborStates.filter(x => x._1 == color)
+
         conflictsForId.size
       case (id, color) =>
-        val neighbors = evaluationGraph.computeNeighbours(id)
+        val neighbors = evaluationGraph.computeNeighbours(id).toList
         val conflictsForId = neighbors.map(aggregate(_)).filter(_ == color)
         conflictsForId.size
     }.sum / 2
@@ -115,14 +119,14 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
   def countLocMinima(aggregate: Map[Int, State]): Long = {
     val numberOfLocMinima = aggregate.map {
       case (id, (color, rank)) =>
-        val neighbors = evaluationGraph.computeNeighbours(id)
+        val neighbors = evaluationGraph.computeNeighbours(id).toList
         val neighborStates = neighbors.map(aggregate(_)).asInstanceOf[Iterable[(Int, Double)]]
         val conflictsForId = neighborStates.filter(x => x._1 == color)
         val minPossibleConflicts = evaluationGraph.domainForVertex(id).map(col => (neighborStates.filter(x => x._1 == col)).size).min
         //TODO: here to compute min number of conflicts given neighbor states and check if conflictsForId.size is equal to that
         if (conflictsForId.size == minPossibleConflicts) 1 else 0
       case (id, color) =>
-        val neighbors = evaluationGraph.computeNeighbours(id)
+        val neighbors = evaluationGraph.computeNeighbours(id).toList
         val conflictsForId = neighbors.map(aggregate(_)).filter(_ == color)
         val minPossibleConflicts = evaluationGraph.domainForVertex(id).map(col => (neighbors.filter(_ == col)).size).min
         //TODO: here to compute min number of conflicts given neighbor states and check if conflictsForId.size is equal to that
@@ -149,7 +153,9 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
     }
   }
 
-  def shouldTerminate(outAnimation: FileWriter, outConflicts: FileWriter, outRanks: Option[FileWriter], outIndConflicts: FileWriter, outLocMinima: FileWriter, stats: RunStats, maxUtility: Int)(aggregate: Map[Int, State]): Boolean = {
+  //  def shouldTerminate(outAnimation: FileWriter, outConflicts: FileWriter, outRanks: Option[FileWriter], outIndConflicts: FileWriter, outLocMinima: FileWriter, stats: RunStats, maxUtility: Int)(aggregate: Map[Int, State]): Boolean = {
+  def shouldTerminate(outConflicts: FileWriter, outLocMinima: FileWriter, stats: RunStats, maxUtility: Int)(aggregate: Map[Int, State]): Boolean = {
+    //println("*Aggregate: " + aggregate.toMap.size + "::" + aggregate.toMap.mkString)
     print("*" + countConflicts(aggregate))
     //    printAnimation(outAnimation, outRanks, outIndConflicts)(aggregate)
     printNumberOfConflicts(outConflicts)(aggregate)
@@ -165,9 +171,9 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
 }
 
 class ColorPrintingGlobalTerminationCondition(
-  outAnimation: FileWriter,
+  //  outAnimation: FileWriter,
   outConflicts: FileWriter,
-  outIndConflicts: FileWriter,
+  //  outIndConflicts: FileWriter,
   outLocMinima: FileWriter,
   stats: RunStats,
   startTime: Long,
@@ -179,14 +185,15 @@ class ColorPrintingGlobalTerminationCondition(
 
   def aggregationOperation = aggregationOperationParam
   override def aggregationInterval = aggregationIntervalParam
-  def shouldTerminate(r: Map[Int, Int]) = ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
+  //  def shouldTerminate(r: Map[Int, Int]) = ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
+  def shouldTerminate(r: Map[Int, Int]) = ColorPrinter(evaluationGraph).shouldTerminate(outConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
 }
 
 class ColorRankPrintingGlobalTerminationCondition(
-  outAnimation: FileWriter,
+  //outAnimation: FileWriter,
   outConflicts: FileWriter,
-  outRanks: Option[FileWriter],
-  outIndConflicts: FileWriter,
+  //outRanks: Option[FileWriter],
+  //outIndConflicts: FileWriter,
   outLocMinima: FileWriter,
   stats: RunStats,
   startTime: Long,
@@ -199,6 +206,7 @@ class ColorRankPrintingGlobalTerminationCondition(
 
   def aggregationOperation = aggregationOperationParam
   override def aggregationInterval = aggregationIntervalParam
-  def shouldTerminate(r: Map[Int, (Int, Double)]) = ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
+  //  def shouldTerminate(r: Map[Int, (Int, Double)]) = ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
+  def shouldTerminate(r: Map[Int, (Int, Double)]) = ColorPrinter(evaluationGraph).shouldTerminate(outConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
 }
 

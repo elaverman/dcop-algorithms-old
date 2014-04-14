@@ -50,29 +50,27 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     val graphDirectoryFolder = new File("output/" + evaluationGraph.toString())
     if (!graphDirectoryFolder.exists)
       graphDirectoryFolder.mkdir
-    val outAnimation = new FileWriter(s"output/${evaluationGraph}/animation${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
+    //    val outAnimation = new FileWriter(s"output/${evaluationGraph}/animation${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
     val outConflicts = new FileWriter(s"output/${evaluationGraph}/conflicts${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
-    val outIndConflicts = new FileWriter(s"output/${evaluationGraph}/indConflicts${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
+    //    val outIndConflicts = new FileWriter(s"output/${evaluationGraph}/indConflicts${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
     val outLocMinima = new FileWriter(s"output/${evaluationGraph}/locMinima${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
-    var outRanks: FileWriter = null
+    //    var outRanks: FileWriter = null
 
     println(optimizer.toString)
     var finalResults = List[Map[String, String]]()
 
     var runResult = Map[String, String]()
 
-    println("Executing.")
-
     val date: Date = new Date
     val startTime = System.nanoTime()
     var extraStats = RunStats(None, evaluationGraph.maxUtility, None)
-
-    val terminationCondition = if (!computeRanks)
-      new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
-    else {
-      outRanks = new java.io.FileWriter(s"output/${evaluationGraph}/ranks${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
-      new ColorRankPrintingGlobalTerminationCondition(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, (Int, Double)], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
-    }
+    val terminationCondition = new ColorPrintingGlobalTerminationCondition(outConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+    //val terminationCondition = if (!computeRanks)
+    //      new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+    //    else {
+    //      outRanks = new java.io.FileWriter(s"output/${evaluationGraph}/ranks${optimizer}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
+    //      new ColorRankPrintingGlobalTerminationCondition(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, (Int, Double)], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+    //    }
 
     val idStateMapAggregator = if (!computeRanks)
       IdStateMapAggregator[Int, Int]
@@ -81,9 +79,13 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     }
 
     val initialAggregate = evaluationGraph.graph.aggregate(idStateMapAggregator)
-    ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, evaluationGraph.maxUtility)(initialAggregate)
+    println(evaluationGraph)
+    println("*Initial aggregate " + initialAggregate.toMap.mkString(" "))
+
+    ColorPrinter(evaluationGraph).shouldTerminate(outConflicts, outLocMinima, extraStats, evaluationGraph.maxUtility)(initialAggregate)
     val stats = evaluationGraph.graph.execute(executionConfig.withGlobalTerminationCondition(terminationCondition))
 
+    println("*Executing.")
     //   stats.aggregatedWorkerStatistics.numberOfOutgoingEdges
     val finishTime = System.nanoTime
     val executionTime = roundToMillisecondFraction(finishTime - startTime)
@@ -129,19 +131,16 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     runResult += s"signalThreshold" -> executionConfig.signalThreshold.toString // 
     runResult += s"collectThreshold" -> executionConfig.collectThreshold.toString //
 
-    // runResult += s"startTime" -> startTime.toString //
-    // runResult += s"endTime" -> finishTime.toString //
-
     println("\nNumber of conflicts at the end: " + ColorPrinter(evaluationGraph).countConflicts(evaluationGraph.graph.aggregate(idStateMapAggregator)))
     println("Shutting down.")
     evaluationGraph.graph.shutdown
 
-    outAnimation.close
+    //    outAnimation.close
     outConflicts.close
     outLocMinima.close
-    if (outRanks != null)
-      outRanks.close
-    outIndConflicts.close
+    //    if (outRanks != null)
+    //      outRanks.close
+    //    outIndConflicts.close
 
     runResult :: finalResults
 
@@ -156,7 +155,7 @@ case class DcopMixedAlgorithmRun(optimizer1: DcopAlgorithm[Int, Int], optimizer2
   }
 
   def runAlgorithm(): List[Map[String, String]] = {
-    println("Starting.")
+    println("*Starting.")
 
     val evaluationGraph = evaluationGraphParameters match {
       case gridParameters: GridParameters => throw new Error("MIXED Dimacs graph still unsupported.")
@@ -188,36 +187,37 @@ case class DcopMixedAlgorithmRun(optimizer1: DcopAlgorithm[Int, Int], optimizer2
         }
 
     }
-    println("Preparing Execution configuration.")
-    println(executionConfig.executionMode)
+    //println("Preparing Execution configuration.")
+    //println(executionConfig.executionMode)
 
     //TODO: Replace ${evaluationGraph.domainForVertex(1)} from the file names with something better.
     val graphDirectoryFolder = new File("output/" + evaluationGraph.toString())
     if (!graphDirectoryFolder.exists)
       graphDirectoryFolder.mkdir
-    val outAnimation = new FileWriter(s"output/${evaluationGraph}/animation${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
+//    val outAnimation = new FileWriter(s"output/${evaluationGraph}/animation${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
     val outConflicts = new FileWriter(s"output/${evaluationGraph}/conflicts${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
-    val outIndConflicts = new FileWriter(s"output/${evaluationGraph}/indConflicts${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
+//    val outIndConflicts = new FileWriter(s"output/${evaluationGraph}/indConflicts${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
     val outLocMinima = new FileWriter(s"output/${evaluationGraph}/locMinima${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
-    var outRanks: FileWriter = null
+//    var outRanks: FileWriter = null
 
     //println(optimizer.toString)
     var finalResults = List[Map[String, String]]()
 
     var runResult = Map[String, String]()
 
-    println("Executing.")
-
     val date: Date = new Date
     val startTime = System.nanoTime()
     var extraStats = RunStats(None, evaluationGraph.maxUtility, None)
 
-    val terminationCondition = if (!computeRanks)
-      new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
-    else {
-      outRanks = new java.io.FileWriter(s"output/${evaluationGraph}/ranks${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
-      new ColorRankPrintingGlobalTerminationCondition(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, (Int, Double)], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
-    }
+    val terminationCondition =  new ColorPrintingGlobalTerminationCondition(outConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+//    = if (!computeRanks)
+//      //new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+//      new ColorPrintingGlobalTerminationCondition(outConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+//    else {
+//      outRanks = new java.io.FileWriter(s"output/${evaluationGraph}/ranks${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
+//      //      new ColorRankPrintingGlobalTerminationCondition(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, (Int, Double)], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+//      new ColorRankPrintingGlobalTerminationCondition(outConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, (Int, Double)], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+//    }
 
     val idStateMapAggregator = if (!computeRanks)
       IdStateMapAggregator[Int, Int]
@@ -226,7 +226,14 @@ case class DcopMixedAlgorithmRun(optimizer1: DcopAlgorithm[Int, Int], optimizer2
     }
 
     val initialAggregate = evaluationGraph.graph.aggregate(idStateMapAggregator)
-    ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, evaluationGraph.maxUtility)(initialAggregate)
+    println("*Initial aggregate")
+    println(initialAggregate.toMap.mkString(" "))
+
+    //    ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, evaluationGraph.maxUtility)(initialAggregate)
+    ColorPrinter(evaluationGraph).shouldTerminate(outConflicts, outLocMinima, extraStats, evaluationGraph.maxUtility)(initialAggregate)
+
+    println("*Executing.")
+
     val stats = evaluationGraph.graph.execute(executionConfig.withGlobalTerminationCondition(terminationCondition))
 
     //   stats.aggregatedWorkerStatistics.numberOfOutgoingEdges
@@ -281,12 +288,12 @@ case class DcopMixedAlgorithmRun(optimizer1: DcopAlgorithm[Int, Int], optimizer2
     println("Shutting down.")
     evaluationGraph.graph.shutdown
 
-    outAnimation.close
+//    outAnimation.close
     outConflicts.close
     outLocMinima.close
-    if (outRanks != null)
-      outRanks.close
-    outIndConflicts.close
+//    if (outRanks != null)
+//      outRanks.close
+//    outIndConflicts.close
 
     runResult :: finalResults
 

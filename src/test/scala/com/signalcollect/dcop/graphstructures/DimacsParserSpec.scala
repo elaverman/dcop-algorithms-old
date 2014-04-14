@@ -2,8 +2,9 @@ package com.signalcollect.dcop.graphstructures
 
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers
+import com.signalcollect.dcop.TestAnnouncements
 
-class DimacsParserSpec extends FlatSpec with Matchers {
+class DimacsParserSpec extends FlatSpec with Matchers with TestAnnouncements {
 
   "DimacsParser" should "correctly parse a comment" in {
     val parsed = DimacsParser.parseLine("c blalfdlkjre lrkj relkj ", 0)

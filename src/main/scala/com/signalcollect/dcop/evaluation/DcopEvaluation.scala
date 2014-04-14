@@ -52,12 +52,12 @@ object DcopEvaluation extends App {
   val debug = false
 
   /*********/
-  def evalName = s"Adopt40 InvSwitch"
-  def evalNumber = 3
-  def runs = 10
+  def evalName = s"miniTestGru"
+  def evalNumber = 4
+  def runs = 1
   def pure = true
-  var evaluation = new Evaluation(evaluationName = evalName, evaluationNumber = evalNumber, executionHost = kraken).addResultHandler(mySql)
-  //      var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
+//  var evaluation = new Evaluation(evaluationName = evalName, evaluationNumber = evalNumber, executionHost = kraken).addResultHandler(mySql)
+        var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
   /*********/
 
   val optimizers: List[DcopAlgorithm[Int, Int]] = List(
