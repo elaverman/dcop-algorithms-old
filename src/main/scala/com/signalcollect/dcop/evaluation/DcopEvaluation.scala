@@ -9,6 +9,7 @@ import com.signalcollect.dcop._
 import scala.util.Random
 import scala.slick.lifted.TableQuery
 import java.net._
+import com.signalcollect.nodeprovisioning.slurm._
 
 object DcopEvaluation extends App {
 
@@ -26,10 +27,10 @@ object DcopEvaluation extends App {
     jobSubmitter = new TorqueJobSubmitter(username = System.getProperty("user.name"), hostname = "kraken.ifi.uzh.ch"),
     coresPerNode = 23,
     localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/", priority = TorquePriority.fast)
-  val gru = new TorqueHost(
-    jobSubmitter = new TorqueJobSubmitter(username = System.getProperty("user.name"), hostname = "gru.ifi.uzh.ch"),
-    coresPerNode = 23,
-    localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/", priority = TorquePriority.slow)
+  val gru = new SlurmHost(
+    jobSubmitter = new SlurmJobSubmitter(username = System.getProperty("user.name"), hostname = "gru.ifi.uzh.ch"),
+    coresPerNode = 1,
+    localJarPath = assemblyPath, jvmParameters = jvmParameters, jdkBinPath = "/home/user/verman/jdk1.7.0_45/bin/")
   val localHost = new LocalHost
   val googleDocs = new GoogleDocsResultHandler(args(0), args(1), "optimizerEvaluations", "Ranked")
   val mySql = new MySqlResultHandler(args(2), args(3), args(4))
@@ -52,12 +53,13 @@ object DcopEvaluation extends App {
   val debug = false
 
   /*********/
-  def evalName = s"miniTestGru"
+  def evalName = s"miniTestGru2"
   def evalNumber = 4
   def runs = 1
   def pure = true
 //  var evaluation = new Evaluation(evaluationName = evalName, evaluationNumber = evalNumber, executionHost = kraken).addResultHandler(mySql)
-        var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
+  var evaluation = new Evaluation(evaluationName = evalName, evaluationNumber = evalNumber, executionHost = gru).addResultHandler(mySql)
+//        var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
   /*********/
 
   val optimizers: List[DcopAlgorithm[Int, Int]] = List(
@@ -77,14 +79,14 @@ object DcopEvaluation extends App {
     //    //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.4),
     //    Switch2RankedConflictDsaBVertexColoring(changeProbability = 0.7),
     //    Switch2RankedConflictDsaBVertexColoring(changeProbability = 0.6))
-    SwitchInv1RankedConflictDsaBVertexColoring(changeProbability = 0.6),
-    SwitchInv1RankedConflictDsaBVertexColoring(changeProbability = 0.4),
-    SwitchInv1RankedConflictDsaBVertexColoring(changeProbability = 0.8),
-    SwitchInv2RankedConflictDsaBVertexColoring(changeProbability = 0.6),
-    SwitchInv2RankedConflictDsaBVertexColoring(changeProbability = 0.4),
-    SwitchInv2RankedConflictDsaBVertexColoring(changeProbability = 0.8),
-    SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.6),
-    SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.4),
+//    SwitchInv1RankedConflictDsaBVertexColoring(changeProbability = 0.6),
+//    SwitchInv1RankedConflictDsaBVertexColoring(changeProbability = 0.4),
+//    SwitchInv1RankedConflictDsaBVertexColoring(changeProbability = 0.8),
+//    SwitchInv2RankedConflictDsaBVertexColoring(changeProbability = 0.6),
+//    SwitchInv2RankedConflictDsaBVertexColoring(changeProbability = 0.4),
+//    SwitchInv2RankedConflictDsaBVertexColoring(changeProbability = 0.8),
+//    SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.6),
+//    SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.4),
     SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.8))
 
   val optimizerPairs: List[(DcopAlgorithm[Int, Int], DcopAlgorithm[Int, Int])] = List(
@@ -157,7 +159,7 @@ object DcopEvaluation extends App {
   //  case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean)
   //  case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialValue: (Set[Int]) => Int, debug: Boolean, width: Int)
 
-  val adoptGraphNamesList = new java.io.File("adoptInput").listFiles.filter(x => (x.getName.startsWith("Problem-GraphColor-40"))).map(_.getName)
+  val adoptGraphNamesList = new java.io.File("adoptInput").listFiles.filter(x => (x.getName.startsWith("Problem-GraphColor-40_3_"))).map(_.getName)
   val dimacsGraphNamesList = new java.io.File("dimacsInput").listFiles.filter(x => (x.getName.endsWith("flat1000_76_0.col"))).map(_.getName)
 
   if (pure) {
