@@ -75,7 +75,7 @@ trait RankedTargetFunctions[AgentId, Action] extends TargetFunctionModule[AgentI
     /**
    * Same as RankWeightedTargetFunction, but when it reaches a certain iteration it behaves like the MemoryLessTargetFunction
    */
-  trait SwitchRankWeightedTargetFunction extends RankWeightedTargetFunction {
+  trait Switch1RankWeightedTargetFunction extends RankWeightedTargetFunction {
     this: UtilityFunction =>
 
     var iteration = 0  
@@ -93,7 +93,7 @@ trait RankedTargetFunctions[AgentId, Action] extends TargetFunctionModule[AgentI
     override def computeExpectedUtilities(c: Config) = {
       iteration += 1
       if (switched == false && iteration > 10)
-        if (Random.nextDouble <= 0.7)
+        if (Random.nextDouble <= 0.2)
           switched = true
           
       if (!switched) {
@@ -117,18 +117,40 @@ trait RankedTargetFunctions[AgentId, Action] extends TargetFunctionModule[AgentI
     var iteration = 0  
     var switched = false
       
-//    def isAtRankedNashEquilibrium(c: Config): Boolean = {
-//      val expectedUtilities = computeRankedExpectedUtilities(c)
-//      val maxUtility = expectedUtilities.values.max
-//      val currentUtility = expectedUtilities(c.centralVariableValue)
-//      maxUtility == currentUtility
-//    }
+    def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
+    
+    override def computeExpectedUtilities(c: Config) = {
+      iteration += 1
+      if (switched == false && iteration > 15)
+        if (Random.nextDouble <= 0.2)
+          switched = true
+          
+      if (!switched) {
+        computeRankedExpectedUtilities(c)
+      } else {
+        val configurationCandidates: Set[Config] = for {
+          assignment <- c.domain
+        } yield c.withCentralVariableAssignment(assignment)
+        val configUtilities = configurationCandidates.map(c => (c.centralVariableValue, computeUtility(c))).toMap
+        configUtilities
+      }
+    }
+  }
+  
+        /**
+   * Same as RankWeightedTargetFunction, but when it reaches a certain iteration it behaves like the MemoryLessTargetFunction
+   */
+  trait Switch3RankWeightedTargetFunction extends RankWeightedTargetFunction {
+    this: UtilityFunction =>
+
+    var iteration = 0  
+    var switched = false
       
     def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
     
     override def computeExpectedUtilities(c: Config) = {
       iteration += 1
-      if (switched == false && iteration > 10)
+      if (switched == false && iteration > 20)
         if (Random.nextDouble <= 0.2)
           switched = true
           
