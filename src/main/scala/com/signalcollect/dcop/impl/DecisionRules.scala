@@ -153,12 +153,24 @@ trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModu
     }
   }
 
-//  trait SimulatedAnnealing extends ArgmaxADecisionRule {
-//    this: TargetFunction =>
-//      
-//    override def computeMove(c: Config) = {
-//
-//    }
-//  }
+  trait SimulatedAnnealingDecisionRule extends ArgmaxADecisionRule {
+    this: TargetFunction =>
+
+    def const: Double
+    def k: Double
+    var iteration = 0  
+      
+    override def computeMove(c: Config) = {
+      iteration +=1
+      val randomMove = c.domain.toSeq(Random.nextInt(c.domain.size))
+      val expectedUtilities = computeExpectedUtilities(c).toMap[Action, Double]
+      val delta = expectedUtilities.getOrElse[Double](randomMove, -1) - expectedUtilities.getOrElse[Double](c.centralVariableValue, -1)
+      if (delta <= 0 && Random.nextDouble <= scala.math.exp(delta/iteration)) {
+        randomMove
+      } else {
+        c.centralVariableValue
+      }
+    }
+  }
 
 }
