@@ -5,7 +5,7 @@ import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
 
 case class DsanVertexColoring(changeProbability: Double, const: Double, k: Double)
-  extends SimpleDcopAlgorithm {
+  extends SimpleDcopAlgorithm[Nothing] {
   val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
   val rule = new SimulatedAnnealingDecisionRule with NashEquilibriumConvergence with MemoryLessTargetFunction with VertexColoringUtility { def const = const; def k = k }
   override def toString = "DsaAVertexColoringChangeProbability" + changeProbability + "const" + const + "k" + k
@@ -16,28 +16,28 @@ case class DsanVertexColoring(changeProbability: Double, const: Double, k: Doubl
  */
 
 case class RankedDsanVertexColoring(changeProbability: Double, const: Double, k: Double)
-  extends RankedDcopAlgorithm {
+  extends RankedDcopAlgorithm[Nothing] {
   val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
   val rule = new SimulatedAnnealingDecisionRule with NashEquilibriumConvergence with RankWeightedTargetFunction { def const = const; def k = k }
   override def toString = "RankedDsaBVertexColoringChangeProbability" + changeProbability + "const" + const + "k" + k
 }
 
 case class RankedConflictDsanVertexColoring(changeProbability: Double, const: Double, k: Double)
-  extends RankedDcopAlgorithm {
+  extends RankedDcopAlgorithm[Nothing] {
   val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
   val rule = new SimulatedAnnealingDecisionRule with ZeroConflictConvergence with RankWeightedTargetFunction { def const = const; def k = k }
   override def toString = "RankedConflictDsaBVertexColoringChangeProbability" + changeProbability + "const" + const + "k" + k
 }
 
 case class NoRankConflictDsanVertexColoring(changeProbability: Double, const: Double, k: Double)
-  extends RankedDcopAlgorithm with TargetFunctionsWithUtilityFunctions[Int, Int] { //the TargetFunctionsWithUtilityFunctions enables to add with MemoryLessTargetFunction and ConflictBasedVertexColoringUtility
+  extends RankedDcopAlgorithm[Nothing] with TargetFunctionsWithUtilityFunctions[Int, Int, Nothing] { //the TargetFunctionsWithUtilityFunctions enables to add with MemoryLessTargetFunction and ConflictBasedVertexColoringUtility
   val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
   val rule = new SimulatedAnnealingDecisionRule with ZeroConflictConvergence with MemoryLessTargetFunction with ConflictBasedVertexColoringUtility { def const = const; def k = k }
   override def toString = "NoRankConflictDsaBVertexColoringChangeProbability" + changeProbability + "const" + const + "k" + k
 }
 
 case class DynamicRankedConflictDsanVertexColoring(changeProbability: Double, const: Double, k: Double)
-  extends RankedDcopAlgorithm {
+  extends RankedDcopAlgorithm[Nothing] {
   val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
   val rule = new SimulatedAnnealingDecisionRule with ZeroConflictConvergence with DynamicRankWeightedTargetFunction with ConflictBasedVertexColoringUtility { def const = const; def k = k }
   override def toString = "DynamicRankedConflictDsaBVertexColoringChangeProbability" + changeProbability + "const" + const + "k" + k
@@ -48,28 +48,28 @@ case class DynamicRankedConflictDsanVertexColoring(changeProbability: Double, co
  */
 
 case class RankedConflictDsanVertexColoringWithRankedChangeProbability(relativeChangeProbability: Double, const: Double, k: Double)
-  extends RankedDcopAlgorithm with RankedAdjustmentSchedules[Int, Int] {
+  extends RankedDcopAlgorithm[Nothing] with RankedAdjustmentSchedules[Int, Int, Nothing] {
   val schedule = new RankedBasedAdjustmentSchedule(relativeChangeProbability)
   val rule = new SimulatedAnnealingDecisionRule with ZeroConflictConvergence with RankWeightedTargetFunction { def const = const; def k = k }
   override def toString = "RankedConflictDsaBVertexColoringWithRankedChangeProbability" + relativeChangeProbability + "const" + const + "k" + k
 }
 
 case class NoRankConflictDsanVertexColoringWithRankedChangeProbability(relativeChangeProbability: Double, const: Double, k: Double)
-  extends RankedDcopAlgorithm with TargetFunctionsWithUtilityFunctions[Int, Int] with RankedAdjustmentSchedules[Int, Int] { //the TargetFunctionsWithUtilityFunctions enables to add with MemoryLessTargetFunction and ConflictBasedVertexColoringUtility
+  extends RankedDcopAlgorithm[Nothing] with TargetFunctionsWithUtilityFunctions[Int, Int, Nothing] with RankedAdjustmentSchedules[Int, Int, Nothing] { //the TargetFunctionsWithUtilityFunctions enables to add with MemoryLessTargetFunction and ConflictBasedVertexColoringUtility
   val schedule = new RankedBasedAdjustmentSchedule(relativeChangeProbability)
   val rule = new SimulatedAnnealingDecisionRule with ZeroConflictConvergence with MemoryLessTargetFunction with ConflictBasedVertexColoringUtility { def const = const; def k = k }
   override def toString = "NoRankConflictDsaBVertexColoringWithRankedChangeProbability" + relativeChangeProbability + "const" + const + "k" + k
 }
 
 case class RankedConflictDsanVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability: Double, const: Double, k: Double)
-  extends RankedDcopAlgorithm with RankedAdjustmentSchedules[Int, Int] {
+  extends RankedDcopAlgorithm[Nothing] with RankedAdjustmentSchedules[Int, Int, Nothing] {
   val schedule = new InvertRankedBasedAdjustmentSchedule(relativeChangeProbability)
   val rule = new SimulatedAnnealingDecisionRule with ZeroConflictConvergence with RankWeightedTargetFunction { def const = const; def k = k }
   override def toString = "RankedConflictDsaBVertexColoringWithInvertedRankedChangeProbability" + relativeChangeProbability + "const" + const + "k" + k
 }
 
 case class NoRankConflictDsanVertexColoringWithInvertedRankedChangeProbability(relativeChangeProbability: Double, const: Double, k: Double)
-  extends RankedDcopAlgorithm with TargetFunctionsWithUtilityFunctions[Int, Int] with RankedAdjustmentSchedules[Int, Int] { //the TargetFunctionsWithUtilityFunctions enables to add with MemoryLessTargetFunction and ConflictBasedVertexColoringUtility
+  extends RankedDcopAlgorithm[Nothing] with TargetFunctionsWithUtilityFunctions[Int, Int, Nothing] with RankedAdjustmentSchedules[Int, Int, Nothing] { //the TargetFunctionsWithUtilityFunctions enables to add with MemoryLessTargetFunction and ConflictBasedVertexColoringUtility
   val schedule = new InvertRankedBasedAdjustmentSchedule(relativeChangeProbability)
   val rule = new SimulatedAnnealingDecisionRule with ZeroConflictConvergence with MemoryLessTargetFunction with ConflictBasedVertexColoringUtility { def const = const; def k = k }
   override def toString = "NoRankConflictDsaBVertexColoringWithInvertedRankedChangeProbability" + relativeChangeProbability + "const" + const + "k" + k

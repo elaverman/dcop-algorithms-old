@@ -11,7 +11,7 @@ import scala.slick.lifted.TableQuery
 import java.net._
 import com.signalcollect.nodeprovisioning.slurm._
 
-object DcopEvaluation extends App {
+object MapCreation extends App {
 
   def jvmParameters = " -Xmx10240m" +
     // " -Xms512m" +
@@ -55,20 +55,15 @@ object DcopEvaluation extends App {
   /*********/
   def evalName = s"BigEval gru"
   def evalNumber = 8
-  def runs = 10
-  def pure = false
+  def runs = 1
+  def pure = true
   //  var evaluation = new Evaluation(evaluationName = evalName, evaluationNumber = evalNumber, executionHost = kraken).addResultHandler(mySql)
-  var evaluation = new Evaluation(evaluationName = evalName, evaluationNumber = evalNumber, executionHost = gru) //.addResultHandler(mySql)
-  //        var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
+  //var evaluation = new Evaluation(evaluationName = evalName, evaluationNumber = evalNumber, executionHost = gru) //.addResultHandler(mySql)
+    var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost)//.addResultHandler(mySql)
   /*********/
 
-  val optimizers: List[DcopAlgorithm[Int, Int]] = List(
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.4),
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
-    RankedConflictDsaBVertexColoring(changeProbability = 0.4),
-    RankedConflictDsaBVertexColoring(changeProbability = 0.8),
-    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.4),
-    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.8))
+  val optimizers: List[DcopAlgorithm[Int, (Int, Int), Int]] = List(
+    DsaBProximity(changeProbability = 0.8))
   //    NoRankConflictDsaBVertexColoring(changeProbability = 0.5),
   //    NoRankConflictDsaBVertexColoring(changeProbability = 0.6),
   //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
@@ -111,10 +106,6 @@ object DcopEvaluation extends App {
   //    SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.7),
   //    SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.8))
 
-  val optimizerPairs: List[(DcopAlgorithm[Int, Int], DcopAlgorithm[Int, Int])] = List(
-    (NoRankConflictDsaBVertexColoring(changeProbability = 0.6), DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.4)),
-    (RankedConflictDsaBVertexColoring(changeProbability = 0.5), DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.4)),
-    (NoRankConflictDsaBVertexColoring(changeProbability = 0.6), RankedConflictDsaBVertexColoring(changeProbability = 0.5)))
 
   val proportions = List(0.1, 0.3, 0.5, 0.7, 0.9)
 
@@ -123,8 +114,9 @@ object DcopEvaluation extends App {
     (ExecutionMode.Synchronous, 1, 100) //30, 3600) //5, 800),
     )
 
-  val adoptGraphNamesList = new java.io.File("adoptInput").listFiles.filter(x => (x.getName.startsWith("Problem-GraphColor-40_3_"))).map(_.getName)
-  val dimacsGraphNamesList = new java.io.File("dimacsInput").listFiles.filter(x => (x.getName.endsWith("flat1000_76_0.col"))).map(_.getName)
+//  val adoptGraphNamesList = new java.io.File("adoptInput").listFiles.filter(x => (x.getName.startsWith("Problem-GraphColor-40_3_"))).map(_.getName)
+//  val dimacsGraphNamesList = new java.io.File("dimacsInput").listFiles.filter(x => (x.getName.endsWith("flat1000_76_0.col"))).map(_.getName)
+    val proximityGraphNamesList = new java.io.File("proximityInput").listFiles.filter(x => (x.getName.endsWith(".txt"))).map(_.getName)
 
   if (pure) {
     /**
@@ -133,7 +125,7 @@ object DcopEvaluation extends App {
     for (runNumber <- (0 until runs)) {
       for (optimizer <- optimizers) {
         val evaluationGraphs = //List(GridParameters((0 to 9).toSet, zeroInitialized, debug, 1000)) // ++
-          adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug)) // ++
+          proximityGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug)) // ++
         //        dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug)) ++
         //          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 75).toSet, zeroInitialized, debug)) ++
         //          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 99).toSet, zeroInitialized, debug))
@@ -149,30 +141,6 @@ object DcopEvaluation extends App {
       }
     }
   } else {
-    /**
-     * Mixed algorithms evaluation
-     */
-
-    for (runNumber <- (0 until runs)) {
-      for (optimizerPair <- optimizerPairs) {
-        for (proportion <- proportions) {
-          val evaluationGraphs = //List(GridParameters((0 to 9).toSet, zeroInitialized, debug, 1000)) // ++
-            adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug)) // ++
-          //        dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug)) ++
-          //          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 75).toSet, zeroInitialized, debug)) ++
-          //          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 99).toSet, zeroInitialized, debug))
-          for (evaluationGraph <- evaluationGraphs) {
-            for (executionMat <- execModesAggrIntervAndTermLimits) {
-              val executionConfig = executionMat._1 match {
-                case ExecutionMode.Synchronous => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withStepsLimit(executionMat._3)
-                case _ => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withTimeLimit(executionMat._3)
-              }
-              evaluation = evaluation.addEvaluationRun(DcopMixedAlgorithmRun(optimizerPair._1, optimizerPair._2, proportion, evaluationGraph, executionConfig, runNumber, executionMat._2, getRevision, evalName).runAlgorithm)
-            }
-          }
-        }
-      }
-    }
   }
 
   evaluation.execute

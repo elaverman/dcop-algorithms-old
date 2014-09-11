@@ -22,13 +22,13 @@ package com.signalcollect.dcop.graph
 import com.signalcollect._
 import com.signalcollect.dcop.modules._
 
-class SimpleDcopVertex[Id, State](
+class SimpleDcopVertex[Id, State, ConstraintParams](
   id: Id,
   val domain: Set[State],
-  override val optimizer: OptimizerModule[Id, State],
+  override val optimizer: OptimizerModule[Id, State, ConstraintParams],
   initialState: State,
   debug: Boolean = false)
-  extends DcopVertex[Id, State, State](id, domain, optimizer, initialState, debug)
-  with SimpleConfigCreation[Id, State] {
+  extends DcopVertex[Id, State, State, ConstraintParams](id, domain, optimizer, initialState, debug)
+  with SimpleConfigCreation[Id, State, ConstraintParams] {
   override def configToState(c: optimizer.Config): State = c.centralVariableValue
 }

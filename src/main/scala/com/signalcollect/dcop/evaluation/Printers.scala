@@ -10,10 +10,10 @@ import com.signalcollect.dcop.impl.RankedConfiguration
 import java.io.FileWriter
 import com.signalcollect.dcop.graphstructures.Grid
 import com.signalcollect.dcop.graphstructures.EvaluationGraph
-import com.signalcollect.dcop.graphstructures.AdoptGraph
+//import com.signalcollect.dcop.graphstructures.AdoptGraph
 import com.signalcollect.dcop.graphstructures.ConstraintEvaluationGraph
 
-case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
+case class ColorPrinter[State](evaluationGraph: EvaluationGraph[State, Nothing]) {
   //TODO: Implement methods for handling non-ranked
   var iteration = 1
   var firstLocMinimum = 30000
@@ -170,23 +170,23 @@ case class ColorPrinter[State](evaluationGraph: EvaluationGraph) {
   }
 }
 
-class ColorPrintingGlobalTerminationCondition(
+class ColorPrintingGlobalTerminationCondition[Action](
   //  outAnimation: FileWriter,
   outConflicts: FileWriter,
   //  outIndConflicts: FileWriter,
   outLocMinima: FileWriter,
   stats: RunStats,
   startTime: Long,
-  aggregationOperationParam: IdStateMapAggregator[Int, Int],
+  aggregationOperationParam: IdStateMapAggregator[Int, Action],
   aggregationIntervalParam: Long,
-  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition //[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
+  evaluationGraph: EvaluationGraph[Action, Nothing]) extends GlobalTerminationCondition //[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
   with Serializable {
-  type ResultType = Map[Int, Int]
+  type ResultType = Map[Int, Action]
 
   def aggregationOperation = aggregationOperationParam
   override def aggregationInterval = aggregationIntervalParam
   //  def shouldTerminate(r: Map[Int, Int]) = ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, None, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
-  def shouldTerminate(r: Map[Int, Int]) = ColorPrinter(evaluationGraph).shouldTerminate(outConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
+  def shouldTerminate(r: Map[Int, Action]) = ColorPrinter(evaluationGraph).shouldTerminate(outConflicts, outLocMinima, stats, evaluationGraph.maxUtility)(r)
 }
 
 class ColorRankPrintingGlobalTerminationCondition(
@@ -200,7 +200,7 @@ class ColorRankPrintingGlobalTerminationCondition(
   //  gridWidth: Int,
   aggregationOperationParam: IdStateMapAggregator[Int, (Int, Double)],
   aggregationIntervalParam: Long,
-  evaluationGraph: EvaluationGraph) extends GlobalTerminationCondition //[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, outRanks, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
+  evaluationGraph: EvaluationGraph[(Int, Double), Nothing]) extends GlobalTerminationCondition //[Map[Int, (Int, Double)]](aggregationOperation, aggregationInterval, ColorPrinter(evaluationGraph).shouldTerminate(outAnimation, outConflicts, outRanks, outIndConflicts, outLocMinima, stats, evaluationGraph.maxUtility))
   with Serializable {
   type ResultType = Map[Int, (Int, Double)]
 

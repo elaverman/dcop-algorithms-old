@@ -3,14 +3,14 @@ package com.signalcollect.dcop.graph
 import com.signalcollect._
 import com.signalcollect.dcop.modules._
 
-abstract class DcopVertex[Id, VertexState, Action](
+abstract class DcopVertex[Id, VertexState, Action, ConstraintParams](
   id: Id,
   domain: Set[Action],
-  val optimizer: OptimizerModule[Id, Action],
+  val optimizer: OptimizerModule[Id, Action, ConstraintParams],
   initialState: VertexState,
   debug: Boolean = false)
   extends DataGraphVertex(id, initialState)
-  with DcopConvergenceDetection[Id, VertexState, Action] {
+  with DcopConvergenceDetection[Id, VertexState, Action, ConstraintParams] {
 
   def currentConfig: optimizer.Config
 

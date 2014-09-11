@@ -3,8 +3,8 @@ package com.signalcollect.dcop.impl
 import scala.util.Random
 import com.signalcollect.dcop.modules._
 
-trait AdjustmentSchedules[AgentId, Action] extends AdjustmentScheduleModule[AgentId, Action] {
-  this: ConfigurationModule[AgentId, Action] =>
+trait AdjustmentSchedules[AgentId, Action, ConstraintParams] extends AdjustmentScheduleModule[AgentId, Action, ConstraintParams] {
+  this: ConfigurationModule[AgentId, Action, ConstraintParams] =>
 
   class ParallelRandomAdjustmentSchedule(changeProbability: Double) extends AdjustmentSchedule {
     def shouldConsiderMove(c: Config) = {
@@ -18,8 +18,8 @@ trait AdjustmentSchedules[AgentId, Action] extends AdjustmentScheduleModule[Agen
 
 }
 
-trait RankedAdjustmentSchedules[AgentId, Action] extends AdjustmentScheduleModule[AgentId, Action] {
-  this: UtilityFunctionModule[AgentId, Action] with RankedConfiguration[AgentId, Action] =>
+trait RankedAdjustmentSchedules[AgentId, Action, ConstraintParams] extends AdjustmentScheduleModule[AgentId, Action, ConstraintParams] {
+  this: UtilityFunctionModule[AgentId, Action, ConstraintParams] with RankedConfiguration[AgentId, Action, ConstraintParams] =>
 
   class RankedBasedAdjustmentSchedule(relativeChangeProbability: Double) extends AdjustmentSchedule {
     def shouldConsiderMove(c: Config) = {

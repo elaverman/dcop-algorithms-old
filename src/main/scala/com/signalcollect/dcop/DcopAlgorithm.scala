@@ -3,20 +3,25 @@ package com.signalcollect.dcop
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
 
-trait SimpleDcopAlgorithm
-  extends DcopAlgorithm[Int, Int]
-  with SimpleConfiguration[Int, Int]
-  with TargetFunctionsWithUtilityFunctions[Int, Int]
+trait SimpleDcopAlgorithm[ConstraintParams]
+  extends DcopAlgorithm[Int, Int, ConstraintParams]
+  with SimpleConfiguration[Int, Int, ConstraintParams]
+  with TargetFunctionsWithUtilityFunctions[Int, Int, ConstraintParams]
 
-trait RankedDcopAlgorithm
-  extends RankedConfiguration[Int, Int]
-  with RankedTargetFunctions[Int, Int]
-  with DcopAlgorithm[Int, Int]
+trait SimpleProximityDcopAlgorithm[Action, ConstraintParams]
+  extends DcopAlgorithm[Int, Action, ConstraintParams]
+  with SimpleConfiguration[Int, Action, ConstraintParams]
+  with TargetFunctionsWithUtilityFunctions[Int, Action, ConstraintParams]
 
-trait DcopAlgorithm[AgentId, Action]
-  extends OptimizerModule[AgentId, Action]
-  with AdjustmentSchedules[AgentId, Action]
-  with DecisionRulesWithTargetFunctions[AgentId, Action]
-  with TargetFunctionModule[AgentId, Action]
-  with UtilityFunctions[AgentId, Action]
+trait RankedDcopAlgorithm[ConstraintParams]
+  extends RankedConfiguration[Int, Int, ConstraintParams]
+  with RankedTargetFunctions[Int, Int, ConstraintParams]
+  with DcopAlgorithm[Int, Int, ConstraintParams]
+
+trait DcopAlgorithm[AgentId, Action, ConstraintParams]
+  extends OptimizerModule[AgentId, Action, ConstraintParams]
+  with AdjustmentSchedules[AgentId, Action, ConstraintParams]
+  with DecisionRulesWithTargetFunctions[AgentId, Action, ConstraintParams]
+  with TargetFunctionModule[AgentId, Action, ConstraintParams]
+  with UtilityFunctions[AgentId, Action, ConstraintParams]
  

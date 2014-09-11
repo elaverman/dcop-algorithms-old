@@ -1,7 +1,7 @@
 package com.signalcollect.dcop.modules
 
-trait AdjustmentScheduleModule[AgentId, Action] {
-  this: ConfigurationModule[AgentId, Action] =>
+trait AdjustmentScheduleModule[AgentId, Action, ConstraintParams] {
+  this: ConfigurationModule[AgentId, Action, ConstraintParams] =>
 
   val schedule: AdjustmentSchedule
 

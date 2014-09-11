@@ -3,7 +3,7 @@ package com.signalcollect.dcop.graphstructures
 import com.signalcollect.dcop.DcopAlgorithm
 import com.signalcollect.Graph
 
-abstract class EvaluationGraph(optimizer: DcopAlgorithm[Int, Int]) {
+abstract class EvaluationGraph[Action, ConstraintParams](optimizer: DcopAlgorithm[Int, Action, ConstraintParams]) {
   def graph: Graph[Any, Any]
   def computeNeighbours(id: Int): Iterable[Int]
   def size: Int
@@ -12,5 +12,8 @@ abstract class EvaluationGraph(optimizer: DcopAlgorithm[Int, Int]) {
 }
 
 
-abstract class ConstraintEvaluationGraph(optimizer: DcopAlgorithm[Int, Int]) extends 
+abstract class ConstraintEvaluationGraph[ConstraintParams](optimizer: DcopAlgorithm[Int, Int, ConstraintParams]) extends 
 	EvaluationGraph(optimizer)
+
+abstract class MapGraph[ConstraintParams](optimizer: DcopAlgorithm[Int, (Int, Int), ConstraintParams]) extends 
+	EvaluationGraph[(Int, Int), ConstraintParams](optimizer)

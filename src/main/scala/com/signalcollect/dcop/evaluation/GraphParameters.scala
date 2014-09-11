@@ -12,7 +12,9 @@ import com.signalcollect.dcop.graph.RankedDcopVertex
 import scala.io.Source
 import scala.annotation.tailrec
 
-abstract class EvaluationGraphParameters {
+abstract class GraphParameters
+
+abstract class EvaluationGraphParameters extends GraphParameters {
   def initialValue: (Set[Int]) => Int
 }
 
@@ -27,3 +29,5 @@ case class AdoptGraphParameters(adoptFileName: String, initValue: (Set[Int]) => 
 case class DimacsGraphParameters(dimacsFileName: String, val domain: Set[Int], initValue: (Set[Int]) => Int, val debug: Boolean) extends EvaluationGraphParameters {
   def initialValue = initValue
 }
+
+case class ProximityGraphParameters(proximityFileName: String, val debug: Boolean) extends GraphParameters

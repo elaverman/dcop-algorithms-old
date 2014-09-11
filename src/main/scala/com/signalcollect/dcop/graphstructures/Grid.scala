@@ -11,13 +11,13 @@ import scala.io.Source
 import scala.Array.canBuildFrom
 import com.signalcollect.dcop.impl.RankedConfiguration
 
-case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialValue: (Set[Int]) => Int, debug: Boolean, width: Int) extends EvaluationGraph(optimizer) {
+case class Grid(optimizer: DcopAlgorithm[Int, Int, Option[Nothing]], domain: Set[Int], initialValue: (Set[Int]) => Int, debug: Boolean, width: Int) extends EvaluationGraph(optimizer) {
 
   val g = GraphBuilder.build
 
   optimizer match {
 
-    case rankedOptimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] =>
+    case rankedOptimizer: OptimizerModule[Int, Int, Option[Nothing]] with RankedConfiguration[Int, Int, Option[Nothing]] =>
       println("Ranked Optimizer for Grid of width " + width)
       for (i <- 0 until width * width) {
         g.addVertex(new RankedDcopVertex(i, domain, rankedOptimizer, initialValue(domain), debug = debug))
@@ -28,7 +28,7 @@ case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialVal
         }
       }
 
-    case simpleOptimizer: OptimizerModule[Int, Int] =>
+    case simpleOptimizer: OptimizerModule[Int, Int, Option[Nothing]] =>
       println("Simple Optimizer for Grid of width " + width)
       for (i <- 0 until width * width)
         g.addVertex(new SimpleDcopVertex(i, domain, simpleOptimizer, initialValue(domain), debug = debug))

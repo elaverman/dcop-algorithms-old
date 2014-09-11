@@ -1,7 +1,7 @@
 package com.signalcollect.dcop.modules
 
-trait ConfigurationModule[AgentId, Action] extends Serializable {
-  this: OptimizerModule[AgentId, Action] =>
+trait ConfigurationModule[AgentId, Action, NeighbourParams] extends Serializable {
+  this: OptimizerModule[AgentId, Action, NeighbourParams] =>
 
   type Config <: Configuration
   type Factory <: ConfigFactory
@@ -19,7 +19,7 @@ trait ConfigurationModule[AgentId, Action] extends Serializable {
   }
 
   trait Configuration extends Serializable {
-    def neighborhood: Map[AgentId, Action]
+    def neighborhood: Map[AgentId, (Action, NeighbourParams)]
     def domain: Set[Action]
     def withCentralVariableAssignment(value: Action): Config
     def centralVariableAssignment: (AgentId, Action)

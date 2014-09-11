@@ -3,11 +3,11 @@ package com.signalcollect.dcop.graph
 import com.signalcollect._
 import com.signalcollect.dcop.modules.OptimizerModule
 
-trait DcopConvergenceDetection[Id, VertexState, AgentAction] {
+trait DcopConvergenceDetection[Id, VertexState, AgentAction, ConstraintParams] {
   this: DataGraphVertex[Id, VertexState] =>
 
   protected def domain: Set[AgentAction]
-  val optimizer: OptimizerModule[Id, AgentAction]
+  val optimizer: OptimizerModule[Id, AgentAction, ConstraintParams]
 
   def isConverged(c: optimizer.Config): Boolean = {
     optimizer.isConverged(c)

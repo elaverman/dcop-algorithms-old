@@ -1,7 +1,7 @@
 package com.signalcollect.dcop.modules
 
-trait DecisionRuleModule[AgentId, Action] {
-  this: ConfigurationModule[AgentId, Action] =>
+trait DecisionRuleModule[AgentId, Action, ConstraintParams] {
+  this: ConfigurationModule[AgentId, Action, ConstraintParams] =>
 
   type Utility = Double
 

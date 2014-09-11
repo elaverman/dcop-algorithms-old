@@ -2,8 +2,8 @@ package com.signalcollect.dcop.impl
 
 import com.signalcollect.dcop.modules._
 
-trait SimpleConfiguration[Id, Action] extends ConfigurationModule[Id, Action] {
-  this: OptimizerModule[Id, Action] =>
+trait SimpleConfiguration[Id, Action, ConstraintParams] extends ConfigurationModule[Id, Action, ConstraintParams] {
+  this: OptimizerModule[Id, Action, ConstraintParams] =>
 
   type Config = SimpleConfig
   type Factory = SimpleConfigFactory
@@ -45,8 +45,8 @@ trait SimpleConfiguration[Id, Action] extends ConfigurationModule[Id, Action] {
 
 }
 
-class RankedConfiguration[Id, Action] extends ConfigurationModule[Id, Action] {
-  this: OptimizerModule[Id, Action] =>
+class RankedConfiguration[Id, Action, ConstraintParams] extends ConfigurationModule[Id, Action, ConstraintParams] {
+  this: OptimizerModule[Id, Action, ConstraintParams] =>
 
   type Config = RankedConfig
   type Factory = RankedConfigFactory

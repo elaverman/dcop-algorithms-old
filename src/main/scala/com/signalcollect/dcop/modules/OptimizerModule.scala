@@ -1,9 +1,9 @@
 package com.signalcollect.dcop.modules
 
-trait OptimizerModule[AgentId, Action]
-  extends ConfigurationModule[AgentId, Action]
-  with AdjustmentScheduleModule[AgentId, Action]
-  with DecisionRuleModule[AgentId, Action] {
+trait OptimizerModule[AgentId, Action, ConstraintParams]
+  extends ConfigurationModule[AgentId, Action, ConstraintParams]
+  with AdjustmentScheduleModule[AgentId, Action, ConstraintParams]
+  with DecisionRuleModule[AgentId, Action, ConstraintParams] {
 
   def createNewConfig(params: Any*) = factory.createNewConfig(params: _*)
 

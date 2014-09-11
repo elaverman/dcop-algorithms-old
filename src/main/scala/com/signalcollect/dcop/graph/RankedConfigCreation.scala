@@ -7,9 +7,9 @@ import com.signalcollect.dcop.modules._
 /**
  * Assumes that vertex state and agent action have the same type.
  */
-trait RankedConfigCreation[Id, Action] {
+trait RankedConfigCreation[Id, Action, ConstraintParams] {
   this: DataGraphVertex[Id, (Action, Double)] 
-  with DcopConvergenceDetection[Id, (Action, Double), Action] =>
+  with DcopConvergenceDetection[Id, (Action, Double), Action, ConstraintParams] =>
   //with RankedConfiguration[Id, Action, Rank] =>
 
   type Signal = (Action, Double)

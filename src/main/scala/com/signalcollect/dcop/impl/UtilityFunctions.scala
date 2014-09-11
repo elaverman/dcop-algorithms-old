@@ -2,8 +2,8 @@ package com.signalcollect.dcop.impl
 
 import com.signalcollect.dcop.modules._
 
-trait UtilityFunctions[AgentId, Action] extends UtilityFunctionModule[AgentId, Action] {
-  this: ConfigurationModule[AgentId, Action] =>
+trait UtilityFunctions[AgentId, Action, ExtraParams] extends UtilityFunctionModule[AgentId, Action, ExtraParams] {
+  this: ConfigurationModule[AgentId, Action, ExtraParams] =>
 
   trait VertexColoringUtility extends UtilityFunction {
     def computeUtility(c: Config) = {
@@ -20,6 +20,13 @@ trait UtilityFunctions[AgentId, Action] extends UtilityFunctionModule[AgentId, A
       val occupiedColors = c.neighborhood.values
       val numberOfConflicts = occupiedColors.filter(_ == c.centralVariableValue).size
       - numberOfConflicts
+    }
+  }
+  
+  trait ProximityUtility extends UtilityFunction {
+    def computeUtility(c: Config, time: Int) = {
+      ???
+      //TODO here
     }
   }
 }

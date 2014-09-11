@@ -3,8 +3,8 @@ package com.signalcollect.dcop.impl
 import scala.util.Random
 import com.signalcollect.dcop.modules._
 
-trait DecisionRules[AgentId, Action] extends DecisionRuleModule[AgentId, Action] {
-  this: ConfigurationModule[AgentId, Action] =>
+trait DecisionRules[AgentId, Action, ConstraintParams] extends DecisionRuleModule[AgentId, Action, ConstraintParams] {
+  this: ConfigurationModule[AgentId, Action, ConstraintParams] =>
 
   //    object RandomDecisionRule extends DecisionRule {
   //       def computeMove(c: Config) = {
@@ -15,8 +15,8 @@ trait DecisionRules[AgentId, Action] extends DecisionRuleModule[AgentId, Action]
 
 }
 
-trait DecisionRulesWithTargetFunctions[AgentId, Action] extends DecisionRuleModule[AgentId, Action] {
-  this: TargetFunctionModule[AgentId, Action] with ConfigurationModule[AgentId, Action] =>
+trait DecisionRulesWithTargetFunctions[AgentId, Action, ConstraintParams] extends DecisionRuleModule[AgentId, Action, ConstraintParams] {
+  this: TargetFunctionModule[AgentId, Action, ConstraintParams] with ConfigurationModule[AgentId, Action, ConstraintParams] =>
 
   trait NashEquilibriumConvergence extends DecisionRule {
     this: TargetFunction =>

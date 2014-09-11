@@ -24,7 +24,7 @@ import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
 
 class RankedVertexColoringEdge(targetId: Int) extends DefaultEdge(targetId) {
-  type Source = RankedDcopVertex[_, _]
+  type Source = RankedDcopVertex[_, _, _]
 
   def signal = {
     val sourceState = source.state
@@ -32,15 +32,15 @@ class RankedVertexColoringEdge(targetId: Int) extends DefaultEdge(targetId) {
   }
 }
 
-class RankedDcopVertex[Id, Action](
+class RankedDcopVertex[Id, Action, ConstraintParams](
   id: Id,
   val domain: Set[Action],
-  override val optimizer: OptimizerModule[Id, Action] with RankedConfiguration[Id, Action],
+  override val optimizer: OptimizerModule[Id, Action, ConstraintParams] with RankedConfiguration[Id, Action, ConstraintParams],
   initialAction: Action,
   baseRank: Double = 0.15,
   debug: Boolean = false)
-  extends DcopVertex[Id, (Action, Double), Action](id, domain, optimizer, (initialAction, baseRank), debug)
-  with RankedConfigCreation[Id, Action] {
+  extends DcopVertex[Id, (Action, Double), Action, ConstraintParams](id, domain, optimizer, (initialAction, baseRank), debug)
+  with RankedConfigCreation[Id, Action, ConstraintParams] {
 
   def configToState(c: optimizer.Config): (Action, Double) = {
     val move = c.centralVariableValue

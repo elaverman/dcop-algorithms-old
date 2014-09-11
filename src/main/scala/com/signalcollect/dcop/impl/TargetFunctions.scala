@@ -3,8 +3,8 @@ package com.signalcollect.dcop.impl
 import com.signalcollect.dcop.modules._
 import scala.util.Random
 
-trait TargetFunctionsWithUtilityFunctions[AgentId, Action] extends TargetFunctionModule[AgentId, Action] {
-  this: UtilityFunctionModule[AgentId, Action] with ConfigurationModule[AgentId, Action] =>
+trait TargetFunctionsWithUtilityFunctions[AgentId, Action, ConstraintParams] extends TargetFunctionModule[AgentId, Action, ConstraintParams] {
+  this: UtilityFunctionModule[AgentId, Action, ConstraintParams] with ConfigurationModule[AgentId, Action, ConstraintParams] =>
 
   trait MemoryLessTargetFunction extends TargetFunction {
     this: UtilityFunction =>
@@ -20,8 +20,8 @@ trait TargetFunctionsWithUtilityFunctions[AgentId, Action] extends TargetFunctio
   }
 }
 
-trait RankedTargetFunctions[AgentId, Action] extends TargetFunctionModule[AgentId, Action] {
-  this: UtilityFunctionModule[AgentId, Action] with RankedConfiguration[AgentId, Action] =>
+trait RankedTargetFunctions[AgentId, Action, ConstraintParams] extends TargetFunctionModule[AgentId, Action, ConstraintParams] {
+  this: UtilityFunctionModule[AgentId, Action, ConstraintParams] with RankedConfiguration[AgentId, Action, ConstraintParams] =>
 
   trait RankWeightedTargetFunction extends TargetFunction {
     def computeExpectedUtilities(c: Config) = {

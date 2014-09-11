@@ -10,11 +10,12 @@ import com.signalcollect.dcop.impl.RankedConfiguration
 import java.io.FileWriter
 import java.io.File
 import com.signalcollect.dcop.graphstructures.Grid
-import com.signalcollect.dcop.graphstructures.AdoptGraph
-import com.signalcollect.dcop.graphstructures.DimacsGraph
-import com.signalcollect.dcop.graphstructures.MixedAdoptGraph
+//import com.signalcollect.dcop.graphstructures.AdoptGraph
+//import com.signalcollect.dcop.graphstructures.DimacsGraph
+//import com.signalcollect.dcop.graphstructures.MixedAdoptGraph
+import com.signalcollect.dcop.graphstructures.ProximityGraph
 
-case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[Int], */ evaluationGraphParameters: EvaluationGraphParameters, executionConfig: ExecutionConfiguration, runNumber: Int, aggregationInterval: Int, revision: String, evaluationDescription: String) {
+case class DcopAlgorithmRun[Action, ConstraintParams](optimizer: DcopAlgorithm[Int, Action, ConstraintParams], /*domain: Set[Int], */ evaluationGraphParameters: GraphParameters, executionConfig: ExecutionConfiguration, runNumber: Int, aggregationInterval: Int, revision: String, evaluationDescription: String) {
 
   def roundToMillisecondFraction(nanoseconds: Long): Double = {
     ((nanoseconds / 100000.0).round) / 10.0
@@ -23,10 +24,20 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
   def runAlgorithm(): List[Map[String, String]] = {
     println("Starting.")
 
-    val evaluationGraph = evaluationGraphParameters match {
-      case gridParameters: GridParameters => Grid(optimizer, gridParameters.domain, gridParameters.initialValue, gridParameters.debug, gridParameters.width)
-      case adoptGraphParameters: AdoptGraphParameters => AdoptGraph(optimizer, adoptGraphParameters.adoptFileName, adoptGraphParameters.initialValue, adoptGraphParameters.debug)
-      case dimacsGraphParameters: DimacsGraphParameters => DimacsGraph(optimizer, dimacsGraphParameters.domain, dimacsGraphParameters.dimacsFileName, dimacsGraphParameters.initialValue, dimacsGraphParameters.debug)
+    val evaluationGraph = optimizer match {
+      case opt: DcopAlgorithm[Int, Int, Option[Nothing]] => {
+        evaluationGraphParameters match {
+          case gridParameters: GridParameters => Grid(opt, gridParameters.domain, gridParameters.initialValue, gridParameters.debug, gridParameters.width)
+//          case adoptGraphParameters: AdoptGraphParameters => AdoptGraph(opt, adoptGraphParameters.adoptFileName, adoptGraphParameters.initialValue, adoptGraphParameters.debug)
+//          case dimacsGraphParameters: DimacsGraphParameters => DimacsGraph(opt, dimacsGraphParameters.domain, dimacsGraphParameters.dimacsFileName, dimacsGraphParameters.initialValue, dimacsGraphParameters.debug)
+        }
+      }
+      case optCp: DcopAlgorithm[Int, (Int, Int), Int] => {
+        evaluationGraphParameters match {
+          case proximityGraphParameters: ProximityGraphParameters => ProximityGraph(optCp, proximityGraphParameters.proximityFileName, false)
+        }
+      }
+
     }
 
     println(optimizer)
@@ -35,11 +46,11 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
 
     optimizer match {
 
-      case rankedOptimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] =>
+      case rankedOptimizer: OptimizerModule[Int, Action, ConstraintParams] with RankedConfiguration[Int, Action, ConstraintParams] =>
         println("Ranked Optimizer")
         computeRanks = true
 
-      case simpleOptimizer: OptimizerModule[Int, Int] =>
+      case simpleOptimizer: OptimizerModule[Int, Action, ConstraintParams] =>
         println("Simple Optimizer")
         computeRanks = true
     }
@@ -73,16 +84,16 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     //    }
 
     val idStateMapAggregator = if (!computeRanks)
-      IdStateMapAggregator[Int, Int]
+      IdStateMapAggregator[Int, Action]
     else {
-      IdStateMapAggregator[Int, (Int, Double)]
+      IdStateMapAggregator[Int, (Action, Double)]
     }
 
     val initialAggregate = evaluationGraph.graph.aggregate(idStateMapAggregator)
     println(evaluationGraph)
     println("*Initial aggregate " + initialAggregate.toMap.mkString(" "))
 
-    ColorPrinter(evaluationGraph).shouldTerminate(outConflicts, outLocMinima, extraStats, evaluationGraph.maxUtility)(initialAggregate)
+//    ColorPrinter(evaluationGraph).shouldTerminate(outConflicts, outLocMinima, extraStats, evaluationGraph.maxUtility)(initialAggregate)
     val stats = evaluationGraph.graph.execute(executionConfig.withGlobalTerminationCondition(terminationCondition))
 
     println("*Executing.")
@@ -90,30 +101,30 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     val finishTime = System.nanoTime
     val executionTime = roundToMillisecondFraction(finishTime - startTime)
 
-    val conflictCount = ColorPrinter(evaluationGraph).countConflicts(evaluationGraph.graph.aggregate(idStateMapAggregator))
+//    val conflictCount = ColorPrinter(evaluationGraph).countConflicts(evaluationGraph.graph.aggregate(idStateMapAggregator))
 
-    val utility = (evaluationGraph.maxUtility - conflictCount * 2).toDouble
+//    val utility = (evaluationGraph.maxUtility - conflictCount * 2).toDouble
     val domainSize = evaluationGraph match {
       case grid: Grid => grid.domain.size
-      case dimacsGraph: DimacsGraph => dimacsGraph.domain.size
+ //     case dimacsGraph: DimacsGraph => dimacsGraph.domain.size
       case other => -1
     }
 
     val avgGlobalUtilityRatio = extraStats.avgGlobalVsOpt.getOrElse(-1)
-    val endUtilityRatio = (evaluationGraph.maxUtility - conflictCount * 2).toDouble / evaluationGraph.maxUtility
-    val isOptimal = if (conflictCount == 0) 1 else 0
+//    val endUtilityRatio = (evaluationGraph.maxUtility - conflictCount * 2).toDouble / evaluationGraph.maxUtility
+//    val isOptimal = if (conflictCount == 0) 1 else 0
     val timeToFirstLocOptimum = extraStats.timeToFirstLocOptimum.getOrElse(-1)
     val messagesPerVertexPerStep = stats.aggregatedWorkerStatistics.signalMessagesReceived.toDouble / (evaluationGraph.size.toDouble * executionConfig.stepsLimit.getOrElse(1.toLong))
     runResult += s"evaluationDescription" -> evaluationDescription //
     runResult += s"optimizer" -> optimizer.toString //
-    runResult += s"utility" -> utility.toString
+ //   runResult += s"utility" -> utility.toString
     runResult += s"domainSize" -> domainSize.toString
     runResult += s"graphSize" -> evaluationGraph.size.toString //
     runResult += s"executionMode" -> executionConfig.executionMode.toString //
-    runResult += s"conflictCount" -> conflictCount.toString //
+ //   runResult += s"conflictCount" -> conflictCount.toString //
     runResult += s"avgGlobalUtilityRatio" -> avgGlobalUtilityRatio.toString // Measure (1)
-    runResult += s"endUtilityRatio" -> endUtilityRatio.toString // Measure (2)
-    runResult += s"isOptimal" -> isOptimal.toString // Measure (3)
+ //   runResult += s"endUtilityRatio" -> endUtilityRatio.toString // Measure (2)
+ //   runResult += s"isOptimal" -> isOptimal.toString // Measure (3)
     runResult += s"timeToFirstLocOptimum" -> timeToFirstLocOptimum.toString // Measure (4)
     runResult += s"messagesPerVertexPerStep" -> messagesPerVertexPerStep.toString // Measure (5)
     runResult += s"isOptimizerRanked" -> computeRanks.toString
@@ -131,7 +142,7 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
     runResult += s"signalThreshold" -> executionConfig.signalThreshold.toString // 
     runResult += s"collectThreshold" -> executionConfig.collectThreshold.toString //
 
-    println("\nNumber of conflicts at the end: " + ColorPrinter(evaluationGraph).countConflicts(evaluationGraph.graph.aggregate(idStateMapAggregator)))
+//    println("\nNumber of conflicts at the end: " + ColorPrinter(evaluationGraph).countConflicts(evaluationGraph.graph.aggregate(idStateMapAggregator)))
     println("Shutting down.")
     evaluationGraph.graph.shutdown
 
@@ -147,8 +158,9 @@ case class DcopAlgorithmRun(optimizer: DcopAlgorithm[Int, Int], /*domain: Set[In
   }
 }
 
+/**
 //TODO Ugly. Rewrite
-case class DcopMixedAlgorithmRun(optimizer1: DcopAlgorithm[Int, Int], optimizer2: DcopAlgorithm[Int, Int], proportion: Double, /*domain: Set[Int], */ evaluationGraphParameters: EvaluationGraphParameters, executionConfig: ExecutionConfiguration, runNumber: Int, aggregationInterval: Int, revision: String, evaluationDescription: String) {
+case class DcopMixedAlgorithmRun[Action, +ConstraintParams](optimizer1: DcopAlgorithm[Int, Action, ConstraintParams], optimizer2: DcopAlgorithm[Int, Action, ConstraintParams], proportion: Double, /*domain: Set[Int], */ evaluationGraphParameters: EvaluationGraphParameters, executionConfig: ExecutionConfiguration, runNumber: Int, aggregationInterval: Int, revision: String, evaluationDescription: String) {
 
   def roundToMillisecondFraction(nanoseconds: Long): Double = {
     ((nanoseconds / 100000.0).round) / 10.0
@@ -157,10 +169,18 @@ case class DcopMixedAlgorithmRun(optimizer1: DcopAlgorithm[Int, Int], optimizer2
   def runAlgorithm(): List[Map[String, String]] = {
     println("*Starting.")
 
-    val evaluationGraph = evaluationGraphParameters match {
-      case gridParameters: GridParameters => throw new Error("MIXED Dimacs graph still unsupported.")
-      case adoptGraphParameters: AdoptGraphParameters => MixedAdoptGraph(optimizer1, optimizer2, proportion, adoptGraphParameters.adoptFileName, adoptGraphParameters.initialValue, adoptGraphParameters.debug)
-      case dimacsGraphParameters: DimacsGraphParameters => throw new Error("MIXED Dimacs graph still unsupported.")
+    val evaluationGraph = (optimizer1, optimizer2) match {
+      case opt: (DcopAlgorithm[Int, Int, Nothing], DcopAlgorithm[Int, Int, Nothing]) =>
+        evaluationGraphParameters match {
+          case gridParameters: GridParameters => throw new Error("MIXED Dimacs graph still unsupported.")
+          case adoptGraphParameters: AdoptGraphParameters => MixedAdoptGraph(opt._1, opt._2, proportion, adoptGraphParameters.adoptFileName, adoptGraphParameters.initialValue, adoptGraphParameters.debug)
+          case dimacsGraphParameters: DimacsGraphParameters => throw new Error("MIXED Dimacs graph still unsupported.")
+        }
+      case optCp: (DcopAlgorithm[Int, (Int, Int), Int], DcopAlgorithm[Int, (Int, Int), Int]) => {
+        evaluationGraphParameters match {
+          case proximityGraphParameters: ProximityGraphParameters => throw new Error("MIXED Proximity graph still unsupported.")
+        }
+      }
     }
 
     println(optimizer1 + " " + optimizer2 + " " + proportion)
@@ -169,18 +189,18 @@ case class DcopMixedAlgorithmRun(optimizer1: DcopAlgorithm[Int, Int], optimizer2
 
     optimizer1 match {
 
-      case rankedOptimizer1: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] =>
+      case rankedOptimizer1: OptimizerModule[Int, Action, ConstraintParams] with RankedConfiguration[Int, Action, ConstraintParams] =>
         optimizer2 match {
-          case rankedOptimizer2: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] =>
+          case rankedOptimizer2: OptimizerModule[Int, Action, ConstraintParams] with RankedConfiguration[Int, Action, ConstraintParams] =>
 
             println("Ranked Optimizers")
             computeRanks = true
           case other => throw new Error("Optimizers are not both ranked.")
         }
 
-      case simpleOptimizer1: OptimizerModule[Int, Int] =>
+      case simpleOptimizer1: OptimizerModule[Int, Action, ConstraintParams] =>
         optimizer2 match {
-          case simpleOptimizer2: OptimizerModule[Int, Int] =>
+          case simpleOptimizer2: OptimizerModule[Int, Action, ConstraintParams] =>
             println("Simple Optimizers")
             computeRanks = true //TODO Verify why this was set to true instead of false
           case other => throw new Error("Optimizers are not both simple.")
@@ -194,11 +214,11 @@ case class DcopMixedAlgorithmRun(optimizer1: DcopAlgorithm[Int, Int], optimizer2
     val graphDirectoryFolder = new File("output/" + evaluationGraph.toString())
     if (!graphDirectoryFolder.exists)
       graphDirectoryFolder.mkdir
-//    val outAnimation = new FileWriter(s"output/${evaluationGraph}/animation${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
+    //    val outAnimation = new FileWriter(s"output/${evaluationGraph}/animation${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
     val outConflicts = new FileWriter(s"output/${evaluationGraph}/conflicts${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
-//    val outIndConflicts = new FileWriter(s"output/${evaluationGraph}/indConflicts${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
+    //    val outIndConflicts = new FileWriter(s"output/${evaluationGraph}/indConflicts${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
     val outLocMinima = new FileWriter(s"output/${evaluationGraph}/locMinima${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
-//    var outRanks: FileWriter = null
+    //    var outRanks: FileWriter = null
 
     //println(optimizer.toString)
     var finalResults = List[Map[String, String]]()
@@ -209,15 +229,15 @@ case class DcopMixedAlgorithmRun(optimizer1: DcopAlgorithm[Int, Int], optimizer2
     val startTime = System.nanoTime()
     var extraStats = RunStats(None, evaluationGraph.maxUtility, None)
 
-    val terminationCondition =  new ColorPrintingGlobalTerminationCondition(outConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
-//    = if (!computeRanks)
-//      //new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
-//      new ColorPrintingGlobalTerminationCondition(outConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
-//    else {
-//      outRanks = new java.io.FileWriter(s"output/${evaluationGraph}/ranks${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
-//      //      new ColorRankPrintingGlobalTerminationCondition(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, (Int, Double)], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
-//      new ColorRankPrintingGlobalTerminationCondition(outConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, (Int, Double)], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
-//    }
+    val terminationCondition = new ColorPrintingGlobalTerminationCondition(outConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+    //    = if (!computeRanks)
+    //      //new ColorPrintingGlobalTerminationCondition(outAnimation, outConflicts, outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+    //      new ColorPrintingGlobalTerminationCondition(outConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, Int], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+    //    else {
+    //      outRanks = new java.io.FileWriter(s"output/${evaluationGraph}/ranks${optimizer1}${optimizer2}${proportion}${executionConfig.executionMode}${executionConfig.stepsLimit}${evaluationGraph.domainForVertex(1).size}Run$runNumber.txt")
+    //      //      new ColorRankPrintingGlobalTerminationCondition(outAnimation, outConflicts, Some(outRanks), outIndConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, (Int, Double)], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+    //      new ColorRankPrintingGlobalTerminationCondition(outConflicts, outLocMinima, extraStats, startTime, aggregationOperationParam = new IdStateMapAggregator[Int, (Int, Double)], aggregationIntervalParam = aggregationInterval, evaluationGraph = evaluationGraph)
+    //    }
 
     val idStateMapAggregator = if (!computeRanks)
       IdStateMapAggregator[Int, Int]
@@ -288,14 +308,14 @@ case class DcopMixedAlgorithmRun(optimizer1: DcopAlgorithm[Int, Int], optimizer2
     println("Shutting down.")
     evaluationGraph.graph.shutdown
 
-//    outAnimation.close
+    //    outAnimation.close
     outConflicts.close
     outLocMinima.close
-//    if (outRanks != null)
-//      outRanks.close
-//    outIndConflicts.close
+    //    if (outRanks != null)
+    //      outRanks.close
+    //    outIndConflicts.close
 
     runResult :: finalResults
 
   }
-}
+}**/

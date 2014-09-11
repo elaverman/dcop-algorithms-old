@@ -12,15 +12,15 @@ import scala.Array.canBuildFrom
 import com.signalcollect.dcop.impl.RankedConfiguration
 import com.signalcollect.Graph
 
-object AdoptGraphUtilities {
+object ProximityGraphUtilities {
 
-  def parseAdoptFile(fileName: String): ConstraintGraphData = {
-    val textLines = Source.fromFile("adoptInput/" + fileName).getLines.toList
+  def parseProximityFile(fileName: String): ConstraintGraphData[(Int, Int), Int] = {
+    val textLines = Source.fromFile("proximityInput/" + fileName).getLines.toList
     val constraintGraphData = getFromText(textLines)
     constraintGraphData
   }
 
-  def getFromText(textLines: List[String]): ConstraintGraphData = {
+  def getFromText(textLines: List[String]): ConstraintGraphData[(Int, Int), Int] = {
     textLines match {
       case Nil => ConstraintGraphData(Map(), Map())
       case tl :: tls => {
@@ -29,7 +29,13 @@ object AdoptGraphUtilities {
           case "AGENT" => getFromText(tls) //lose it
           case "VARIABLE" => {
             val variableId = splitTextLine(1).toInt
-            val variablePossibleValues: Set[Int] = (0 to (splitTextLine(3).toInt - 1)).toSet
+            val variableLabel: String = splitTextLine(2)
+            val centerX = (splitTextLine(3).toDouble * 100).toInt
+            val centerY = (splitTextLine(4).toDouble * 100).toInt
+            val stepNumber = splitTextLine(5).toInt
+            val xPossibleValues = ((centerX - stepNumber) to (centerX + stepNumber)).toList
+            val yPossibleValues = ((centerY - stepNumber) to (centerY + stepNumber)).toList
+            val variablePossibleValues: Set[(Int, Int)] = (for (x <- xPossibleValues; y <- yPossibleValues) yield (x, y)).toSet
             getFromText(tls).addPossibleValues(variableId, variablePossibleValues)
           }
           case "CONSTRAINT" => {
@@ -60,11 +66,11 @@ object AdoptGraphUtilities {
 
 }
 
-trait BaseAdoptGraph {
+trait BaseProximityGraph {
 
-  def constraintGraphData: ConstraintGraphData
+  def constraintGraphData: ConstraintGraphData[(Int, Int), Int]
 
-  def constraintGraph: Graph[Any, Any]
+  def constraintGraph: Graph[(Int, Int), (Int, Int)]
 
   def adoptFileName: String
 
@@ -81,19 +87,25 @@ trait BaseAdoptGraph {
   override def toString = adoptFileName
 }
 
-case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer) with BaseAdoptGraph {
+case class ProximityGraph(optimizer: DcopAlgorithm[Int, (Int, Int), Int], adoptFileName: String, debug: Boolean) extends MapGraph[Int](optimizer) with BaseProximityGraph {
 
-  val constraintGraphData = AdoptGraphUtilities.parseAdoptFile(adoptFileName)
+  val constraintGraphData = ProximityGraphUtilities.parseProximityFile(adoptFileName)
 
+  def initialValue(initialSet: Set[(Int, Int)]) = {
+    val xs = initialSet.map(_._1)
+    val ys = initialSet.map(_._2)
+    (((xs.max - xs.min)/2).toInt, ((ys.max - ys.min)/2).toInt)
+  } 
+  
   val constraintGraph = constraintGraphData.buildConstraintGraphFromData(optimizer, initialValue, debug)
 
 }
 
-case class MixedAdoptGraph(optimizer1: DcopAlgorithm[Int, Int], optimizer2: DcopAlgorithm[Int, Int], proportion: Double, adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer1) with BaseAdoptGraph {
-
-  val constraintGraphData = AdoptGraphUtilities.parseAdoptFile(adoptFileName)
-
-  val constraintGraph =
-    constraintGraphData.buildMixedConstraintGraphFromData(optimizer1, optimizer2, proportion, initialValue, debug)
-
-}
+//case class MixedProximityGraph(optimizer1: DcopAlgorithm[Int, (Int, Int), Int], optimizer2: DcopAlgorithm[Int, (Int, Int), Int], proportion: Double, adoptFileName: String, initialValue: (Set[(Int, Int)]) => (Int, Int), debug: Boolean) extends MapGraph(optimizer1) with BaseProximityGraph {
+//
+//  val constraintGraphData = ProximityGraphUtilities.parseProximityFile(adoptFileName)
+//
+//  val constraintGraph =
+//    constraintGraphData.buildMixedConstraintGraphFromData(optimizer1, optimizer2, proportion, initialValue, debug)
+//
+//}
