@@ -1,14 +1,10 @@
 package com.signalcollect.dcop.evaluation
 
-import com.signalcollect.dcop.DcopAlgorithm
 import com.signalcollect.Graph
-import com.signalcollect.dcop.impl.RankedConfiguration
-import com.signalcollect.dcop.modules.OptimizerModule
 import com.signalcollect.GraphBuilder
 import com.signalcollect.StateForwarderEdge
-import com.signalcollect.dcop.graph.RankedVertexColoringEdge
-import com.signalcollect.dcop.graph.SimpleDcopVertex
-import com.signalcollect.dcop.graph.RankedDcopVertex
+import com.signalcollect.dcop.graph._
+
 import scala.io.Source
 import scala.annotation.tailrec
 

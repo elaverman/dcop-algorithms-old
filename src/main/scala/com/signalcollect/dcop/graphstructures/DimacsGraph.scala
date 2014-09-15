@@ -1,8 +1,9 @@
 package com.signalcollect.dcop.graphstructures
 
-import com.signalcollect.dcop.DcopAlgorithm
+import com.signalcollect.dcop.modules._
+import com.signalcollect.dcop.impl.SimpleOptimizer
 
-case class DimacsGraph(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], dimacsFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer) {
+case class DimacsGraphOptimizer[Opt <: Optimizer[Int, Int, Configuration[Int, Int], Double]](optimizer: Opt, domain: Set[Int], dimacsFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer) {
 
   val constraintGraphData = getConstraintGraphData(DimacsParser.parse(new java.io.File("dimacsInput/" + dimacsFileName)))
 
@@ -11,8 +12,8 @@ case class DimacsGraph(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], dim
 
   //TODO: v Ask Philip about this next function
   //Attention: ConstraintGraphData assumes vertex ids from 0, while the Dimacs format assumes them from 1
-  def getConstraintGraphData(entities: Traversable[DimacsEntity]): ConstraintGraphData = {
-    var constraintGraphData = ConstraintGraphData(Map(), Map())
+  def getConstraintGraphData(entities: Traversable[DimacsEntity]): ConstraintGraphData[Int, Int] = {
+    var constraintGraphData: ConstraintGraphData[Int, Int] = ConstraintGraphData(Map(), Map())
     for (e <- entities) {
       e match {
         case metaData: MetaData =>

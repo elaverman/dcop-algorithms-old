@@ -21,14 +21,23 @@
 package com.signalcollect.dcop.graph
 import com.signalcollect._
 import com.signalcollect.dcop.modules._
+import com.signalcollect.dcop.impl.SimpleConfig
 
-class SimpleDcopVertex[Id, State](
+class SimpleDcopVertex[Id, ActionAndState, UtilityType](
   id: Id,
-  val domain: Set[State],
-  override val optimizer: OptimizerModule[Id, State],
-  initialState: State,
+  val domain: Set[ActionAndState],
+  val optimizer: Optimizer[Id, ActionAndState, Configuration[Id, ActionAndState], UtilityType],
+  initialState: ActionAndState,
   debug: Boolean = false)
-  extends DcopVertex[Id, State, State](id, domain, optimizer, initialState, debug)
-  with SimpleConfigCreation[Id, State] {
-  override def configToState(c: optimizer.Config): State = c.centralVariableValue
+  extends DcopVertex[Id, ActionAndState, ActionAndState,  UtilityType](id, domain, optimizer, initialState, debug){
+  
+  override def configToState(c: Configuration[Id, ActionAndState]): ActionAndState = c.centralVariableValue
+  
+  override def currentConfig: Configuration[Id, ActionAndState] = {
+    val neighborhood: Map[Id, ActionAndState] = mostRecentSignalMap.seq.toMap.asInstanceOf[Map[Id, ActionAndState]]
+    val centralVariableAssignment = (id, state)
+    val c = SimpleConfig(neighborhood, domain, centralVariableAssignment)
+    c
+  }
+  
 }

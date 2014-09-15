@@ -1,7 +1,6 @@
 package com.signalcollect.dcop.graphstructures
 
-import com.signalcollect.dcop.DcopAlgorithm
-import com.signalcollect.dcop.modules.OptimizerModule
+import com.signalcollect.dcop.modules.Optimizer
 import com.signalcollect.GraphBuilder
 import com.signalcollect.StateForwarderEdge
 import com.signalcollect.dcop.graph.RankedVertexColoringEdge
@@ -9,18 +8,19 @@ import com.signalcollect.dcop.graph.SimpleDcopVertex
 import com.signalcollect.dcop.graph.RankedDcopVertex
 import scala.io.Source
 import scala.Array.canBuildFrom
-import com.signalcollect.dcop.impl.RankedConfiguration
+import com.signalcollect.dcop.impl._
 import com.signalcollect.Graph
+import com.signalcollect.dcop.modules.Configuration
 
 object AdoptGraphUtilities {
 
-  def parseAdoptFile(fileName: String): ConstraintGraphData = {
+  def parseAdoptFile(fileName: String): ConstraintGraphData[Int, Int] = {
     val textLines = Source.fromFile("adoptInput/" + fileName).getLines.toList
     val constraintGraphData = getFromText(textLines)
     constraintGraphData
   }
 
-  def getFromText(textLines: List[String]): ConstraintGraphData = {
+  def getFromText(textLines: List[String]): ConstraintGraphData[Int, Int] = {
     textLines match {
       case Nil => ConstraintGraphData(Map(), Map())
       case tl :: tls => {
@@ -62,7 +62,7 @@ object AdoptGraphUtilities {
 
 trait BaseAdoptGraph {
 
-  def constraintGraphData: ConstraintGraphData
+  def constraintGraphData: ConstraintGraphData[Int, Int]
 
   def constraintGraph: Graph[Any, Any]
 
@@ -81,7 +81,7 @@ trait BaseAdoptGraph {
   override def toString = adoptFileName
 }
 
-case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer) with BaseAdoptGraph {
+case class AdoptGraph[Opt <: Optimizer[Int, Int, Configuration[Int, Int], Double]](optimizer: Opt, adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer) with BaseAdoptGraph {
 
   val constraintGraphData = AdoptGraphUtilities.parseAdoptFile(adoptFileName)
 
@@ -89,7 +89,7 @@ case class AdoptGraph(optimizer: DcopAlgorithm[Int, Int], adoptFileName: String,
 
 }
 
-case class MixedAdoptGraph(optimizer1: DcopAlgorithm[Int, Int], optimizer2: DcopAlgorithm[Int, Int], proportion: Double, adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer1) with BaseAdoptGraph {
+case class MixedAdoptGraph[Opt <: Optimizer[Int, Int, Configuration[Int, Int], Double]](optimizer1: Opt, optimizer2: Opt, proportion: Double, adoptFileName: String, initialValue: (Set[Int]) => Int, debug: Boolean) extends ConstraintEvaluationGraph(optimizer1) with BaseAdoptGraph {
 
   val constraintGraphData = AdoptGraphUtilities.parseAdoptFile(adoptFileName)
 

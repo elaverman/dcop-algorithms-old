@@ -10,6 +10,8 @@ import scala.util.Random
 import scala.slick.lifted.TableQuery
 import java.net._
 import com.signalcollect.nodeprovisioning.slurm._
+import com.signalcollect.dcop.modules._
+import com.signalcollect.dcop.impl._
 
 object DcopEvaluation extends App {
 
@@ -62,59 +64,15 @@ object DcopEvaluation extends App {
   //        var evaluation = new Evaluation(evaluationName = evalName, executionHost = localHost).addResultHandler(mySql)
   /*********/
 
-  val optimizers: List[DcopAlgorithm[Int, Int]] = List(
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.4),
-    NoRankConflictDsaBVertexColoring(changeProbability = 0.8),
-    RankedConflictDsaBVertexColoring(changeProbability = 0.4),
-    RankedConflictDsaBVertexColoring(changeProbability = 0.8),
-    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.4),
-    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.8))
-  //    NoRankConflictDsaBVertexColoring(changeProbability = 0.5),
-  //    NoRankConflictDsaBVertexColoring(changeProbability = 0.6),
-  //    NoRankConflictDsaBVertexColoring(changeProbability = 0.7),
-  //    RankedConflictDsaBVertexColoring(changeProbability = 0.5),
-  //    RankedConflictDsaBVertexColoring(changeProbability = 0.6),
-  //    RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.5),
-  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.6),
-  //    DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.7),
-  //Normal switches
-  //    Switch1RankedConflictDsaBVertexColoring(changeProbability = 0.4),
-  //    Switch1RankedConflictDsaBVertexColoring(changeProbability = 0.5),
-  //    Switch1RankedConflictDsaBVertexColoring(changeProbability = 0.6),
-  //    Switch1RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-  //    Switch1RankedConflictDsaBVertexColoring(changeProbability = 0.8),
-  //    Switch2RankedConflictDsaBVertexColoring(changeProbability = 0.4),
-  //    Switch2RankedConflictDsaBVertexColoring(changeProbability = 0.5),
-  //    Switch2RankedConflictDsaBVertexColoring(changeProbability = 0.6),
-  //    Switch2RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-  //    Switch2RankedConflictDsaBVertexColoring(changeProbability = 0.8),
-  //    Switch3RankedConflictDsaBVertexColoring(changeProbability = 0.4),
-  //    Switch3RankedConflictDsaBVertexColoring(changeProbability = 0.5),
-  //    Switch3RankedConflictDsaBVertexColoring(changeProbability = 0.6),
-  //    Switch3RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-  //    Switch3RankedConflictDsaBVertexColoring(changeProbability = 0.8),
-  //    //Inverted switches
-  //    SwitchInv1RankedConflictDsaBVertexColoring(changeProbability = 0.4),
-  //    SwitchInv1RankedConflictDsaBVertexColoring(changeProbability = 0.5),
-  //    SwitchInv1RankedConflictDsaBVertexColoring(changeProbability = 0.6),
-  //    SwitchInv1RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-  //    SwitchInv1RankedConflictDsaBVertexColoring(changeProbability = 0.8),
-  //    SwitchInv2RankedConflictDsaBVertexColoring(changeProbability = 0.4),
-  //    SwitchInv2RankedConflictDsaBVertexColoring(changeProbability = 0.5),
-  //    SwitchInv2RankedConflictDsaBVertexColoring(changeProbability = 0.6),
-  //    SwitchInv2RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-  //    SwitchInv2RankedConflictDsaBVertexColoring(changeProbability = 0.8),
-  //    SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.4),
-  //    SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.5),
-  //    SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.6),
-  //    SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.7),
-  //    SwitchInv3RankedConflictDsaBVertexColoring(changeProbability = 0.8))
+  //TODO Why do we have the probl since we SimpleConfig used by DsaAVC extends Configuration??
+  val optimizers: List[Optimizer[Int, Int, Configuration[Int, Int], Double]] = List(
+    DsaAVertexColoring[Int, Int](changeProbability = 0.4))
 
-  val optimizerPairs: List[(DcopAlgorithm[Int, Int], DcopAlgorithm[Int, Int])] = List(
-    (NoRankConflictDsaBVertexColoring(changeProbability = 0.6), DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.4)),
-    (RankedConflictDsaBVertexColoring(changeProbability = 0.5), DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.4)),
-    (NoRankConflictDsaBVertexColoring(changeProbability = 0.6), RankedConflictDsaBVertexColoring(changeProbability = 0.5)))
+  //TODO Put back in the mixed optimizers
+  //  val optimizerPairs: List[(DcopAlgorithm[Int, Int], DcopAlgorithm[Int, Int])] = List(
+  //    (NoRankConflictDsaBVertexColoring(changeProbability = 0.6), DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.4)),
+  //    (RankedConflictDsaBVertexColoring(changeProbability = 0.5), DynamicRankedConflictDsaBVertexColoring(changeProbability = 0.4)),
+  //    (NoRankConflictDsaBVertexColoring(changeProbability = 0.6), RankedConflictDsaBVertexColoring(changeProbability = 0.5)))
 
   val proportions = List(0.1, 0.3, 0.5, 0.7, 0.9)
 
@@ -149,30 +107,31 @@ object DcopEvaluation extends App {
       }
     }
   } else {
-    /**
-     * Mixed algorithms evaluation
-     */
-
-    for (runNumber <- (0 until runs)) {
-      for (optimizerPair <- optimizerPairs) {
-        for (proportion <- proportions) {
-          val evaluationGraphs = //List(GridParameters((0 to 9).toSet, zeroInitialized, debug, 1000)) // ++
-            adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug)) // ++
-          //        dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug)) ++
-          //          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 75).toSet, zeroInitialized, debug)) ++
-          //          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 99).toSet, zeroInitialized, debug))
-          for (evaluationGraph <- evaluationGraphs) {
-            for (executionMat <- execModesAggrIntervAndTermLimits) {
-              val executionConfig = executionMat._1 match {
-                case ExecutionMode.Synchronous => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withStepsLimit(executionMat._3)
-                case _ => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withTimeLimit(executionMat._3)
-              }
-              evaluation = evaluation.addEvaluationRun(DcopMixedAlgorithmRun(optimizerPair._1, optimizerPair._2, proportion, evaluationGraph, executionConfig, runNumber, executionMat._2, getRevision, evalName).runAlgorithm)
-            }
-          }
-        }
-      }
-    }
+    //TODO: put back in the mixed optimizers
+    //    /**
+    //     * Mixed algorithms evaluation
+    //     */
+    //
+    //    for (runNumber <- (0 until runs)) {
+    //      for (optimizerPair <- optimizerPairs) {
+    //        for (proportion <- proportions) {
+    //          val evaluationGraphs = //List(GridParameters((0 to 9).toSet, zeroInitialized, debug, 1000)) // ++
+    //            adoptGraphNamesList.map(x => AdoptGraphParameters(x, zeroInitialized, debug)) // ++
+    //          //        dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 3).toSet, zeroInitialized, debug)) ++
+    //          //          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 75).toSet, zeroInitialized, debug)) ++
+    //          //          dimacsGraphNamesList.map(x => DimacsGraphParameters(x, (0 to 99).toSet, zeroInitialized, debug))
+    //          for (evaluationGraph <- evaluationGraphs) {
+    //            for (executionMat <- execModesAggrIntervAndTermLimits) {
+    //              val executionConfig = executionMat._1 match {
+    //                case ExecutionMode.Synchronous => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withStepsLimit(executionMat._3)
+    //                case _ => ExecutionConfiguration(executionMat._1).withSignalThreshold(0.01).withTimeLimit(executionMat._3)
+    //              }
+    //              evaluation = evaluation.addEvaluationRun(DcopMixedAlgorithmRun(optimizerPair._1, optimizerPair._2, proportion, evaluationGraph, executionConfig, runNumber, executionMat._2, getRevision, evalName).runAlgorithm)
+    //            }
+    //          }
+    //        }
+    //      }
+    //    }
   }
 
   evaluation.execute

@@ -1,7 +1,5 @@
 package com.signalcollect.dcop.graphstructures
 
-import com.signalcollect.dcop.DcopAlgorithm
-import com.signalcollect.dcop.modules.OptimizerModule
 import com.signalcollect.GraphBuilder
 import com.signalcollect.StateForwarderEdge
 import com.signalcollect.dcop.graph.RankedVertexColoringEdge
@@ -9,18 +7,19 @@ import com.signalcollect.dcop.graph.SimpleDcopVertex
 import com.signalcollect.dcop.graph.RankedDcopVertex
 import scala.io.Source
 import scala.Array.canBuildFrom
-import com.signalcollect.dcop.impl.RankedConfiguration
+import com.signalcollect.dcop.modules._
+import com.signalcollect.dcop.impl._
 
-case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialValue: (Set[Int]) => Int, debug: Boolean, width: Int) extends EvaluationGraph(optimizer) {
+case class Grid[Action, Opt <: Optimizer[Int, Action, Configuration[Int, Action], Double]](optimizer: Opt, domain: Set[Action], initialValue: (Set[Action]) => Action, debug: Boolean, width: Int) extends EvaluationGraph(optimizer) {
 
   val g = GraphBuilder.build
 
   optimizer match {
 
-    case rankedOptimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] =>
+    case rankedOptimizer: RankedOptimizer[Int, Action] =>
       println("Ranked Optimizer for Grid of width " + width)
-      for (i <- 0 until width * width) {
-        g.addVertex(new RankedDcopVertex(i, domain, rankedOptimizer, initialValue(domain), debug = debug))
+      for (i <- 0 until (width * width)) {
+        g.addVertex(new RankedDcopVertex[Int, Action, Double](i, domain, rankedOptimizer, initialValue(domain), debug = debug))
       }
       for (i <- 0 until width * width) {
         for (n <- computeNeighbours(i)) {
@@ -28,7 +27,7 @@ case class Grid(optimizer: DcopAlgorithm[Int, Int], domain: Set[Int], initialVal
         }
       }
 
-    case simpleOptimizer: OptimizerModule[Int, Int] =>
+    case simpleOptimizer: SimpleOptimizer[Int, Action] =>
       println("Simple Optimizer for Grid of width " + width)
       for (i <- 0 until width * width)
         g.addVertex(new SimpleDcopVertex(i, domain, simpleOptimizer, initialValue(domain), debug = debug))
