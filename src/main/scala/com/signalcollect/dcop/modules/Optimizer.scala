@@ -1,6 +1,6 @@
 package com.signalcollect.dcop.modules
 
-trait Optimizer[AgentId, Action, +Config <: Configuration[AgentId, Action], UtilityType] {
+trait Optimizer[AgentId, Action, Config <: Configuration[AgentId, Action], UtilityType] {
   def schedule: AdjustmentSchedule[AgentId, Action, Config]
   def rule: DecisionRule[AgentId, Action, Config, UtilityType]
 

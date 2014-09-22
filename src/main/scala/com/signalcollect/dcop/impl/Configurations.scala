@@ -6,9 +6,9 @@ case class SimpleConfig[Id, Action](
   val neighborhood: Map[Id, Action],
   val domain: Set[Action],
   val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action] {
-  
   def withCentralVariableAssignment(value: Action): SimpleConfig[Id, Action] = {
-    this.copy(centralVariableAssignment = (centralVariableAssignment._1, value))
+    val test = this.copy(centralVariableAssignment = (centralVariableAssignment._1, value))
+    test
   }
 
   def computeExpectedNumberOfConflicts = {

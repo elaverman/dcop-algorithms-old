@@ -4,13 +4,13 @@ import scala.util.Random
 import com.signalcollect.dcop.modules._
 
 //TODO Constrain Config <: Configuration[AgentId, Action]?
-class ParallelRandomAdjustmentSchedule[AgentId, Action, Config](changeProbability: Double) extends AdjustmentSchedule[AgentId, Action, Config] {
+class ParallelRandomAdjustmentSchedule[AgentId, Action, Config <: Configuration[AgentId, Action]](changeProbability: Double) extends AdjustmentSchedule[AgentId, Action, Config] {
   def shouldConsiderMove(c: Config) = {
     Random.nextDouble <= changeProbability
   }
 }
 
-class FloodAdjustmentSchedule[AgentId, Action, Config] extends AdjustmentSchedule[AgentId, Action, Config] {
+class FloodAdjustmentSchedule[AgentId, Action, Config <: Configuration[AgentId, Action]] extends AdjustmentSchedule[AgentId, Action, Config] {
   def shouldConsiderMove(c: Config) = true
 }
 

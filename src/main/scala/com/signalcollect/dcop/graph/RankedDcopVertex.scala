@@ -35,11 +35,11 @@ class RankedVertexColoringEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
 class RankedDcopVertex[Id, Action, UtilityType](
   id: Id,
   val domain: Set[Action],
-  val optimizer: Optimizer[Id, Action, RankedConfiguration[Id, Action], UtilityType],
+  override val optimizer: Optimizer[Id, Action, RankedConfiguration[Id, Action], UtilityType],
   initialAction: Action,
   baseRank: Double = 0.15,
   debug: Boolean = false)
-  extends DcopVertex[Id, (Action, Double), Action, UtilityType](id, domain, optimizer, (initialAction, baseRank), debug) {
+  extends DcopVertex[Id, (Action, Double), Action, RankedConfiguration[Id, Action], UtilityType](id, domain, optimizer, (initialAction, baseRank), debug) {
 
   type Signal = (Action, Double)
 
@@ -56,7 +56,7 @@ class RankedDcopVertex[Id, Action, UtilityType](
     c
   }
 
-  override def configToState(c: RankedConfiguration[Id, Action]): (Action, Double) = {
+  def configToState(c: RankedConfiguration[Id, Action]): (Action, Double) = {
     val move = c.centralVariableValue
     (move, computeRankForMove(c))
   }

@@ -23,13 +23,13 @@ import com.signalcollect._
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl.SimpleConfig
 
-class SimpleDcopVertex[Id, ActionAndState, UtilityType](
+class SimpleDcopVertex[Id, ActionAndState, Config <: Configuration[Id, ActionAndState], UtilityType](
   id: Id,
   val domain: Set[ActionAndState],
-  val optimizer: Optimizer[Id, ActionAndState, Configuration[Id, ActionAndState], UtilityType],
+  override val optimizer: Optimizer[Id, ActionAndState, Config, UtilityType],
   initialState: ActionAndState,
   debug: Boolean = false)
-  extends DcopVertex[Id, ActionAndState, ActionAndState,  UtilityType](id, domain, optimizer, initialState, debug){
+  extends DcopVertex[Id, ActionAndState, ActionAndState, Config, UtilityType](id, domain, optimizer, initialState, debug){
   
   override def configToState(c: Configuration[Id, ActionAndState]): ActionAndState = c.centralVariableValue
   

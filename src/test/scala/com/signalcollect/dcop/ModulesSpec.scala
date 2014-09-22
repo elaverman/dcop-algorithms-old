@@ -31,20 +31,23 @@
 //import com.signalcollect.dcop.evaluation.AggregateResults
 //import com.signalcollect.dcop.evaluation.AggregateResultsFunctions
 //import com.signalcollect.dcop.evaluation._
-//import com.signalcollect.dcop.graphstructures.AdoptGraph
 //
-//class PrintersSpec extends FlatSpec with ShouldMatchers with Checkers with TestAnnouncements {
+//class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAnnouncements {
 //
-//  "countConflicts" should "correctly aggregate over a map" in {
+//  "A 2-Vertex graph" should "correctly assign 2-colors" in {
 //    check(
 //      {
-//        val aggregate: Map[Int, (Int, Double)] = Map((0 to 39) map { x => (x -> (0, 0.15)) }: _*)
-//        val aGraph = AdoptGraph(DsaAVertexColoring[Int, Int](changeProbability = 0.4), "Problem-GraphColor-40_3_2_0.4_r0", initialValue = x => 0, false)
-// //       assert(ColorPrinter[Int, Int, (Int,Double)](aGraph).countConflicts(aggregate) == 80, "Did not calculate number of conflicts correctly.")
-//        aGraph.graph.shutdown
+//        def initial0Value = 0
+//        val g = GraphBuilder.build
+//        val vertex0 = new SimpleDcopVertex(0, Set(0,1), new SimpleOptimizer[Int, Int], initial0Value, debug = true)
+//        val vertex1 = new SimpleDcopVertex(0, Set(0,1), new SimpleOptimizer[Int, Int], initial0Value, debug = true)
+//        g.addVertex(vertex0)
+//        g.addVertex(vertex1)
+//        assert(vertex0.state != vertex1.state)
+//        g.shutdown
 //        true
 //      },
-//      minSuccessful(1))
+//      minSuccessful(100))
 //  }
 //
 //}

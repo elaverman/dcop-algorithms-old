@@ -26,7 +26,6 @@ import org.scalatest.ShouldMatchers
 import org.scalatest.prop.Checkers
 import com.signalcollect._
 import com.signalcollect.dcop.graph.SimpleDcopVertex
-import com.signalcollect.dcop.modules.OptimizerModule
 import org.scalacheck.Gen
 import org.scalacheck.Arbitrary
 import com.signalcollect.dcop.evaluation.AggregateResults

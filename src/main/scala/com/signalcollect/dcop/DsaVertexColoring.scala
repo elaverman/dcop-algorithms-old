@@ -6,7 +6,7 @@ import com.signalcollect.dcop.impl._
 
 case class DsaAVertexColoring[AgentId, Action](changeProbability: Double)
   extends Optimizer[AgentId, Action, SimpleConfig[AgentId, Action], Double] {
-  val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
+  val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, SimpleConfig[AgentId, Action]](changeProbability)
   def rule = new Object 
   		with ArgmaxADecisionRule[AgentId, Action, SimpleConfig[AgentId, Action]] 
   		with NashEquilibriumConvergence[AgentId, Action, SimpleConfig[AgentId, Action]] 
@@ -36,18 +36,22 @@ case class DsaAVertexColoring[AgentId, Action](changeProbability: Double)
 ////  override def toString = "ConflictDsaAVertexColoringChangeProbability" + changeProbability
 ////}
 //
-///**
-// * Ranked, RankedConflict, NoRankConflict, DynamicRankedConflict
-// */
-//
-//
-//case class RankedDsaAVertexColoring(changeProbability: Double)
-//  extends RankedDcopAlgorithm {
-//  val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
-//  val rule = new ArgmaxADecisionRule with NashEquilibriumConvergence with RankWeightedTargetFunction
-//  override def toString = "RankedDsaAVertexColoringChangeProbability" + changeProbability
-//}
-//
+/**
+ * Ranked, RankedConflict, NoRankConflict, DynamicRankedConflict
+ */
+
+
+case class RankedDsaAVertexColoring[AgentId, Action](changeProbability: Double)
+  extends Optimizer[AgentId, Action, RankedConfig[AgentId, Action], Double] {
+  val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, RankedConfig[AgentId, Action]](changeProbability)
+  val rule = new Object 
+  		with ArgmaxADecisionRule[AgentId, Action, RankedConfig[AgentId, Action]] 
+  		with NashEquilibriumConvergence[AgentId, Action, RankedConfig[AgentId, Action]]  
+  		with RankWeightedTargetFunction[AgentId, Action, RankedConfig[AgentId, Action], Double] 
+  		with VertexColoringUtility[AgentId, Action, SimpleConfig[AgentId, Action]]
+  override def toString = "RankedDsaAVertexColoringChangeProbability" + changeProbability
+}
+
 //case class RankedDsaBVertexColoring(changeProbability: Double)
 //  extends RankedDcopAlgorithm {
 //  val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)
