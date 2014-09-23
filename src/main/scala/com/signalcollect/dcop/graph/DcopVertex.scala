@@ -10,7 +10,7 @@ abstract class DcopVertex[Id, VertexState, Action, Config <: Configuration[Id, A
   initialState: VertexState,
   debug: Boolean = false)
   extends DataGraphVertex(id, initialState)
-  with DcopConvergenceDetection[Id, VertexState, Action, UtilityType] {
+  with DcopConvergenceDetection[Id, VertexState, Action, Config, UtilityType] {
 
   def currentConfig: Config
 

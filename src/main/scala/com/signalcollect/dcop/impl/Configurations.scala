@@ -6,9 +6,8 @@ case class SimpleConfig[Id, Action](
   val neighborhood: Map[Id, Action],
   val domain: Set[Action],
   val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action] {
-  def withCentralVariableAssignment(value: Action): SimpleConfig[Id, Action] = {
-    val test = this.copy(centralVariableAssignment = (centralVariableAssignment._1, value))
-    test
+  def withCentralVariableAssignment(value: Action) = {
+    this.copy(centralVariableAssignment = (centralVariableAssignment._1, value)).asInstanceOf[this.type]
   }
 
   def computeExpectedNumberOfConflicts = {
@@ -28,8 +27,8 @@ case class RankedConfig[Id, Action](
   val domain: Set[Action],
   val centralVariableAssignment: (Id, Action)) extends RankedConfiguration[Id, Action] {
 
-  def withCentralVariableAssignment(value: Action): RankedConfig[Id, Action] = {
-    this.copy(centralVariableAssignment = (centralVariableAssignment._1, value))
+  def withCentralVariableAssignment(value: Action): this.type = {
+    this.copy(centralVariableAssignment = (centralVariableAssignment._1, value)).asInstanceOf[this.type]
   }
 
   def computeExpectedNumberOfConflicts = {

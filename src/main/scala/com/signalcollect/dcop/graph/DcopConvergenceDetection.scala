@@ -4,17 +4,17 @@ import com.signalcollect._
 import com.signalcollect.dcop.modules.Optimizer
 import com.signalcollect.dcop.modules.Configuration
 
-trait DcopConvergenceDetection[AgentId, VertexState, Action, UtilityType] {
+trait DcopConvergenceDetection[AgentId, VertexState, Action, Config <: Configuration[AgentId, Action], UtilityType] {
   this: DataGraphVertex[AgentId, VertexState] =>
 
   protected def domain: Set[Action]
-  val optimizer: Optimizer[AgentId, Action, Configuration[AgentId, Action], UtilityType]
+  val optimizer: Optimizer[AgentId, Action, Config, UtilityType]
 
-  def isConverged(c: Configuration[AgentId, Action]): Boolean = {
+  def isConverged(c: Config): Boolean = {
     optimizer.isConverged(c)
   }
 
-  def currentConfig: Configuration[AgentId, Action]
+  def currentConfig: Config
 
   override def scoreSignal: Double = {
     if (edgesModifiedSinceSignalOperation) {

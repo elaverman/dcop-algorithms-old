@@ -4,9 +4,9 @@ trait Optimizer[AgentId, Action, Config <: Configuration[AgentId, Action], Utili
   def schedule: AdjustmentSchedule[AgentId, Action, Config]
   def rule: DecisionRule[AgentId, Action, Config, UtilityType]
 
-  def shouldConsiderMove(c: Config) = schedule.shouldConsiderMove(c)
+  def shouldConsiderMove(c: Config): Boolean = schedule.shouldConsiderMove(c)
 
-  def computeMove(c: Config) = rule.computeMove(c)
+  def computeMove(c: Config): Action = rule.computeMove(c)
 
-  def isConverged(c: Config) = rule.isConverged(c)
+  def isConverged(c: Config): Boolean = rule.isConverged(c)
 }

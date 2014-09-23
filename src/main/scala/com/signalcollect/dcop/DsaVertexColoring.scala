@@ -3,17 +3,19 @@ package com.signalcollect.dcop
 import scala.util.Random
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
+import com.signalcollect.dcop.impl.ArgmaxADecisionRule
 
-case class DsaAVertexColoring[AgentId, Action](changeProbability: Double)
-  extends Optimizer[AgentId, Action, SimpleConfig[AgentId, Action], Double] {
-  val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, SimpleConfig[AgentId, Action]](changeProbability)
-  def rule = new Object 
-  		with ArgmaxADecisionRule[AgentId, Action, SimpleConfig[AgentId, Action]] 
-  		with NashEquilibriumConvergence[AgentId, Action, SimpleConfig[AgentId, Action]] 
-  		with MemoryLessTargetFunction[AgentId, Action, SimpleConfig[AgentId, Action], Double] 
-  		with VertexColoringUtility[AgentId, Action, SimpleConfig[AgentId, Action]]
-  override def toString = "DsaAVertexColoringChangeProbability" + changeProbability
-}
+//TODO rewrite
+//case class DsaAVertexColoring[AgentId, Action](changeProbability: Double)
+//  {
+//  val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, SimpleConfig[AgentId, Action]](changeProbability)
+//  def rule = new Optimizer[AgentId, Action, SimpleConfig[AgentId, Action], Double]
+//  		with ArgmaxADecisionRule[AgentId, Action, SimpleConfig[AgentId, Action]] 
+//  		with NashEquilibriumConvergence[AgentId, Action, SimpleConfig[AgentId, Action]] 
+//  		with MemoryLessTargetFunction[AgentId, Action, SimpleConfig[AgentId, Action], Double] 
+//  		with VertexColoringUtility[AgentId, Action, SimpleConfig[AgentId, Action]]
+//  override def toString = "DsaAVertexColoringChangeProbability" + changeProbability
+//}
 
 //case class DsaBVertexColoring(changeProbability: Double)
 //  extends SimpleDcopAlgorithm {
@@ -40,17 +42,25 @@ case class DsaAVertexColoring[AgentId, Action](changeProbability: Double)
  * Ranked, RankedConflict, NoRankConflict, DynamicRankedConflict
  */
 
-
-case class RankedDsaAVertexColoring[AgentId, Action](changeProbability: Double)
-  extends Optimizer[AgentId, Action, RankedConfig[AgentId, Action], Double] {
-  val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, RankedConfig[AgentId, Action]](changeProbability)
-  val rule = new Object 
-  		with ArgmaxADecisionRule[AgentId, Action, RankedConfig[AgentId, Action]] 
-  		with NashEquilibriumConvergence[AgentId, Action, RankedConfig[AgentId, Action]]  
-  		with RankWeightedTargetFunction[AgentId, Action, RankedConfig[AgentId, Action], Double] 
+class SimpleOptimizer[AgentId, Action](changeProbability: Double) extends Optimizer[AgentId, Action, SimpleConfig[AgentId, Action], Double] {
+  val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, SimpleConfig[AgentId, Action]](changeProbability)
+  val rule = new ArgmaxADecisionRule[AgentId, Action, SimpleConfig[AgentId, Action]] 
+  		with NashEquilibriumConvergence[AgentId, Action, SimpleConfig[AgentId, Action]]  
+  		with MemoryLessTargetFunction[AgentId, Action, SimpleConfig[AgentId, Action], Double] 
   		with VertexColoringUtility[AgentId, Action, SimpleConfig[AgentId, Action]]
-  override def toString = "RankedDsaAVertexColoringChangeProbability" + changeProbability
 }
+
+
+//case class RankedDsaAVertexColoring[AgentId, Action](changeProbability: Double)
+//  {
+//  val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, RankedConfig[AgentId, Action]](changeProbability)
+//  val rule = new Object with Optimizer[AgentId, Action, RankedConfig[AgentId, Action], Double]
+//  		with ArgmaxADecisionRule[AgentId, Action, RankedConfig[AgentId, Action]] 
+//  		with NashEquilibriumConvergence[AgentId, Action, RankedConfig[AgentId, Action]]  
+//  		with RankWeightedTargetFunction[AgentId, Action, RankedConfig[AgentId, Action], Double] 
+//  		with VertexColoringUtility[AgentId, Action, SimpleConfig[AgentId, Action]]
+//  override def toString = "RankedDsaAVertexColoringChangeProbability" + changeProbability
+//}
 
 //case class RankedDsaBVertexColoring(changeProbability: Double)
 //  extends RankedDcopAlgorithm {
