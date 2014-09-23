@@ -8,9 +8,3 @@ trait Configuration[AgentId, Action] extends Serializable {
   def centralVariableValue = centralVariableAssignment._2
   def computeExpectedNumberOfConflicts: Int
 }
-
-//TODO: Extend to support different rank types
-trait RankedConfiguration[AgentId, Action] extends Configuration[AgentId, Action] {
-  def ranks: Map[AgentId, Double]
-  def withCentralVariableAssignment(value: Action): this.type
-}

@@ -14,8 +14,8 @@ class FloodAdjustmentSchedule[AgentId, Action, Config <: Configuration[AgentId, 
   def shouldConsiderMove(c: Config) = true
 }
 
-class RankedBasedAdjustmentSchedule[AgentId, Action, Config <: RankedConfiguration[AgentId, Action]](relativeChangeProbability: Double) extends AdjustmentSchedule[AgentId, Action, Config] { //with UtilityFunction[AgentId, Action, Config]{
-  def shouldConsiderMove(c: Config) = {
+class RankedBasedAdjustmentSchedule[AgentId, Action](relativeChangeProbability: Double) extends AdjustmentSchedule[AgentId, Action, RankedConfig[AgentId, Action]] { //with UtilityFunction[AgentId, Action, Config]{
+  def shouldConsiderMove(c: RankedConfig[AgentId, Action]) = {
     val maxNeighbourRank = c.ranks.values.max
     val rankForCurrentConfig = c.ranks(c.centralVariableAssignment._1)
     val relativeRankRatio = rankForCurrentConfig / maxNeighbourRank
@@ -24,8 +24,8 @@ class RankedBasedAdjustmentSchedule[AgentId, Action, Config <: RankedConfigurati
   }
 }
 
-class InvertRankedBasedAdjustmentSchedule[AgentId, Action, Config <: RankedConfiguration[AgentId, Action]](relativeChangeProbability: Double) extends AdjustmentSchedule[AgentId, Action, Config] {
-  def shouldConsiderMove(c: Config) = {
+class InvertRankedBasedAdjustmentSchedule[AgentId, Action](relativeChangeProbability: Double) extends AdjustmentSchedule[AgentId, Action, RankedConfig[AgentId, Action]] {
+  def shouldConsiderMove(c: RankedConfig[AgentId, Action]) = {
     val maxNeighbourRank = c.ranks.values.max
     val rankForCurrentConfig = c.ranks(c.centralVariableAssignment._1)
     val relativeRankRatio = rankForCurrentConfig / maxNeighbourRank
@@ -34,16 +34,16 @@ class InvertRankedBasedAdjustmentSchedule[AgentId, Action, Config <: RankedConfi
   }
 }
 
-class DynamicRankedBasedAdjustmentSchedule[AgentId, Action, Config <: RankedConfiguration[AgentId, Action]](relativeChangeProbability: Double) extends AdjustmentSchedule[AgentId, Action, Config] {
+class DynamicRankedBasedAdjustmentSchedule[AgentId, Action](relativeChangeProbability: Double) extends AdjustmentSchedule[AgentId, Action, RankedConfig[AgentId, Action]] {
 
-  def isAtRankedNashEquilibriumInAdjustmentSchedule(c: Config): Boolean = {
+  def isAtRankedNashEquilibriumInAdjustmentSchedule(c: RankedConfig[AgentId, Action]): Boolean = {
     val expectedUtilities = computeRankedExpectedUtilitiesInAdjustmentSchedule(c)
     val maxUtility = expectedUtilities.values.max
     val currentUtility = expectedUtilities(c.centralVariableValue)
     maxUtility == currentUtility
   }
 
-  def computeRankedExpectedUtilitiesInAdjustmentSchedule(c: Config) = {
+  def computeRankedExpectedUtilitiesInAdjustmentSchedule(c: RankedConfig[AgentId, Action]) = {
     val configurationCandidates = for {
       assignment <- c.domain
     } yield c.withCentralVariableAssignment(assignment)
@@ -58,7 +58,7 @@ class DynamicRankedBasedAdjustmentSchedule[AgentId, Action, Config <: RankedConf
     configUtilities.toMap
   }
 
-  def shouldConsiderMove(c: Config) = {
+  def shouldConsiderMove(c: RankedConfig[AgentId, Action]) = {
     val maxNeighbourRank = c.ranks.values.max
     val rankForCurrentConfig = c.ranks(c.centralVariableAssignment._1)
     val relativeRankRatio = rankForCurrentConfig / maxNeighbourRank
@@ -71,7 +71,7 @@ class DynamicRankedBasedAdjustmentSchedule[AgentId, Action, Config <: RankedConf
   //  class DiscountedRankedBasedAdjustmentSchedule(baseChangeProbability: Double) extends AdjustmentSchedule {
   //    var stepCount: Int = 0 
   //    
-  //    def shouldConsiderMove(c: Config) = {
+  //    def shouldConsiderMove(c: RankedConfig[AgentId, Action]) = {
   //      val maxNeighbourRank = c.ranks.values.max
   //      val rankForCurrentConfig = c.ranks(c.centralVariableAssignment._1)
   //      val relativeRankRatio = rankForCurrentConfig / maxNeighbourRank // Ranks are > 0

@@ -35,15 +35,15 @@ class RankedVertexColoringEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
 class RankedDcopVertex[Id, Action, UtilityType](
   id: Id,
   val domain: Set[Action],
-  override val optimizer: Optimizer[Id, Action, RankedConfiguration[Id, Action], UtilityType],
+  override val optimizer: Optimizer[Id, Action, RankedConfig[Id, Action], UtilityType],
   initialAction: Action,
   baseRank: Double = 0.15,
   debug: Boolean = false)
-  extends DcopVertex[Id, (Action, Double), Action, RankedConfiguration[Id, Action], UtilityType](id, domain, optimizer, (initialAction, baseRank), debug) {
+  extends DcopVertex[Id, (Action, Double), Action, RankedConfig[Id, Action], UtilityType](id, domain, optimizer, (initialAction, baseRank), debug) {
 
   type Signal = (Action, Double)
 
-  def currentConfig: RankedConfiguration[Id, Action] = {
+  def currentConfig: RankedConfig[Id, Action] = {
     val neighborhoodSignalMap = (mostRecentSignalMap.toMap).
       asInstanceOf[Map[Id, (Action, Double)]]
     val neighborhoodAssignments = neighborhoodSignalMap.
@@ -56,12 +56,12 @@ class RankedDcopVertex[Id, Action, UtilityType](
     c
   }
 
-  def configToState(c: RankedConfiguration[Id, Action]): (Action, Double) = {
+  def configToState(c: RankedConfig[Id, Action]): (Action, Double) = {
     val move = c.centralVariableValue
     (move, computeRankForMove(c))
   }
 
-  def computeRankForMove(c: RankedConfiguration[Id, Action]): Double = {
+  def computeRankForMove(c: RankedConfig[Id, Action]): Double = {
     val allies = c.neighborhood.filter(_._2 != c.centralVariableValue)
     val allyRankSum = allies.keys.map(c.ranks).sum
     val dampingFactor = 1.0 - baseRank

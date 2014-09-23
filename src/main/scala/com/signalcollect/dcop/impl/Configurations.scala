@@ -6,7 +6,7 @@ case class SimpleConfig[Id, Action](
   val neighborhood: Map[Id, Action],
   val domain: Set[Action],
   val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action] {
-  def withCentralVariableAssignment(value: Action) = {
+  final def withCentralVariableAssignment(value: Action) = {
     this.copy(centralVariableAssignment = (centralVariableAssignment._1, value)).asInstanceOf[this.type]
   }
 
@@ -21,13 +21,15 @@ case class SimpleConfig[Id, Action](
     s"      centralVariableAssignment = $centralVariableAssignment.toString\n"
 }
 
+
+
 case class RankedConfig[Id, Action](
   val neighborhood: Map[Id, Action],
   val ranks: Map[Id, Double],
   val domain: Set[Action],
-  val centralVariableAssignment: (Id, Action)) extends RankedConfiguration[Id, Action] {
+  val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action] {
 
-  def withCentralVariableAssignment(value: Action): this.type = {
+  final def withCentralVariableAssignment(value: Action): this.type = {
     this.copy(centralVariableAssignment = (centralVariableAssignment._1, value)).asInstanceOf[this.type]
   }
 
