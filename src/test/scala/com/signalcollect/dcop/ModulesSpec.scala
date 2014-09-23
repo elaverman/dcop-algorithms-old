@@ -54,7 +54,7 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
       minSuccessful(1))
   }
   
-    "A 2-Vertex graph" should "correctly assign 2-colors" in {
+    "A 2-Vertex Ranked-graph" should "correctly assign 2-colors" in {
     check(
       {
         def initial0Value = 0
