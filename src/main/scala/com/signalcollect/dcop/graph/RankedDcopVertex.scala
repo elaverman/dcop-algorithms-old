@@ -32,7 +32,7 @@ class RankedVertexColoringEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
   }
 }
 
-/** A Dcop vertex. Description
+/** A Ranked Dcop vertex. Its state is composed by its action and its rank.ß
   *
   * @param id The Vertex Id
   * @param domain The variable Domain

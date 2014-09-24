@@ -10,7 +10,6 @@ import com.signalcollect.dcop.modules._
   * @param optimizer The optimizer used
   * @param initialState Initial state of the vertex
   * @param debug Boolean idicating if there should be any printlines
-  * @param convergeByEntireState Boolean indicating if the algorithm stops when the entire state or only the action stabilizes.
   */
 abstract class DcopVertex[Id, VertexState, Action, Config <: Configuration[Id, Action], UtilityType](
   id: Id,
