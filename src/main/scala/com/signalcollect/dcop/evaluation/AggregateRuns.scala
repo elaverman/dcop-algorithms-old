@@ -6,7 +6,7 @@
 //import com.signalcollect._
 //import java.util.Date
 //import com.signalcollect.dcop._
-//import com.signalcollect.dcop.impl.RankedConfiguration
+//import com.signalcollect.dcop.impl.RankedConfig
 //import java.io.FileWriter
 //import java.io.File
 //
@@ -30,7 +30,7 @@
 //
 //    optimizer match {
 //
-//      case rankedOptimizer: OptimizerModule[Int, Int] with RankedConfiguration[Int, Int] =>
+//      case rankedOptimizer: OptimizerModule[Int, Int] with RankedConfig[Int, Int] =>
 //        println("Ranked Optimizer")
 //        computeRanks = true
 //

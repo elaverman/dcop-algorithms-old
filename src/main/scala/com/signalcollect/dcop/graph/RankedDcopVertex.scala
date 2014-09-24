@@ -23,8 +23,8 @@ import com.signalcollect._
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
 
-class RankedVertexColoringEdge(targetId: Int) extends DefaultEdge(targetId) {
-  type Source = RankedDcopVertex[_, _]
+class RankedVertexColoringEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
+  type Source = RankedDcopVertex[_, _, _]
 
   def signal = {
     val sourceState = source.state
@@ -32,29 +32,58 @@ class RankedVertexColoringEdge(targetId: Int) extends DefaultEdge(targetId) {
   }
 }
 
-class RankedDcopVertex[Id, Action](
+/** A Ranked Dcop vertex. Its state is composed by its action and its rank.ß
+  *
+  * @param id The Vertex Id
+  * @param domain The variable Domain
+  * @param optimizer The optimizer used
+  * @param initialState Initial state of the vertex
+  * @param debug Boolean idicating if there should be any printlines
+  * @param convergeByEntireState Boolean indicating if the algorithm stops when the entire state or only the action stabilizes.
+  */
+class RankedDcopVertex[Id, Action, UtilityType](
   id: Id,
   val domain: Set[Action],
-  override val optimizer: OptimizerModule[Id, Action] with RankedConfiguration[Id, Action],
+  override val optimizer: Optimizer[Id, Action, RankedConfig[Id, Action], UtilityType],
   initialAction: Action,
   baseRank: Double = 0.15,
-  debug: Boolean = false)
-  extends DcopVertex[Id, (Action, Double), Action](id, domain, optimizer, (initialAction, baseRank), debug)
-  with RankedConfigCreation[Id, Action] {
+  debug: Boolean = false,
+  eps: Double = 0.01,
+  convergeByEntireState: Boolean = true)
+  extends DcopVertex[Id, (Action, Double), Action, RankedConfig[Id, Action], UtilityType](id, domain, optimizer, (initialAction, baseRank), debug) {
 
-  def configToState(c: optimizer.Config): (Action, Double) = {
+  type Signal = (Action, Double)
+
+  def currentConfig: RankedConfig[Id, Action] = {
+    val neighborhoodSignalMap = (mostRecentSignalMap.toMap).
+      asInstanceOf[Map[Id, (Action, Double)]]
+    val neighborhoodAssignments = neighborhoodSignalMap.
+      map(tuple => (tuple._1, tuple._2._1)).toMap
+    val neighborhoodRanks: Map[Id, Double] = neighborhoodSignalMap.
+      map(tuple => (tuple._1, tuple._2._2)).toMap
+    val centralVariableAssignment = (id, state._1)
+    val ranks = neighborhoodRanks + ((id, state._2))
+    val c = RankedConfig(neighborhoodAssignments, ranks, domain, centralVariableAssignment)
+    c
+  }
+
+  def configToState(c: RankedConfig[Id, Action]): (Action, Double) = {
     val move = c.centralVariableValue
     (move, computeRankForMove(c))
   }
 
-  def computeRankForMove(c: optimizer.Config): Double = {
+  def computeRankForMove(c: RankedConfig[Id, Action]): Double = {
     val allies = c.neighborhood.filter(_._2 != c.centralVariableValue)
     val allyRankSum = allies.keys.map(c.ranks).sum
     val dampingFactor = 1.0 - baseRank
     val newPageRank = baseRank + dampingFactor * allyRankSum
     newPageRank
   }
-
+  
+  override def isStateUnchanged(oldState: (Action, Double), newState: (Action, Double)): Boolean = {
+    (oldState._1 == newState._1) && (math.abs(oldState._2 - newState._2) < eps)
+  }
+  
   override def collect = {
     val c = currentConfig
     if (optimizer.shouldConsiderMove(c)) {
@@ -66,48 +95,15 @@ class RankedDcopVertex[Id, Action](
       }
       newState
     } else {
+      val newState = if (convergeByEntireState) configToState(c) else state
       if (debug) {
         if (isConverged(c)) {
-          println(s"Vertex $id has converged and stays at move $state.")
+          println(s"Vertex $id has converged and stays at move $newState.")
         } else {
-          println(s"Vertex $id still has conflicts but stays at move $state anyway.")
+          println(s"Vertex $id still, NOT converged, stays at move, and has $newState.")
         }
       }
-      configToState(c)
-    }
-  }
-
-//  override def scoreSignal: Double = {
-//    if (edgesModifiedSinceSignalOperation) {
-//      1
-//    } else {
-//      lastSignalState match {
-//        case Some(oldState) =>
-//          if (oldState._1 == state._1 && isConverged(currentConfig)) {
-//            0
-//          } else {
-//            1
-//          }
-//        case noStateOrStateChanged => 
-//          1
-//      }
-//    }
-//  }
-  
-    override def scoreSignal: Double = {
-    if (edgesModifiedSinceSignalOperation) {
-      1
-    } else {
-      lastSignalState match {
-        case Some(oldState) =>
-          if (oldState == state && isConverged(currentConfig)) {
-            0
-          } else {
-            1
-          }
-        case noStateOrStateChanged => 
-          1
-      }
+      newState
     }
   }
 

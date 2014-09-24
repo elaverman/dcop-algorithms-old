@@ -1,29 +1,25 @@
 package com.signalcollect.dcop.evaluation
 
-import com.signalcollect.dcop.DcopAlgorithm
 import com.signalcollect.Graph
-import com.signalcollect.dcop.impl.RankedConfiguration
-import com.signalcollect.dcop.modules.OptimizerModule
 import com.signalcollect.GraphBuilder
 import com.signalcollect.StateForwarderEdge
-import com.signalcollect.dcop.graph.RankedVertexColoringEdge
-import com.signalcollect.dcop.graph.SimpleDcopVertex
-import com.signalcollect.dcop.graph.RankedDcopVertex
+import com.signalcollect.dcop.graph._
+
 import scala.io.Source
 import scala.annotation.tailrec
 
-abstract class EvaluationGraphParameters {
-  def initialValue: (Set[Int]) => Int
+abstract class EvaluationGraphParameters[Action] {
+  def initialValue: (Set[Action]) => Action
 }
 
-case class GridParameters(val domain: Set[Int], initValue: (Set[Int]) => Int, val debug: Boolean, val width: Int) extends EvaluationGraphParameters {
+case class GridParameters[Action](val domain: Set[Action], initValue: (Set[Action]) => Action, val debug: Boolean, val width: Int) extends EvaluationGraphParameters[Action] {
   def initialValue = initValue
 }
 
-case class AdoptGraphParameters(adoptFileName: String, initValue: (Set[Int]) => Int, val debug: Boolean) extends EvaluationGraphParameters {
+case class AdoptGraphParameters[Action](adoptFileName: String, initValue: (Set[Action]) => Action, val debug: Boolean) extends EvaluationGraphParameters[Action] {
   def initialValue = initValue
 }
 
-case class DimacsGraphParameters(dimacsFileName: String, val domain: Set[Int], initValue: (Set[Int]) => Int, val debug: Boolean) extends EvaluationGraphParameters {
+case class DimacsGraphParameters[Action](dimacsFileName: String, val domain: Set[Action], initValue: (Set[Action]) => Action, val debug: Boolean) extends EvaluationGraphParameters[Action] {
   def initialValue = initValue
 }

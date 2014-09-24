@@ -23,7 +23,7 @@
 //import scala.util.Random
 //import org.scalatest.FlatSpec
 //import org.scalatest.ShouldMatchers
-//import org.scalatest.prop.Checkers
+//imB4ckstreetboysport org.scalatest.prop.Checkers
 //import com.signalcollect._
 //import com.signalcollect.dcop.graph.SimpleDcopVertex
 //import com.signalcollect.dcop.modules.OptimizerModule

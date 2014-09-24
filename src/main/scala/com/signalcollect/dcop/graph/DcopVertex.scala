@@ -3,18 +3,26 @@ package com.signalcollect.dcop.graph
 import com.signalcollect._
 import com.signalcollect.dcop.modules._
 
-abstract class DcopVertex[Id, VertexState, Action](
+/** A Dcop vertex. Description
+  *
+  * @param id The Vertex Id
+  * @param domain The variable Domain
+  * @param optimizer The optimizer used
+  * @param initialState Initial state of the vertex
+  * @param debug Boolean idicating if there should be any printlines
+  */
+abstract class DcopVertex[Id, VertexState, Action, Config <: Configuration[Id, Action], UtilityType](
   id: Id,
   domain: Set[Action],
-  val optimizer: OptimizerModule[Id, Action],
+  val optimizer: Optimizer[Id, Action, Config, UtilityType],
   initialState: VertexState,
   debug: Boolean = false)
   extends DataGraphVertex(id, initialState)
-  with DcopConvergenceDetection[Id, VertexState, Action] {
+  with DcopConvergenceDetection[Id, VertexState, Action, Config, UtilityType] {
 
-  def currentConfig: optimizer.Config
+  def currentConfig: Config
 
-  def configToState(m: optimizer.Config): VertexState
+  def configToState(m: Config): VertexState
 
   def collect = {
     val c = currentConfig
@@ -30,8 +38,9 @@ abstract class DcopVertex[Id, VertexState, Action](
       if (debug) {
         if (isConverged(c)) {
           println(s"Vertex $id has converged and stays at move $state.")
+        } else {
+          println(s"Vertex $id still, NOT converged, stays at move, and has $state.")
         }
-        println(s"Vertex $id still has conflicts but stays at move $state anyway.")
       }
       state
     }
