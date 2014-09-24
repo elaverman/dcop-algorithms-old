@@ -16,17 +16,22 @@ trait DcopConvergenceDetection[AgentId, VertexState, Action, Config <: Configura
 
   def currentConfig: Config
 
+  def isStateUnchanged(oldState: VertexState, newState: VertexState): Boolean = {
+    oldState == newState
+  }
+
   override def scoreSignal: Double = {
     if (edgesModifiedSinceSignalOperation) {
       1
     } else {
       lastSignalState match {
-        case Some(oldState) =>
-          if (oldState == state && isConverged(currentConfig)) {
+        case Some(oldState) => {
+          if (isStateUnchanged(oldState, state) && isConverged(currentConfig)) {
             0
           } else {
             1
           }
+        }
         case noStateOrStateChanged => 1
       }
     }
