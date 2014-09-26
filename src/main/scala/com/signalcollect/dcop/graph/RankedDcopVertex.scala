@@ -32,15 +32,16 @@ class RankedVertexColoringEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
   }
 }
 
-/** A Ranked Dcop vertex. Its state is composed by its action and its rank.ß
-  *
-  * @param id The Vertex Id
-  * @param domain The variable Domain
-  * @param optimizer The optimizer used
-  * @param initialState Initial state of the vertex
-  * @param debug Boolean idicating if there should be any printlines
-  * @param convergeByEntireState Boolean indicating if the algorithm stops when the entire state or only the action stabilizes.
-  */
+/**
+ * A Ranked Dcop vertex. Its state is composed by its action and its rank.ß
+ *
+ * @param id The Vertex Id
+ * @param domain The variable Domain
+ * @param optimizer The optimizer used
+ * @param initialState Initial state of the vertex
+ * @param debug Boolean idicating if there should be any printlines
+ * @param convergeByEntireState Boolean indicating if the algorithm stops when the entire state or only the action stabilizes.
+ */
 class RankedDcopVertex[Id, Action, UtilityType](
   id: Id,
   val domain: Set[Action],
@@ -79,28 +80,22 @@ class RankedDcopVertex[Id, Action, UtilityType](
     val newPageRank = baseRank + dampingFactor * allyRankSum
     newPageRank
   }
-  
+
   override def isStateUnchanged(oldState: (Action, Double), newState: (Action, Double)): Boolean = {
     (oldState._1 == newState._1) && (math.abs(oldState._2 - newState._2) < eps)
   }
-  
+
   override def collect = {
     val c = currentConfig
     if (optimizer.shouldConsiderMove(c)) {
-      val move = optimizer.computeMove(c)
-      val newConfig = c.withCentralVariableAssignment(move)
-      val newState = configToState(newConfig)
-      if (debug) {
-        println(s"Vertex $id has changed its state from $state to $newState.")
-      }
-      newState
+      changeState(c)
     } else {
       val newState = if (convergeByEntireState) configToState(c) else state
       if (debug) {
         if (isConverged(c)) {
           println(s"Vertex $id has converged and stays at move $newState.")
         } else {
-          println(s"Vertex $id still, NOT converged, stays at move, and has $newState.")
+          println(s"Vertex $id still NOT converged, stays at move, and has $newState.")
         }
       }
       newState

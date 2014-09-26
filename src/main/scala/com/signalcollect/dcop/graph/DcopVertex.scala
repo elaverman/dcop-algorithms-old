@@ -24,22 +24,26 @@ abstract class DcopVertex[Id, VertexState, Action, Config <: Configuration[Id, A
 
   def configToState(m: Config): VertexState
 
-  def collect = {
-    val c = currentConfig
-    if (optimizer.shouldConsiderMove(c)) {
-      val move = optimizer.computeMove(c)
+  def changeState(c: Config): VertexState = {
+    val move = optimizer.computeMove(c)
       val newConfig = c.withCentralVariableAssignment(move)
       val newState = configToState(newConfig)
       if (debug) {
         println(s"Vertex $id has changed its state from $state to $newState.")
       }
       newState
+  }
+  
+  def collect = {
+    val c = currentConfig
+    if (optimizer.shouldConsiderMove(c)) {
+      changeState(c)
     } else {
       if (debug) {
         if (isConverged(c)) {
           println(s"Vertex $id has converged and stays at move $state.")
         } else {
-          println(s"Vertex $id still, NOT converged, stays at move, and has $state.")
+          println(s"Vertex $id still NOT converged, stays at move, and has $state.")
         }
       }
       state
