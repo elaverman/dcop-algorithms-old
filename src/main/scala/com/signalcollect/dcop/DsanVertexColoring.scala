@@ -1,9 +1,22 @@
-//package com.signalcollect.dcop
-//
-//import scala.util.Random
-//import com.signalcollect.dcop.modules._
-//import com.signalcollect.dcop.impl._
-//
+package com.signalcollect.dcop
+
+import scala.util.Random
+import com.signalcollect.dcop.modules._
+import com.signalcollect.dcop.impl._
+import com.signalcollect.dcop.impl.ArgmaxADecisionRule
+
+class DsanVertexColoring[AgentId, Action](changeProbability: Double, constant: Double, kval: Double) extends Optimizer[AgentId, Action, SimpleConfig[AgentId, Action], Double] {
+  val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, SimpleConfig[AgentId, Action]](changeProbability)
+  val rule = new SimulatedAnnealingDecisionRule[AgentId, Action, SimpleConfig[AgentId, Action]] 
+    with NashEquilibriumConvergence[AgentId, Action, SimpleConfig[AgentId, Action]] 
+    with MemoryLessTargetFunction[AgentId, Action, SimpleConfig[AgentId, Action], Double] 
+    with VertexColoringUtility[AgentId, Action, SimpleConfig[AgentId, Action]] { 
+      def const = constant 
+      def k = kval 
+      }
+  override def toString = "DsaAVertexColoringChangeProbability" + changeProbability + "const" + constant + "k" + kval
+}
+
 //case class DsanVertexColoring(changeProbability: Double, const: Double, k: Double)
 //  extends SimpleDcopAlgorithm {
 //  val schedule = new ParallelRandomAdjustmentSchedule(changeProbability)

@@ -8,3 +8,4 @@ trait Configuration[AgentId, Action] extends Serializable {
   def centralVariableValue = centralVariableAssignment._2
   def computeExpectedNumberOfConflicts: Int
 }
+
