@@ -3,5 +3,5 @@ import Keys._
 
 object OptimizersBuild extends Build {
    val scCore = ProjectRef(file("../signal-collect"), id = "signal-collect")
-   val scOptimizers = Project(id = "optimizers", base = file(".")) dependsOn(scCore)
+   val scDcopAlgs = Project(id = "dcop-algorithms", base = file(".")) dependsOn(scCore)
 }

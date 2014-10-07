@@ -2,7 +2,7 @@ import AssemblyKeys._
 assemblySettings
 
 /** Project **/
-name := "optimizers"
+name := "dcop-algorithms"
 
 version := "1.0-SNAPSHOT"
 
