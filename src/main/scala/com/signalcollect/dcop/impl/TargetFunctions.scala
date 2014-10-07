@@ -5,11 +5,14 @@ import scala.util.Random
 
 trait MemoryLessTargetFunction[AgentId, Action, Config <: Configuration[AgentId, Action], UtilityType] extends TargetFunction[AgentId, Action, Config, UtilityType] with UtilityFunction[AgentId, Action, Config, UtilityType] {
 
-  def computeExpectedUtilities(c: Config) = {
-    val configurationCandidates = for {
+  def computeCandidates(c: Config) = {
+    for {
       assignment <- c.domain
     } yield c.withCentralVariableAssignment(assignment)
-    val configUtilities = configurationCandidates.map(c => (c.centralVariableValue, computeUtility(c))).toMap
+  }
+  
+  def computeExpectedUtilities(c: Config) = {
+    val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
     configUtilities
   }
 }
@@ -18,16 +21,23 @@ trait MemoryLessTargetFunction[AgentId, Action, Config <: Configuration[AgentId,
  * MemoryTargetFunctions
  */
 
-trait DiscountedExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends TargetFunction[AgentId, Action, Config, Double] with UtilityFunction[AgentId, Action, Config, Double] {
+trait DiscountedExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends MemoryLessTargetFunction[AgentId, Action, Config, Double] {
 
   def rho: Double
   
-  def computeExpectedUtilities(c: Config) = {
-    val configurationCandidates = for {
-      assignment <- c.domain
-    } yield c.withCentralVariableAssignment(assignment)
-    val configUtilities = configurationCandidates.map(c => 
+  override def computeExpectedUtilities(c: Config) = {
+    val configUtilities = computeCandidates(c).map(c => 
       (c.centralVariableValue, if (c.numberOfCollects > 1) rho*computeUtility(c)+(1-rho)*c.memory(c.centralVariableValue) else computeUtility(c))).toMap
+    configUtilities
+  }
+}
+
+
+trait AverageExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends MemoryLessTargetFunction[AgentId, Action, Config, Double] {
+  
+  override def computeExpectedUtilities(c: Config) = {
+    val configUtilities = computeCandidates(c).map(c => 
+      (c.centralVariableValue, (computeUtility(c)+(c.numberOfCollects - 1)*c.memory(c.centralVariableValue))/c.numberOfCollects)).toMap
     configUtilities
   }
 }
@@ -38,13 +48,10 @@ trait DiscountedExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleM
  */
 
 //TODO: Push the Utility calculation into UtilityFunctions.scala and replace the Double in the TargetFunction with the UtilityType.
-trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends TargetFunction[AgentId, Action, Config, Double] with UtilityFunction[AgentId, Action, Config, UtilityType] {
+trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends MemoryLessTargetFunction[AgentId, Action, Config, Double] {
 
-  def computeExpectedUtilities(c: Config) = {
-    val configurationCandidates: Set[Config] = for {
-      assignment <- c.domain
-    } yield c.withCentralVariableAssignment(assignment)
-    val configUtilities = configurationCandidates.map(configuration => {
+  override def computeExpectedUtilities(c: Config) = {
+    val configUtilities = computeCandidates(c).map(configuration => {
       val (allies, opponents) = configuration.neighborhood.partition(_._2 != configuration.centralVariableValue)
       val allyRanks = allies.keys.map(c.ranks(_)).sum
       val opponentRanks = opponents.keys.map(c.ranks(_)).sum
@@ -77,10 +84,7 @@ trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId
       if (!isAtRankedNashEquilibrium(c)) {
         computeRankedExpectedUtilities(c)
       } else {
-        val configurationCandidates: Set[Config] = for {
-          assignment <- c.domain
-        } yield c.withCentralVariableAssignment(assignment)
-        val configUtilities = configurationCandidates.map(c => (c.centralVariableValue, computeUtility(c))).toMap
+        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
         configUtilities
       }
     }
@@ -105,10 +109,7 @@ trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId
       if (!switched) {
         computeRankedExpectedUtilities(c)
       } else {
-        val configurationCandidates: Set[Config] = for {
-          assignment <- c.domain
-        } yield c.withCentralVariableAssignment(assignment)
-        val configUtilities = configurationCandidates.map(c => (c.centralVariableValue, computeUtility(c))).toMap
+        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
         configUtilities
       }
     }
@@ -133,10 +134,7 @@ trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId
       if (!switched) {
         computeRankedExpectedUtilities(c)
       } else {
-        val configurationCandidates: Set[Config] = for {
-          assignment <- c.domain
-        } yield c.withCentralVariableAssignment(assignment)
-        val configUtilities = configurationCandidates.map(c => (c.centralVariableValue, computeUtility(c))).toMap
+        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
         configUtilities
       }
     }
@@ -161,10 +159,7 @@ trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId
       if (!switched) {
         computeRankedExpectedUtilities(c)
       } else {
-        val configurationCandidates: Set[Config] = for {
-          assignment <- c.domain
-        } yield c.withCentralVariableAssignment(assignment)
-        val configUtilities = configurationCandidates.map(c => (c.centralVariableValue, computeUtility(c))).toMap
+        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
         configUtilities
       }
     }
@@ -189,10 +184,7 @@ trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId
       if (!switched) {
         computeRankedExpectedUtilities(c)
       } else {
-        val configurationCandidates: Set[Config] = for {
-          assignment <- c.domain
-        } yield c.withCentralVariableAssignment(assignment)
-        val configUtilities = configurationCandidates.map(c => (c.centralVariableValue, computeUtility(c))).toMap
+        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
         configUtilities
       }
     }
@@ -217,10 +209,7 @@ trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId
       if (!switched) {
         computeRankedExpectedUtilities(c)
       } else {
-        val configurationCandidates: Set[Config] = for {
-          assignment <- c.domain
-        } yield c.withCentralVariableAssignment(assignment)
-        val configUtilities = configurationCandidates.map(c => (c.centralVariableValue, computeUtility(c))).toMap
+        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
         configUtilities
       }
     }
@@ -245,10 +234,7 @@ trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId
       if (!switched) {
         computeRankedExpectedUtilities(c)
       } else {
-        val configurationCandidates: Set[Config] = for {
-          assignment <- c.domain
-        } yield c.withCentralVariableAssignment(assignment)
-        val configUtilities = configurationCandidates.map(c => (c.centralVariableValue, computeUtility(c))).toMap
+        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
         configUtilities
       }
     }
