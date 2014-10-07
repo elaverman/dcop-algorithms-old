@@ -15,6 +15,25 @@ trait MemoryLessTargetFunction[AgentId, Action, Config <: Configuration[AgentId,
 }
 
 /**
+ * MemoryTargetFunctions
+ */
+
+trait DiscountedExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends TargetFunction[AgentId, Action, Config, Double] with UtilityFunction[AgentId, Action, Config, Double] {
+
+  def rho: Double
+  
+  def computeExpectedUtilities(c: Config) = {
+    val configurationCandidates = for {
+      assignment <- c.domain
+    } yield c.withCentralVariableAssignment(assignment)
+    val configUtilities = configurationCandidates.map(c => 
+      (c.centralVariableValue, if (c.numberOfCollects > 1) rho*computeUtility(c)+(1-rho)*c.memory(c.centralVariableValue) else computeUtility(c))).toMap
+    configUtilities
+  }
+}
+
+
+/**
  * RankedTargetFunctions
  */
 

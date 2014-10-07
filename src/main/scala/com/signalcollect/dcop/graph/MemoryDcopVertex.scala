@@ -23,17 +23,17 @@ import com.signalcollect._
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
 
-class RankedVertexColoringEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
-  type Source = RankedDcopVertex[_, _, _]
+class MemoryVertexColoringEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
+  type Source = MemoryDcopVertex[_, _]
 
   def signal = {
     val sourceState = source.state
-    (sourceState._1, sourceState._2 / source.edgeCount)
+    sourceState._1
   }
 }
 
 /**
- * A Ranked Dcop vertex. Its state is composed by its action and its rank.ß
+ * A Memory Dcop vertex.
  *
  * @param id The Vertex Id
  * @param domain The variable Domain
@@ -42,54 +42,43 @@ class RankedVertexColoringEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
  * @param debug Boolean idicating if there should be any printlines
  * @param convergeByEntireState Boolean indicating if the algorithm stops when the entire state or only the action stabilizes.
  */
-class RankedDcopVertex[Id, Action, UtilityType](
+class MemoryDcopVertex[Id, Action](
   id: Id,
   val domain: Set[Action],
-  override val optimizer: Optimizer[Id, Action, RankedConfig[Id, Action], UtilityType],
+  override val optimizer: Optimizer[Id, Action, SimpleMemoryConfig[Id, Action, Double], Double],
   initialAction: Action,
-  baseRank: Double = 0.15,
   debug: Boolean = false,
   eps: Double = 0.01,
   convergeByEntireState: Boolean = true)
-  extends DcopVertex[Id, (Action, Double), Action, RankedConfig[Id, Action], UtilityType](id, domain, optimizer, (initialAction, baseRank), debug) {
+  extends DcopVertex[Id, (Action, Map[Action, Double], Long), Action, SimpleMemoryConfig[Id, Action, Double], Double](
+    id, domain, optimizer, (initialAction, Map.empty[Action, Double].withDefaultValue(0), 0), debug) {
 
-  type Signal = (Action, Double)
+  type Signal = Action //(Action, Map[Action, Double], Long)
 
-  def currentConfig: RankedConfig[Id, Action] = {
-    val neighborhoodSignalMap = (mostRecentSignalMap.toMap).
-      asInstanceOf[Map[Id, (Action, Double)]]
-    val neighborhoodAssignments = neighborhoodSignalMap.
-      map(tuple => (tuple._1, tuple._2._1)).toMap
-    val neighborhoodRanks: Map[Id, Double] = neighborhoodSignalMap.
-      map(tuple => (tuple._1, tuple._2._2)).toMap
+  override def currentConfig: SimpleMemoryConfig[Id, Action, Double] = {
+    val neighborhood: Map[Id, Action] = mostRecentSignalMap.toMap.asInstanceOf[Map[Id, Action]]
     val centralVariableAssignment = (id, state._1)
-    val ranks = neighborhoodRanks + ((id, state._2))
-    val c = RankedConfig(neighborhoodAssignments, ranks, domain, centralVariableAssignment)
+    val oldMemory = state._2
+    val numberOfCollects = state._3
+    val oldC = SimpleMemoryConfig(neighborhood, oldMemory, numberOfCollects, domain, centralVariableAssignment)
+    val memory = optimizer.rule.computeExpectedUtilities(oldC)
+    val c = SimpleMemoryConfig(neighborhood, memory, numberOfCollects+1, domain, centralVariableAssignment) //TODO???
     c
   }
 
-  def configToState(c: RankedConfig[Id, Action]): (Action, Double) = {
-    val move = c.centralVariableValue
-    (move, computeRankForMove(c))
+  def configToState(c: SimpleMemoryConfig[Id, Action, Double]) = {
+    (c.centralVariableValue, c.memory, c.numberOfCollects)
   }
-
-  def computeRankForMove(c: RankedConfig[Id, Action]): Double = {
-    val allies = c.neighborhood.filter(_._2 != c.centralVariableValue)
-    val allyRankSum = allies.keys.map(c.ranks).sum
-    val dampingFactor = 1.0 - baseRank
-    val newPageRank = baseRank + dampingFactor * allyRankSum
-    newPageRank
-  }
-
-  override def isStateUnchanged(oldState: (Action, Double), newState: (Action, Double)): Boolean = {
-    (oldState._1 == newState._1) && (math.abs(oldState._2 - newState._2) < eps)
+  
+    override def isStateUnchanged(oldState: (Action, Map[Action, Double], Long), newState: (Action, Map[Action, Double], Long)): Boolean = {
+    (oldState._1 == newState._1) && (math.abs(oldState._2(oldState._1) - newState._2(newState._1)) < eps)
   }
 
   override def collect = {
     val c = currentConfig
     if (optimizer.shouldConsiderMove(c)) {
       changeState(c)
-    } else { 
+    } else {
       val newState = if (convergeByEntireState) configToState(c) else state
       if (debug) {
         if (isConverged(c)) {
