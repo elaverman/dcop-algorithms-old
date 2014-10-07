@@ -16,3 +16,11 @@ class FadingMemoryJsfpiVertexColoring[AgentId, Action](changeProbability: Double
   override def toString = "JsfpiVertexColoringChangeProbability" + changeProbability + "rhoValue" + rhoValue
 }
 
+class JsfpiVertexColoring[AgentId, Action](changeProbability: Double, rhoValue: Double) extends Optimizer[AgentId, Action, SimpleMemoryConfig[AgentId, Action, Double], Double] {
+  val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, SimpleMemoryConfig[AgentId, Action, Double]](changeProbability)
+  val rule = new ArgmaxADecisionRule[AgentId, Action, SimpleMemoryConfig[AgentId, Action, Double]] 
+    with NashEquilibriumConvergence[AgentId, Action, SimpleMemoryConfig[AgentId, Action, Double]] 
+    with AverageExpectedUtilityTargetFunction[AgentId, Action, SimpleMemoryConfig[AgentId, Action, Double]] 
+    with VertexColoringUtility[AgentId, Action, SimpleMemoryConfig[AgentId, Action, Double]] 
+  override def toString = "JsfpiVertexColoringChangeProbability" + changeProbability + "rhoValue" + rhoValue
+}
