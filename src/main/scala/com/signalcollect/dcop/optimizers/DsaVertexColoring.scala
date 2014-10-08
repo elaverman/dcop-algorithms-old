@@ -1,6 +1,5 @@
-package com.signalcollect.dcop
+package com.signalcollect.dcop.optimizers
 
-import scala.util.Random
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
 import com.signalcollect.dcop.impl.ArgmaxADecisionRule
