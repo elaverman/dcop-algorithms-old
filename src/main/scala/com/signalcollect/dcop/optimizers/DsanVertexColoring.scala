@@ -1,9 +1,7 @@
-package com.signalcollect.dcop
+package com.signalcollect.dcop.optimizers
 
-import scala.util.Random
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
-import com.signalcollect.dcop.impl.ArgmaxADecisionRule
 
 class DsanVertexColoring[AgentId, Action](changeProbability: Double, constant: Double, kval: Double) extends Optimizer[AgentId, Action, SimpleConfig[AgentId, Action], Double] {
   val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, SimpleConfig[AgentId, Action]](changeProbability)

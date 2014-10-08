@@ -28,7 +28,7 @@ import com.signalcollect._
 import com.signalcollect.dcop.graph._
 import org.scalacheck.Gen
 import org.scalacheck.Arbitrary
-import com.signalcollect.dcop.evaluation._
+import com.signalcollect.dcop.optimizers._
 
 class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAnnouncements {
 
