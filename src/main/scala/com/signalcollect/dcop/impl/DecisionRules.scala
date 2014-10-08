@@ -149,4 +149,26 @@ trait SimulatedAnnealingDecisionRule[AgentId, Action, Config <: Configuration[Ag
   }
 }
 
+trait LinearProbabilisticDecisionRule[AgentId, Action, Config <: Configuration[AgentId, Action]] extends ArgmaxADecisionRule[AgentId, Action, Config] {
 
+  def eta: Double
+
+  /*
+   * In the case where we have a flat distribution and normFactor would be 0, the function should return the first action. 
+   */
+  override def computeMove(c: Config): Action = {
+    val expectedUtilities: Map[Action, Double] = computeExpectedUtilities(c)
+    val normFactor = expectedUtilities.values.sum
+    val selectionProb = Random.nextDouble
+
+    var partialSum: Double = 0.0
+    for (action <- expectedUtilities.keys) {
+      partialSum += expectedUtilities(action)
+      if (selectionProb * normFactor <= partialSum) {
+        return action
+      }
+    }
+    throw new Exception("This code should be unreachable.")
+  }
+
+}

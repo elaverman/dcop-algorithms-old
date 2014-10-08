@@ -43,6 +43,21 @@ trait AverageExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemo
 }
 
 
+trait DiscountedAverageRegretsTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends MemoryLessTargetFunction[AgentId, Action, Config, Double] {
+  
+  def rho: Double
+
+  /*
+   * All regrets are minimum 0.
+   */
+  override def computeExpectedUtilities(conf: Config) = {
+    val configUtilities = computeCandidates(conf).map(c => 
+      (c.centralVariableValue, rho*(math.max(computeUtility(c) - computeUtility(conf), 0)) + (1- rho)*c.memory(c.centralVariableValue))).toMap
+    configUtilities
+  }
+}
+
+
 /**
  * RankedTargetFunctions
  */
