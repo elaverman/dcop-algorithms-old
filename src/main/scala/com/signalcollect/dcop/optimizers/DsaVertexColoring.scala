@@ -41,7 +41,7 @@ import com.signalcollect.dcop.impl.ArgmaxADecisionRule
  * Ranked, RankedConflict, NoRankConflict, DynamicRankedConflict
  */
 
-class SimpleOptimizer[AgentId, Action](changeProbability: Double) extends Optimizer[AgentId, Action, SimpleConfig[AgentId, Action], Double] {
+class DsaAVertexColoring[AgentId, Action](changeProbability: Double) extends Optimizer[AgentId, Action, SimpleConfig[AgentId, Action], Double] {
   val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, SimpleConfig[AgentId, Action]](changeProbability)
   val rule = new ArgmaxADecisionRule[AgentId, Action, SimpleConfig[AgentId, Action]] 
   		with NashEquilibriumConvergence[AgentId, Action, SimpleConfig[AgentId, Action]]  
@@ -50,7 +50,7 @@ class SimpleOptimizer[AgentId, Action](changeProbability: Double) extends Optimi
 }
 
 
-class RankedDsaAVertexColoringOptimizer[AgentId, Action](changeProbability: Double) extends Optimizer[AgentId, Action, RankedConfig[AgentId, Action], Double]
+class RankedDsaAVertexColoring[AgentId, Action](changeProbability: Double) extends Optimizer[AgentId, Action, RankedConfig[AgentId, Action], Double]
   {
   val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, RankedConfig[AgentId, Action]](changeProbability)
   val rule = new  ArgmaxADecisionRule[AgentId, Action, RankedConfig[AgentId, Action]] 

@@ -3,69 +3,19 @@ package com.signalcollect.dcop.impl
 import scala.util.Random
 import com.signalcollect.dcop.modules._
 
-//TODO: Once we want a different type of utility, to plug-in a Utility type param for the traits and for the expectedUtilities vals. It must be compatible with the max function.
-//trait NashEquilibriumConvergence[AgentId, Action, Config <: Configuration[AgentId, Action]] extends DecisionRule[AgentId, Action, Config, Double] with TargetFunction[AgentId, Action, Config, Double] {
-//
-//  override protected def isConvergedGivenUtilitiesAndMaxUtility(
-//    c: Config,
-//    expectedUtilities: Map[Action, Double],
-//    maxUtility: Double): Boolean = {
-//    val currentUtility = expectedUtilities(c.centralVariableValue)
-//    maxUtility == currentUtility
-//  }
-//
-//  override def isConverged(c: Config): Boolean = {
-//    val expectedUtilities: Map[Action, Double] = computeExpectedUtilities(c)
-//    val maxUtility = expectedUtilities.values.max
-//    isConvergedGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)
-//  }
-//}
-//
-///**
-// * Is converged only when there are no more conflicts. Not based on the target or utility function.
-// */
-//trait ZeroConflictConvergence[AgentId, Action, Config <: Configuration[AgentId, Action]] extends DecisionRule[AgentId, Action, Config, Double] {
-//
-//  /**
-//   * No delegation between isConverged and isConvergedGivenUtilitiesAndMaxUtility
-//   */
-//  override def isConverged(c: Config): Boolean = {
-//    c.computeExpectedNumberOfConflicts == 0
-//  }
-//}
-//
-///**
-// * Main use for hard constraints, where you have negative utility
-// * for violating constraints and reach 0 utility only when no constraints are violated.
-// * One example is: ConflictBasedVertexColoringUtility
-// */
-//trait ZeroUtilityConvergence[AgentId, Action, Config <: Configuration[AgentId, Action]] extends DecisionRule[AgentId, Action, Config, Double] with TargetFunction[AgentId, Action, Config, Double] {
-//
-//  override protected def isConvergedGivenUtilitiesAndMaxUtility(
-//    c: Config,
-//    expectedUtilities: Map[Action, Double],
-//    maxUtility: Double): Boolean = {
-//    val currentUtility = expectedUtilities(c.centralVariableValue)
-//    currentUtility == 0
-//  }
-//
-//  /**
-//   * No delegation between isConverged and isConvergedGivenUtilitiesAndMaxUtility
-//   */
-//  override def isConverged(c: Config): Boolean = {
-//    val expectedUtilities: Map[Action, Double] = computeExpectedUtilities(c)
-//    val currentUtility = expectedUtilities(c.centralVariableValue)
-//    currentUtility == 0
-//  }
-//}
 
+/**
+ * "If the agent's state at t-1 is one of the states that maximizes the target function, 
+ * then it is the state selected at t. Otherwise, a new state is randomly selected from the set of target function
+ * maximizing states." 
+ */
 trait ArgmaxADecisionRule[AgentId, Action, Config <: Configuration[AgentId, Action]] extends DecisionRule[AgentId, Action, Config, Double] with TargetFunction[AgentId, Action, Config, Double] {
 
   def computeMove(c: Config) = {
     val expectedUtilities: Map[Action, Double] = computeExpectedUtilities(c)
     val maxUtility = expectedUtilities.values.max
     if (isConvergedGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) {
-      c.centralVariableValue
+      c.centralVariableValue 
     } else {
       val maxUtilityMoves: Seq[Action] = expectedUtilities.filter(_._2 == maxUtility).map(_._1).toSeq
       val chosenMaxUtilityMove = maxUtilityMoves(Random.nextInt(maxUtilityMoves.size))
@@ -132,8 +82,8 @@ trait ExplorerArgmaxBDecisionRule[AgentId, Action, Config <: Configuration[Agent
 
 trait SimulatedAnnealingDecisionRule[AgentId, Action, Config <: Configuration[AgentId, Action]] extends ArgmaxADecisionRule[AgentId, Action, Config] {
 
-  def const: Double
-  def k: Double
+//  def const: Double
+//  def k: Double
   var iteration = 0
 
   override def computeMove(c: Config) = {

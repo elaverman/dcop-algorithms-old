@@ -10,6 +10,7 @@ case class SimpleConfig[Id, Action](
     this.copy(centralVariableAssignment = (centralVariableAssignment._1, value)).asInstanceOf[this.type]
   }
 
+  //TODO: Used for ArgmaxB decision rule and for ZeroConflictConvergenceDetection.
   def computeExpectedNumberOfConflicts = {
     val occupiedColors = neighborhood.values
     val numberOfConflicts = occupiedColors.filter(_ == centralVariableValue).size

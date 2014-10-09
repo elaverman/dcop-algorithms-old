@@ -12,10 +12,6 @@ krakenOutput100by100/*
 krakenOutputArch/*
 adoptInput/*
 dimacsInput/*
-
+inputs/*
 *.config
-
-
-
-
 *.sh

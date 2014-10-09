@@ -22,6 +22,7 @@ trait NashEquilibriumConvergence[AgentId, Action, Config <: Configuration[AgentI
   }
 }
 
+
 /**
  * Is converged only when there are no more conflicts. Not based on the target or utility function.
  */

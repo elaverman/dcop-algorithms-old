@@ -40,8 +40,8 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
         for (i <- (1 to 50)) {
           val g = GraphBuilder.build
           try {
-            val vertex0 = new RankedDcopVertex(0, Set(0, 1), new RankedDsaAVertexColoringOptimizer[Int, Int](0.5), initial0Value, debug = false)
-            val vertex1 = new RankedDcopVertex(1, Set(0, 1), new RankedDsaAVertexColoringOptimizer[Int, Int](0.5), initial0Value, debug = false)
+            val vertex0 = new RankedDcopVertex(0, Set(0, 1), new RankedDsaAVertexColoring[Int, Int](0.5), initial0Value, debug = false)
+            val vertex1 = new RankedDcopVertex(1, Set(0, 1), new RankedDsaAVertexColoring[Int, Int](0.5), initial0Value, debug = false)
             g.addVertex(vertex0)
             g.addVertex(vertex1)
             g.addEdge(0, new RankedVertexColoringEdge(1))
@@ -67,8 +67,8 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
         for (i <- (1 to 50)) {
           val g = GraphBuilder.build
           try {
-            val vertex0 = new RankedDcopVertex(0, Set(0, 1), new RankedDsaAVertexColoringOptimizer[Int, Int](0.5), initial0Value, debug = false)
-            val vertex1 = new RankedDcopVertex(1, Set(0, 1), new RankedDsaAVertexColoringOptimizer[Int, Int](0.5), initial0Value, debug = false)
+            val vertex0 = new RankedDcopVertex(0, Set(0, 1), new RankedDsaAVertexColoring[Int, Int](0.5), initial0Value, debug = false)
+            val vertex1 = new RankedDcopVertex(1, Set(0, 1), new RankedDsaAVertexColoring[Int, Int](0.5), initial0Value, debug = false)
             g.addVertex(vertex0)
             g.addVertex(vertex1)
             g.addEdge(0, new RankedVertexColoringEdge(1))
@@ -146,8 +146,8 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
         for (i <- (1 to 50)) {
           val g = GraphBuilder.build
           try {
-            val vertex0 = new SimpleDcopVertex(0, Set(0, 1), new SimpleOptimizer[Int, Int](0.5), initial0Value, debug = false)
-            val vertex1 = new SimpleDcopVertex(1, Set(0, 1), new SimpleOptimizer[Int, Int](0.5), initial0Value, debug = false)
+            val vertex0 = new SimpleDcopVertex(0, Set(0, 1), new DsaAVertexColoring[Int, Int](0.5), initial0Value, debug = false)
+            val vertex1 = new SimpleDcopVertex(1, Set(0, 1), new DsaAVertexColoring[Int, Int](0.5), initial0Value, debug = false)
             g.addVertex(vertex0)
             g.addVertex(vertex1)
             g.addEdge(0, new StateForwarderEdge(1))
