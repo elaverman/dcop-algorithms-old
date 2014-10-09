@@ -23,7 +23,7 @@ import com.signalcollect._
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
 
-class MemoryVertexColoringEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
+class MemoryDcopEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
   type Source = MemoryDcopVertex[_, _]
 
   def signal = {

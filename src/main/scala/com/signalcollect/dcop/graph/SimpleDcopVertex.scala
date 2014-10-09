@@ -23,11 +23,22 @@ import com.signalcollect._
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl.SimpleConfig
 
+class SimpleDcopEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
+  type Source = SimpleDcopVertex[_, _, _]
+
+  def signal = {
+    val sourceState = source.state
+    sourceState.centralVariableValue
+  }
+}
+
 class SimpleDcopVertex[Id, Action, UtilityType](
   override val optimizer: Optimizer[Id, Action, SimpleConfig[Id, Action], UtilityType],
   initialState: SimpleConfig[Id, Action],
   debug: Boolean = false)
   extends DcopVertex[Id, Action, SimpleConfig[Id, Action], UtilityType](optimizer, initialState, debug){
+  
+  type Signal = Action
   
   override def currentConfig: SimpleConfig[Id, Action] = {
     val neighborhood: Map[Id, Action] = mostRecentSignalMap.toMap.asInstanceOf[Map[Id, Action]]

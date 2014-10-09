@@ -23,7 +23,7 @@ import com.signalcollect._
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
 
-class RankedVertexColoringEdge[Id, Action, UtilityType](targetId: Id) extends DefaultEdge(targetId) {
+class RankedDcopEdge[Id, Action, UtilityType](targetId: Id) extends DefaultEdge(targetId) {
   type Source = RankedDcopVertex[Id, Action, UtilityType]
 
   def signal = {
