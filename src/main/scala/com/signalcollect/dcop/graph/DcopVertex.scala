@@ -13,12 +13,10 @@ import com.signalcollect.dcop.modules._
  * @param debug Boolean idicating if there should be any printlines
  */
 abstract class DcopVertex[Id, Action, Config <: Configuration[Id, Action], UtilityType](
-  id: Id,
-  domain: Set[Action],
   val optimizer: Optimizer[Id, Action, Config, UtilityType],
   initialState: Config,
   debug: Boolean = false)
-  extends DataGraphVertex(id, initialState)
+  extends DataGraphVertex(initialState.centralVariableAssignment._1, initialState)
   with DcopConvergenceDetection[Id, Action, Config, UtilityType] {
 
   def currentConfig: Config

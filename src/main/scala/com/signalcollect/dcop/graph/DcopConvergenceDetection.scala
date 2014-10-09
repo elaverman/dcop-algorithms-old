@@ -10,7 +10,6 @@ import com.signalcollect.dcop.modules.Configuration
 trait DcopConvergenceDetection[AgentId, Action, Config <: Configuration[AgentId, Action], UtilityType] {
   this: DataGraphVertex[AgentId, Config] =>
 
-  protected def domain: Set[Action]
   val optimizer: Optimizer[AgentId, Action, Config, UtilityType]
 
   def isConverged(c: Config): Boolean = {

@@ -48,8 +48,8 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
               domain = Set(0, 1),
               centralVariableAssignment = (id, initial0Value))
 
-            val vertex0 = new RankedDcopVertex(0, Set(0, 1), new RankedDsaAVertexColoring[Int, Int](0.5), initialConf(0), debug = false)
-            val vertex1 = new RankedDcopVertex(1, Set(0, 1), new RankedDsaAVertexColoring[Int, Int](0.5), initialConf(1), debug = false)
+            val vertex0 = new RankedDcopVertex(new RankedDsaAVertexColoring[Int, Int](0.5), initialConf(0), debug = false)
+            val vertex1 = new RankedDcopVertex(new RankedDsaAVertexColoring[Int, Int](0.5), initialConf(1), debug = false)
             g.addVertex(vertex0)
             g.addVertex(vertex1)
             g.addEdge(0, new RankedVertexColoringEdge(1))

@@ -44,15 +44,13 @@ class RankedVertexColoringEdge[Id, Action, UtilityType](targetId: Id) extends De
  * @param convergeByEntireState Boolean indicating if the algorithm stops when the entire state or only the action stabilizes.
  */
 class RankedDcopVertex[Id, Action, UtilityType](
-  id: Id,
-  val domain: Set[Action],
   override val optimizer: Optimizer[Id, Action, RankedConfig[Id, Action], UtilityType],
   initialState: RankedConfig[Id, Action],
   baseRank: Double = 0.15,
   debug: Boolean = false,
   eps: Double = 0.01,
   convergeByEntireState: Boolean = true)
-  extends DcopVertex[Id, Action, RankedConfig[Id, Action], UtilityType](id, domain, optimizer, initialState, debug) {
+  extends DcopVertex[Id, Action, RankedConfig[Id, Action], UtilityType](optimizer, initialState, debug) {
 
   //Initialize (initialAction, baseRank: Double = 0.15,)
 
@@ -67,9 +65,9 @@ class RankedDcopVertex[Id, Action, UtilityType](
       map(tuple => (tuple._1, tuple._2._2)).toMap
     //  val ranks = neighborhoodRanks + ((id, state._2))
     val oldRanks = neighborhoodRanks + ((id, state.ranks(id)))
-    val oldC = RankedConfig(neighborhoodAssignments, state.numberOfCollects, oldRanks, domain, state.centralVariableAssignment)
+    val oldC = RankedConfig(neighborhoodAssignments, state.numberOfCollects, oldRanks, state.domain, state.centralVariableAssignment)
     val ranks = neighborhoodRanks + ((id, computeRankForMove(oldC)))
-    val c = RankedConfig(neighborhoodAssignments, state.numberOfCollects + 1, ranks, domain, state.centralVariableAssignment)
+    val c = RankedConfig(neighborhoodAssignments, state.numberOfCollects + 1, ranks, state.domain, state.centralVariableAssignment)
     c
   }
 

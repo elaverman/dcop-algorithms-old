@@ -24,17 +24,15 @@ import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl.SimpleConfig
 
 class SimpleDcopVertex[Id, Action, UtilityType](
-  id: Id,
-  val domain: Set[Action],
   override val optimizer: Optimizer[Id, Action, SimpleConfig[Id, Action], UtilityType],
   initialState: SimpleConfig[Id, Action],
   debug: Boolean = false)
-  extends DcopVertex[Id, Action, SimpleConfig[Id, Action], UtilityType](id, domain, optimizer, initialState, debug){
+  extends DcopVertex[Id, Action, SimpleConfig[Id, Action], UtilityType](optimizer, initialState, debug){
   
   override def currentConfig: SimpleConfig[Id, Action] = {
     val neighborhood: Map[Id, Action] = mostRecentSignalMap.toMap.asInstanceOf[Map[Id, Action]]
   //  val centralVariableAssignment = (id, state)
-    val c = SimpleConfig[Id, Action](neighborhood, state.numberOfCollects+1, domain, state.centralVariableAssignment)
+    val c = SimpleConfig[Id, Action](neighborhood, state.numberOfCollects+1, state.domain, state.centralVariableAssignment)
     c
   }
 }

@@ -43,15 +43,13 @@ class MemoryVertexColoringEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
  * @param convergeByEntireState Boolean indicating if the algorithm stops when the entire state or only the action stabilizes.
  */
 class MemoryDcopVertex[Id, Action](
-  id: Id,
-  val domain: Set[Action],
   override val optimizer: Optimizer[Id, Action, SimpleMemoryConfig[Id, Action, Double], Double],
   initialState: SimpleMemoryConfig[Id, Action, Double],
   debug: Boolean = false,
   eps: Double = 0.01,
   convergeByEntireState: Boolean = true)
   extends DcopVertex[Id, Action, SimpleMemoryConfig[Id, Action, Double], Double](
-    id, domain, optimizer, initialState, debug) {
+    optimizer, initialState, debug) {
 
   //Initialize state memory and stuff: (initialAction, Map.empty[Action, Double].withDefaultValue(0), 0)
 
@@ -59,9 +57,9 @@ class MemoryDcopVertex[Id, Action](
 
   override def currentConfig: SimpleMemoryConfig[Id, Action, Double] = {
     val neighborhood: Map[Id, Action] = mostRecentSignalMap.toMap.asInstanceOf[Map[Id, Action]]
-    val oldC = SimpleMemoryConfig(neighborhood, state.memory, state.numberOfCollects, domain, state.centralVariableAssignment)
+    val oldC = SimpleMemoryConfig(neighborhood, state.memory, state.numberOfCollects, state.domain, state.centralVariableAssignment)
     val newMemory = optimizer.rule.computeExpectedUtilities(oldC)
-    val c = SimpleMemoryConfig(neighborhood, newMemory, state.numberOfCollects + 1, domain, state.centralVariableAssignment) //TODO???
+    val c = SimpleMemoryConfig(neighborhood, newMemory, state.numberOfCollects + 1, state.domain, state.centralVariableAssignment) //TODO???
     c
   }
 
