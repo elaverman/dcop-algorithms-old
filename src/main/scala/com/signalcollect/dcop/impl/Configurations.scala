@@ -4,6 +4,7 @@ import com.signalcollect.dcop.modules._
 
 case class SimpleConfig[Id, Action](
   val neighborhood: Map[Id, Action],
+  val numberOfCollects: Long,
   val domain: Set[Action],
   val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action] {
   final def withCentralVariableAssignment(value: Action) = {
@@ -44,6 +45,7 @@ case class SimpleMemoryConfig[Id, Action, UtilityType](
 
 case class RankedConfig[Id, Action](
   val neighborhood: Map[Id, Action],
+  val numberOfCollects: Long,
   val ranks: Map[Id, Double],
   val domain: Set[Action],
   val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action] {

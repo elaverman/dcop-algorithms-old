@@ -82,8 +82,8 @@ trait ExplorerArgmaxBDecisionRule[AgentId, Action, Config <: Configuration[Agent
 
 trait SimulatedAnnealingDecisionRule[AgentId, Action, Config <: Configuration[AgentId, Action]] extends ArgmaxADecisionRule[AgentId, Action, Config] {
 
-//  def const: Double
-//  def k: Double
+  def const: Double
+  def k: Double
   var iteration = 0
 
   override def computeMove(c: Config) = {

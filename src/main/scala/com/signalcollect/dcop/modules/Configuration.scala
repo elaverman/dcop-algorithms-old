@@ -2,6 +2,7 @@ package com.signalcollect.dcop.modules
 
 trait Configuration[AgentId, Action] extends Serializable {
   def neighborhood: Map[AgentId, Action]
+  def numberOfCollects: Long
   def domain: Set[Action]
   def withCentralVariableAssignment(value: Action): this.type
   def centralVariableAssignment: (AgentId, Action)

@@ -12,7 +12,7 @@ class DsanVertexColoring[AgentId, Action](changeProbability: Double, constant: D
       def const = constant 
       def k = kval 
       }
-  override def toString = "DsaAVertexColoringChangeProbability" + changeProbability + "const" + constant + "k" + kval
+  override def toString = "DsanVertexColoringChangeProbability" + changeProbability + "const" + constant + "k" + kval
 }
 
 //case class DsanVertexColoring(changeProbability: Double, const: Double, k: Double)

@@ -64,7 +64,8 @@ class RankedDcopVertex[Id, Action, UtilityType](
       map(tuple => (tuple._1, tuple._2._2)).toMap
     val centralVariableAssignment = (id, state._1)
     val ranks = neighborhoodRanks + ((id, state._2))
-    val c = RankedConfig(neighborhoodAssignments, ranks, domain, centralVariableAssignment)
+    //TODO: delete dummy value 1.
+    val c = RankedConfig(neighborhoodAssignments, 1, ranks, domain, centralVariableAssignment)
     c
   }
 
