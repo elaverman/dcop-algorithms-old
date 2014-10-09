@@ -55,7 +55,7 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
             g.addEdge(0, new RankedVertexColoringEdge(1))
             g.addEdge(1, new RankedVertexColoringEdge(0))
             println(g.execute)
-            assert(vertex0.state.centralVariableAssignment != vertex1.state.centralVariableAssignment, "Color collision")
+            assert(vertex0.state.centralVariableValue != vertex1.state.centralVariableValue, "Color collision")
             assert(math.abs(vertex0.currentConfig.ranks(vertex0.id) - vertex1.currentConfig.ranks(vertex1.id)) < 0.01, "Should have almost the same rank for both vertices.")
             assert(math.abs(vertex0.currentConfig.ranks(vertex0.id) - vertex1.currentConfig.ranks(vertex0.id)) < 0.01, "Should have the correct rank of the neighbour")
           } finally {
@@ -89,7 +89,7 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
             g.addEdge(0, new RankedVertexColoringEdge(1))
             g.addEdge(1, new RankedVertexColoringEdge(0))
             println(g.execute)
-            assert(vertex0.state.centralVariableAssignment != vertex1.state.centralVariableAssignment, "Color collision")
+            assert(vertex0.state.centralVariableValue != vertex1.state.centralVariableValue, "Color collision")
             assert(math.abs(vertex0.currentConfig.ranks(vertex0.id) - vertex1.currentConfig.ranks(vertex1.id)) < 0.01, "Should have almost the same rank for both vertices.")
             assert(math.abs(vertex0.currentConfig.ranks(vertex0.id) - vertex1.currentConfig.ranks(vertex0.id)) < 0.01, "Should have the correct rank of the neighbour")
           } finally {
@@ -123,7 +123,7 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
             g.addEdge(0, new MemoryVertexColoringEdge(1))
             g.addEdge(1, new MemoryVertexColoringEdge(0))
             println(g.execute)
-            assert(vertex0.state.centralVariableAssignment != vertex1.state.centralVariableAssignment, "Color collision")
+            assert(vertex0.state.centralVariableValue != vertex1.state.centralVariableValue, "Color collision")
           } finally {
             g.shutdown
           }
@@ -157,7 +157,7 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
             g.addEdge(0, new MemoryVertexColoringEdge(1))
             g.addEdge(1, new MemoryVertexColoringEdge(0))
             println(g.execute)
-            assert(vertex0.state.centralVariableAssignment != vertex1.state.centralVariableAssignment, "Color collision")
+            assert(vertex0.state.centralVariableValue != vertex1.state.centralVariableValue, "Color collision")
           } finally {
             g.shutdown
           }
@@ -189,7 +189,7 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
             g.addEdge(0, new StateForwarderEdge(1))
             g.addEdge(1, new StateForwarderEdge(0))
             println(g.execute)
-            assert(vertex0.state.centralVariableAssignment != vertex1.state.centralVariableAssignment, "Color collision")
+            assert(vertex0.state.centralVariableValue != vertex1.state.centralVariableValue, "Color collision")
           } finally {
             g.shutdown
           }
