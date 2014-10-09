@@ -71,11 +71,6 @@ class RankedDcopVertex[Id, Action, UtilityType](
     c
   }
 
-  def configToState(c: RankedConfig[Id, Action]): (Action, Double) = {
-    val move = c.centralVariableValue
-    (move, computeRankForMove(c))
-  }
-
   //TODO: Replace with more general.  
   def computeRankForMove(c: RankedConfig[Id, Action]): Double = {
     val allies = c.neighborhood.filter(_._2 != c.centralVariableValue)
