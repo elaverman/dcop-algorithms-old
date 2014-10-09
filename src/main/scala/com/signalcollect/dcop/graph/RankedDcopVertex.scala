@@ -23,12 +23,13 @@ import com.signalcollect._
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
 
-class RankedVertexColoringEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
-  type Source = RankedDcopVertex[_, _, _]
+class RankedVertexColoringEdge[Id, Action, UtilityType](targetId: Id) extends DefaultEdge(targetId) {
+  type Source = RankedDcopVertex[Id, Action, UtilityType]
 
   def signal = {
     val sourceState = source.state
-    (sourceState._1, sourceState._2 / source.edgeCount)
+    val sourceStateAssignment = source.state.centralVariableAssignment
+    (sourceStateAssignment._2, sourceState.ranks(sourceStateAssignment._1) / source.edgeCount)
   }
 }
 
@@ -46,12 +47,14 @@ class RankedDcopVertex[Id, Action, UtilityType](
   id: Id,
   val domain: Set[Action],
   override val optimizer: Optimizer[Id, Action, RankedConfig[Id, Action], UtilityType],
-  initialAction: Action,
+  initialState: RankedConfig[Id, Action],
   baseRank: Double = 0.15,
   debug: Boolean = false,
   eps: Double = 0.01,
   convergeByEntireState: Boolean = true)
-  extends DcopVertex[Id, (Action, Double), Action, RankedConfig[Id, Action], UtilityType](id, domain, optimizer, (initialAction, baseRank), debug) {
+  extends DcopVertex[Id, Action, RankedConfig[Id, Action], UtilityType](id, domain, optimizer, initialState, debug) {
+
+  //Initialize (initialAction, baseRank: Double = 0.15,)
 
   type Signal = (Action, Double)
 
@@ -62,10 +65,11 @@ class RankedDcopVertex[Id, Action, UtilityType](
       map(tuple => (tuple._1, tuple._2._1)).toMap
     val neighborhoodRanks: Map[Id, Double] = neighborhoodSignalMap.
       map(tuple => (tuple._1, tuple._2._2)).toMap
-    val centralVariableAssignment = (id, state._1)
-    val ranks = neighborhoodRanks + ((id, state._2))
-    //TODO: delete dummy value 1.
-    val c = RankedConfig(neighborhoodAssignments, 1, ranks, domain, centralVariableAssignment)
+    //  val ranks = neighborhoodRanks + ((id, state._2))
+    val oldRanks = neighborhoodRanks + ((id, state.ranks(id)))
+    val oldC = RankedConfig(neighborhoodAssignments, state.numberOfCollects, oldRanks, domain, state.centralVariableAssignment)
+    val ranks = neighborhoodRanks + ((id, computeRankForMove(oldC)))
+    val c = RankedConfig(neighborhoodAssignments, state.numberOfCollects + 1, ranks, domain, state.centralVariableAssignment)
     c
   }
 
@@ -74,6 +78,7 @@ class RankedDcopVertex[Id, Action, UtilityType](
     (move, computeRankForMove(c))
   }
 
+  //TODO: Replace with more general.  
   def computeRankForMove(c: RankedConfig[Id, Action]): Double = {
     val allies = c.neighborhood.filter(_._2 != c.centralVariableValue)
     val allyRankSum = allies.keys.map(c.ranks).sum
@@ -82,16 +87,17 @@ class RankedDcopVertex[Id, Action, UtilityType](
     newPageRank
   }
 
-  override def isStateUnchanged(oldState: (Action, Double), newState: (Action, Double)): Boolean = {
-    (oldState._1 == newState._1) && (math.abs(oldState._2 - newState._2) < eps)
+  override def isStateUnchanged(oldState: RankedConfig[Id, Action], newState: RankedConfig[Id, Action]): Boolean = {
+    (oldState.centralVariableAssignment == newState.centralVariableAssignment) &&
+      (math.abs(oldState.ranks(oldState.centralVariableAssignment._1) - newState.ranks(newState.centralVariableAssignment._1)) < eps)
   }
 
   override def collect = {
     val c = currentConfig
     if (optimizer.shouldConsiderMove(c)) {
-      changeState(c)
-    } else { 
-      val newState = if (convergeByEntireState) configToState(c) else state
+      changeMove(c)
+    } else {
+      val newState = if (convergeByEntireState) c else state
       if (debug) {
         if (isConverged(c)) {
           println(s"Vertex $id has converged and stays at move $newState.")

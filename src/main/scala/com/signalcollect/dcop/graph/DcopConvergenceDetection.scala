@@ -4,8 +4,11 @@ import com.signalcollect._
 import com.signalcollect.dcop.modules.Optimizer
 import com.signalcollect.dcop.modules.Configuration
 
-trait DcopConvergenceDetection[AgentId, VertexState, Action, Config <: Configuration[AgentId, Action], UtilityType] {
-  this: DataGraphVertex[AgentId, VertexState] =>
+/**
+ * The Vertex state is of type Config.
+ */
+trait DcopConvergenceDetection[AgentId, Action, Config <: Configuration[AgentId, Action], UtilityType] {
+  this: DataGraphVertex[AgentId, Config] =>
 
   protected def domain: Set[Action]
   val optimizer: Optimizer[AgentId, Action, Config, UtilityType]
@@ -16,7 +19,7 @@ trait DcopConvergenceDetection[AgentId, VertexState, Action, Config <: Configura
 
   def currentConfig: Config
 
-  def isStateUnchanged(oldState: VertexState, newState: VertexState): Boolean = {
+  def isStateUnchanged(oldState: Config, newState: Config): Boolean = {
     oldState == newState
   }
 

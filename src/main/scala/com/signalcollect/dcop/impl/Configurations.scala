@@ -50,15 +50,14 @@ case class RankedConfig[Id, Action](
   val domain: Set[Action],
   val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action] {
 
+  /*
+   * Not only the value changes, but also the rank.  
+   */
   final def withCentralVariableAssignment(value: Action): this.type = {
     this.copy(centralVariableAssignment = (centralVariableAssignment._1, value)).asInstanceOf[this.type]
   }
 
-  def computeExpectedNumberOfConflicts = {
-    val occupiedColors = neighborhood.values
-    val numberOfConflicts = occupiedColors.filter(_ == centralVariableValue).size
-    numberOfConflicts
-  }
+  def computeExpectedNumberOfConflicts = ???
 
   override def toString = s"      neighborhood = $neighborhood.toString\n" +
     s"      ranks = $ranks.toString\n" +

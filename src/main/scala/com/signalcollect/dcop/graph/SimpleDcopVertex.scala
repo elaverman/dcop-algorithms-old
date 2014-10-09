@@ -23,22 +23,18 @@ import com.signalcollect._
 import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl.SimpleConfig
 
-class SimpleDcopVertex[Id, ActionAndState, UtilityType](
+class SimpleDcopVertex[Id, Action, UtilityType](
   id: Id,
-  val domain: Set[ActionAndState],
-  override val optimizer: Optimizer[Id, ActionAndState, SimpleConfig[Id, ActionAndState], UtilityType],
-  initialState: ActionAndState,
+  val domain: Set[Action],
+  override val optimizer: Optimizer[Id, Action, SimpleConfig[Id, Action], UtilityType],
+  initialState: SimpleConfig[Id, Action],
   debug: Boolean = false)
-  extends DcopVertex[Id, ActionAndState, ActionAndState, SimpleConfig[Id, ActionAndState], UtilityType](id, domain, optimizer, initialState, debug){
+  extends DcopVertex[Id, Action, SimpleConfig[Id, Action], UtilityType](id, domain, optimizer, initialState, debug){
   
-  override def configToState(c: SimpleConfig[Id, ActionAndState]): ActionAndState = c.centralVariableValue
-  
-  override def currentConfig: SimpleConfig[Id, ActionAndState] = {
-    val neighborhood: Map[Id, ActionAndState] = mostRecentSignalMap.toMap.asInstanceOf[Map[Id, ActionAndState]]
-    val centralVariableAssignment = (id, state)
-    //TODO: delete dummy value 1.
-    val c = SimpleConfig(neighborhood, 1, domain, centralVariableAssignment)
+  override def currentConfig: SimpleConfig[Id, Action] = {
+    val neighborhood: Map[Id, Action] = mostRecentSignalMap.toMap.asInstanceOf[Map[Id, Action]]
+  //  val centralVariableAssignment = (id, state)
+    val c = SimpleConfig[Id, Action](neighborhood, state.numberOfCollects+1, domain, state.centralVariableAssignment)
     c
   }
-  
 }
