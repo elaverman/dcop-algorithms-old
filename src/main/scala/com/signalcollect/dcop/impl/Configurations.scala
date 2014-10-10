@@ -35,7 +35,11 @@ case class SimpleMemoryConfig[Id, Action, UtilityType](
     this.copy(centralVariableAssignment = (centralVariableAssignment._1, value)).asInstanceOf[this.type]
   }
 
-  def computeExpectedNumberOfConflicts = ???
+  def computeExpectedNumberOfConflicts = {
+    val occupiedColors = neighborhood.values
+    val numberOfConflicts = occupiedColors.filter(_ == centralVariableValue).size
+    numberOfConflicts
+  }
 
   override def toString = s"      neighborhood = $neighborhood.toString\n" +
     s"      domain = $domain.toString\n" +
@@ -57,7 +61,11 @@ case class RankedConfig[Id, Action](
     this.copy(centralVariableAssignment = (centralVariableAssignment._1, value)).asInstanceOf[this.type]
   }
 
-  def computeExpectedNumberOfConflicts = ???
+  def computeExpectedNumberOfConflicts = {
+    val occupiedColors = neighborhood.values
+    val numberOfConflicts = occupiedColors.filter(_ == centralVariableValue).size
+    numberOfConflicts
+  }
 
   override def toString = s"      neighborhood = $neighborhood.toString\n" +
     s"      ranks = $ranks.toString\n" +
