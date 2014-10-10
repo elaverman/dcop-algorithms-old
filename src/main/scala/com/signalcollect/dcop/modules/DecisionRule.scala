@@ -1,12 +1,24 @@
 package com.signalcollect.dcop.modules
 
-trait DecisionRule[AgentId, Action, Config <: Configuration[AgentId, Action], UtilityType] extends Serializable {
-  def computeMove(c: Config): Action
-  def isConverged(c: Config): Boolean
+//TODO: Instead of Double replae with UtilityType or at least Numeric
 
-  protected def isConvergedGivenUtilitiesAndMaxUtility(
-    c: Config,
-    expectedUtilities: Map[Action, UtilityType],
-    maxUtility: UtilityType): Boolean = isConverged(c)
+trait DecisionRule[AgentId, Action, Config <: Configuration[AgentId, Action]] extends Serializable with TargetFunction[AgentId, Action, Config, Double] {
+  def computeMove(c: Config): Action
+  def shouldTerminate(c: Config): Boolean
+  
+  def isInLocalOptimum(c: Config): Boolean = {
+    val expectedUtilities: Map[Action, Double] = computeExpectedUtilities(c)
+    val maxUtility = expectedUtilities.values.max
+    isInLocalOptimumGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)
+  }
+
+  protected final def isInLocalOptimumGivenUtilitiesAndMaxUtility(
+    c: Config, 
+    expectedUtilities: Map[Action, Double], 
+    maxUtility: Double): Boolean = {
+    val currentUtility = expectedUtilities(c.centralVariableValue)
+    maxUtility == currentUtility
+  }
+      
 }
   

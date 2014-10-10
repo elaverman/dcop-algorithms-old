@@ -9,12 +9,12 @@ import com.signalcollect.dcop.modules._
  * then it is the state selected at t. Otherwise, a new state is randomly selected from the set of target function
  * maximizing states." 
  */
-trait ArgmaxADecisionRule[AgentId, Action, Config <: Configuration[AgentId, Action]] extends DecisionRule[AgentId, Action, Config, Double] with TargetFunction[AgentId, Action, Config, Double] {
+trait ArgmaxADecisionRule[AgentId, Action, Config <: Configuration[AgentId, Action]] extends DecisionRule[AgentId, Action, Config] with TargetFunction[AgentId, Action, Config, Double] {
 
   def computeMove(c: Config) = {
     val expectedUtilities: Map[Action, Double] = computeExpectedUtilities(c)
     val maxUtility = expectedUtilities.values.max
-    if (isConvergedGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) {
+    if (isInLocalOptimumGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) {
       c.centralVariableValue 
     } else {
       val maxUtilityMoves: Seq[Action] = expectedUtilities.filter(_._2 == maxUtility).map(_._1).toSeq
@@ -37,7 +37,7 @@ trait ArgmaxBDecisionRule[AgentId, Action, Config <: Configuration[AgentId, Acti
     //If we are converged already don't stir the boat
     // Attention! If isConverged no longer depends on the utility so 
     // the maxUtility move may not be the current move anymore...
-    if ((isConvergedGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) &&
+    if ((isInLocalOptimumGivenUtilitiesAndMaxUtility(c, expectedUtilities, maxUtility)) &&
       (maxUtilityMoves.contains(c.centralVariableValue)) &&
       (c.computeExpectedNumberOfConflicts == 0)) {
       c.centralVariableValue

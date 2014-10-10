@@ -13,7 +13,7 @@ trait DcopConvergenceDetection[AgentId, Action, Config <: Configuration[AgentId,
   val optimizer: Optimizer[AgentId, Action, Config, UtilityType]
 
   def isConverged(c: Config): Boolean = {
-    optimizer.isConverged(c)
+    optimizer.shouldTerminate(c)//.isConverged(c)
   }
 
   def currentConfig: Config
