@@ -48,7 +48,7 @@ class RankedDcopVertex[Id, Action, UtilityType](
   initialState: RankedConfig[Id, Action],
   baseRank: Double = 0.15,
   debug: Boolean = false,
-  eps: Double = 0.01,
+  eps: Double = 0.00000001,
   convergeByEntireState: Boolean = true)
   extends DcopVertex[Id, Action, RankedConfig[Id, Action], UtilityType](optimizer, initialState, debug) {
 
@@ -80,9 +80,18 @@ class RankedDcopVertex[Id, Action, UtilityType](
     newPageRank
   }
 
+  def sameMaps(newMap: Map[Id, Double], oldMap: Map[Id, Double]): Boolean = {
+    for (elem1 <- newMap) {
+      val inSecondMapValue = oldMap.getOrElse(elem1._1, -1.0)
+      if (math.abs(elem1._2 - inSecondMapValue) > eps) return false
+    }
+    true
+  }
+  
   override def isStateUnchanged(oldState: RankedConfig[Id, Action], newState: RankedConfig[Id, Action]): Boolean = {
     (oldState.centralVariableAssignment == newState.centralVariableAssignment) &&
-      (math.abs(oldState.ranks(oldState.centralVariableAssignment._1) - newState.ranks(newState.centralVariableAssignment._1)) < eps)
+       sameMaps(newState.ranks, oldState.ranks)
+    //(math.abs(oldState.ranks(oldState.centralVariableAssignment._1) - newState.ranks(newState.centralVariableAssignment._1)) < eps)
   }
 
   override def collect = {

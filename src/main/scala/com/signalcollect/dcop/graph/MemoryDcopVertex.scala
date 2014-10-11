@@ -46,7 +46,7 @@ class MemoryDcopVertex[Id, Action](
   override val optimizer: Optimizer[Id, Action, SimpleMemoryConfig[Id, Action, Double], Double],
   initialState: SimpleMemoryConfig[Id, Action, Double],
   debug: Boolean = false,
-  eps: Double = 0.01,
+  eps: Double = 0.00000000001,
   convergeByEntireState: Boolean = true)
   extends DcopVertex[Id, Action, SimpleMemoryConfig[Id, Action, Double], Double](
     optimizer, initialState, debug) {
@@ -63,10 +63,19 @@ class MemoryDcopVertex[Id, Action](
     c
   }
 
-  //TODO: Should the whole memory be the same, or only for the current action?
+    def sameMaps(newMap: Map[Action, Double], oldMap: Map[Action, Double]): Boolean = {
+    for (elem1 <- newMap) {
+      val inSecondMapValue = oldMap.getOrElse(elem1._1, -1.0)
+      if (math.abs(elem1._2 - inSecondMapValue) > eps) return false
+    }
+    true
+  }
+  
+//  //TODO: Should the whole memory be the same, or only for the current action? DAAAAH!!! Same for ranked!!!
   override def isStateUnchanged(oldState: SimpleMemoryConfig[Id, Action, Double], newState: SimpleMemoryConfig[Id, Action, Double]): Boolean = {
     (oldState.centralVariableAssignment == newState.centralVariableAssignment) &&
-      (math.abs(oldState.memory(oldState.centralVariableValue) - newState.memory(newState.centralVariableValue)) < eps)
+      sameMaps(newState.memory, oldState.memory)  
+    //(math.abs(oldState.memory(oldState.centralVariableValue) - newState.memory(newState.centralVariableValue)) < eps)
   }
 
   override def collect = {

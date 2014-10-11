@@ -1,6 +1,6 @@
 package com.signalcollect.dcop.modules
 
-//TODO: Instead of Double replae with UtilityType or at least Numeric
+//TODO: Instead of Double replace with UtilityType or at least Numeric
 
 trait DecisionRule[AgentId, Action, Config <: Configuration[AgentId, Action]] extends Serializable with TargetFunction[AgentId, Action, Config, Double] {
   def computeMove(c: Config): Action

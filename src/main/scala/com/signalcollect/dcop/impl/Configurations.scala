@@ -41,9 +41,10 @@ case class SimpleMemoryConfig[Id, Action, UtilityType](
     numberOfConflicts
   }
 
-  override def toString = s"      neighborhood = $neighborhood.toString\n" +
+  override def toString = s"\n      neighborhood = $neighborhood.toString\n" +
     s"      domain = $domain.toString\n" +
-    s"      centralVariableAssignment = $centralVariableAssignment.toString\n"
+    s"      centralVariableAssignment = $centralVariableAssignment.toString\n" +
+    s"      memory = $memory\n"
 }
 
 
