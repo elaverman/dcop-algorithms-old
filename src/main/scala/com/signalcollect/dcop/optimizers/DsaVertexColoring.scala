@@ -50,8 +50,7 @@ class DsaAVertexColoring[AgentId, Action](changeProbability: Double) extends Opt
 }
 
 
-class RankedDsaAVertexColoring[AgentId, Action](changeProbability: Double) extends Optimizer[AgentId, Action, RankedConfig[AgentId, Action], Double]
-  {
+class RankedDsaAVertexColoring[AgentId, Action](changeProbability: Double) extends Optimizer[AgentId, Action, RankedConfig[AgentId, Action], Double] {
   val schedule = new ParallelRandomAdjustmentSchedule[AgentId, Action, RankedConfig[AgentId, Action]](changeProbability)
   val rule = new  ArgmaxADecisionRule[AgentId, Action, RankedConfig[AgentId, Action]] 
   		with NashEquilibriumConvergence[AgentId, Action, RankedConfig[AgentId, Action]]  

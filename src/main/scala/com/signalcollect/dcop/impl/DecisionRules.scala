@@ -18,6 +18,8 @@ trait ArgmaxADecisionRule[AgentId, Action, Config <: Configuration[AgentId, Acti
       c.centralVariableValue 
     } else {
       val maxUtilityMoves: Seq[Action] = expectedUtilities.filter(_._2 == maxUtility).map(_._1).toSeq
+      if (maxUtilityMoves.size <= 0)println(expectedUtilities)
+      assert(maxUtilityMoves.size > 0)
       val chosenMaxUtilityMove = maxUtilityMoves(Random.nextInt(maxUtilityMoves.size))
       chosenMaxUtilityMove
     }
@@ -86,22 +88,28 @@ trait SimulatedAnnealingDecisionRule[AgentId, Action, Config <: Configuration[Ag
   def k: Double
   var iteration = 0
 
+  def eta(i: Int) = const / i*i
+  var deltaComp = 0.0
+  
   override def computeMove(c: Config) = {
     iteration += 1
     val randomMove = c.domain.toSeq(Random.nextInt(c.domain.size))
     val expectedUtilities = computeExpectedUtilities(c).toMap[Action, Double]
     val delta = expectedUtilities.getOrElse[Double](randomMove, -1) - expectedUtilities.getOrElse[Double](c.centralVariableValue, -1)
-    if (delta <= 0 && Random.nextDouble <= scala.math.exp(delta / iteration)) {
+    deltaComp = delta
+    val probab = if (delta == 0) 0.001 else scala.math.exp( delta * iteration* iteration / 1000 ) //delta / eta(iteration))
+    if (delta > 0 || (delta <= 0 && Random.nextDouble <= probab)) {
       randomMove
     } else {
       c.centralVariableValue
     }
   }
+  
+ // override def shouldTerminate(c: Config): Boolean = isInLocalOptimum(c)&&(scala.math.exp( deltaComp *iteration*iteration) < 0.01)
 }
 
 trait LinearProbabilisticDecisionRule[AgentId, Action, Config <: Configuration[AgentId, Action]] extends ArgmaxADecisionRule[AgentId, Action, Config] {
 
-  def eta: Double
 
   /*
    * In the case where we have a flat distribution and normFactor would be 0, the function should return the first action. 
