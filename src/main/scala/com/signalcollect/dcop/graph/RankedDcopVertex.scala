@@ -88,9 +88,10 @@ class RankedDcopVertex[Id, Action, UtilityType](
     true
   }
   
-  override def isStateUnchanged(oldState: RankedConfig[Id, Action], newState: RankedConfig[Id, Action]): Boolean = {
-    (oldState.centralVariableAssignment == newState.centralVariableAssignment) &&
-       sameMaps(newState.ranks, oldState.ranks)
+  override def isStateUnchanged(oldConfig: RankedConfig[Id, Action], newConfig: RankedConfig[Id, Action]): Boolean = {
+    (oldConfig.centralVariableAssignment == newConfig.centralVariableAssignment) &&
+    (oldConfig.neighborhood == newConfig.neighborhood) && 
+    sameMaps(oldConfig.ranks, newConfig.ranks)
     //(math.abs(oldState.ranks(oldState.centralVariableAssignment._1) - newState.ranks(newState.centralVariableAssignment._1)) < eps)
   }
 
@@ -99,15 +100,14 @@ class RankedDcopVertex[Id, Action, UtilityType](
     if (optimizer.shouldConsiderMove(c)) {
       changeMove(c)
     } else {
-      val newState = if (convergeByEntireState) c else state
       if (debug) {
         if (isConverged(c)) {
-          println(s"Vertex $id has converged and stays at move $newState.")
+          println(s"Vertex $id has converged and stays at move $c.")
         } else {
-          println(s"Vertex $id still NOT converged, stays at move, and has $newState.")
+          println(s"Vertex $id still NOT converged, stays at move, and has $c.")
         }
       }
-      newState
+      c
     }
   }
 

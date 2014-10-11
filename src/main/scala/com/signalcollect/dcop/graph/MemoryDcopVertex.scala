@@ -63,18 +63,19 @@ class MemoryDcopVertex[Id, Action](
     c
   }
 
-    def sameMaps(newMap: Map[Action, Double], oldMap: Map[Action, Double]): Boolean = {
+  def sameMaps(newMap: Map[Action, Double], oldMap: Map[Action, Double]): Boolean = {
     for (elem1 <- newMap) {
       val inSecondMapValue = oldMap.getOrElse(elem1._1, -1.0)
       if (math.abs(elem1._2 - inSecondMapValue) > eps) return false
     }
     true
   }
-  
-//  //TODO: Should the whole memory be the same, or only for the current action? DAAAAH!!! Same for ranked!!!
-  override def isStateUnchanged(oldState: SimpleMemoryConfig[Id, Action, Double], newState: SimpleMemoryConfig[Id, Action, Double]): Boolean = {
-    (oldState.centralVariableAssignment == newState.centralVariableAssignment) &&
-      sameMaps(newState.memory, oldState.memory)  
+
+  //  //TODO: Should the whole memory be the same, or only for the current action? DAAAAH!!! Same for ranked!!!
+  override def isStateUnchanged(oldConfig: SimpleMemoryConfig[Id, Action, Double], newConfig: SimpleMemoryConfig[Id, Action, Double]): Boolean = {
+    (oldConfig.centralVariableAssignment == newConfig.centralVariableAssignment) &&
+      (oldConfig.neighborhood == newConfig.neighborhood) &&
+      sameMaps(oldConfig.memory, newConfig.memory)
     //(math.abs(oldState.memory(oldState.centralVariableValue) - newState.memory(newState.centralVariableValue)) < eps)
   }
 
@@ -83,15 +84,14 @@ class MemoryDcopVertex[Id, Action](
     if (optimizer.shouldConsiderMove(c)) {
       changeMove(c)
     } else {
-      val newState = if (convergeByEntireState) c else state
       if (debug) {
         if (isConverged(c)) {
-          println(s"Vertex $id has converged and stays at move $newState.")
+          println(s"Vertex $id has converged and stays at move $c.")
         } else {
-          println(s"Vertex $id still NOT converged, stays at move, and has $newState.")
+          println(s"Vertex $id still NOT converged, stays at move, and has $c.")
         }
       }
-      newState
+      c
     }
   }
 

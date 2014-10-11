@@ -18,8 +18,9 @@ trait DcopConvergenceDetection[AgentId, Action, Config <: Configuration[AgentId,
 
   def currentConfig: Config
 
-  def isStateUnchanged(oldState: Config, newState: Config): Boolean = {
-    oldState == newState
+  def isStateUnchanged(oldConfig: Config, newConfig: Config): Boolean = {
+    oldConfig.centralVariableAssignment == newConfig.centralVariableAssignment &&
+      oldConfig.neighborhood == newConfig.neighborhood
   }
 
   override def scoreSignal: Double = {
@@ -29,8 +30,8 @@ trait DcopConvergenceDetection[AgentId, Action, Config <: Configuration[AgentId,
       lastSignalState match {
         case Some(oldState) => {
           if (isStateUnchanged(oldState, state) && isConverged(state)) {
-            println("=>" + state)
-            0 
+            //println("=>" + state)
+            0
           } else {
             1
           }

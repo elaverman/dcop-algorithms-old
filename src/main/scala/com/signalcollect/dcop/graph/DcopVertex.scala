@@ -43,7 +43,7 @@ abstract class DcopVertex[Id, Action, Config <: Configuration[Id, Action], Utili
           println(s"Vertex $id still NOT converged, stays at move, and has $state.")
         }
       }
-      state
+      c
     }
   }
 
