@@ -13,7 +13,7 @@ trait DcopConvergenceDetection[AgentId, Action, Config <: Configuration[AgentId,
   val optimizer: Optimizer[AgentId, Action, Config, UtilityType]
 
   def isConverged(c: Config): Boolean = {
-    optimizer.shouldTerminate(c)//.isConverged(c)
+    optimizer.shouldTerminate(c)
   }
 
   def currentConfig: Config
@@ -28,8 +28,9 @@ trait DcopConvergenceDetection[AgentId, Action, Config <: Configuration[AgentId,
     } else {
       lastSignalState match {
         case Some(oldState) => {
-          if (isStateUnchanged(oldState, state) && isConverged(currentConfig)) {
-            0
+          if (isStateUnchanged(oldState, state) && isConverged(state)) {
+            println("=>" + state)
+            0 
           } else {
             1
           }
