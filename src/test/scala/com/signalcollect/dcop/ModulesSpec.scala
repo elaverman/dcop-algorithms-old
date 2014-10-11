@@ -33,6 +33,38 @@ import com.signalcollect.dcop.impl._
 
 class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAnnouncements {
 
+    "A 2-Vertex graph" should "correctly assign 2-colors with Dsan" in {
+    check(
+      {
+        def initial0Value = 0
+
+        for (i <- (1 to 50)) {
+          val g = GraphBuilder.build
+          try {
+            def initialConf(id: Int) = SimpleConfig[Int, Int](
+              neighborhood = Map.empty[Int, Int].withDefaultValue(0),
+              numberOfCollects = 0,
+              domain = Set(0, 1, 2, 3),
+              centralVariableAssignment = (id, initial0Value))
+
+            val vertex0 = new SimpleDcopVertex(new DsanVertexColoring[Int, Int](0.5, 1, 2), initialConf(0), debug = false)
+            val vertex1 = new SimpleDcopVertex(new DsanVertexColoring[Int, Int](0.5, 1, 2), initialConf(1), debug = false)
+            g.addVertex(vertex0)
+            g.addVertex(vertex1)
+            g.addEdge(0, new SimpleDcopEdge(1))
+            g.addEdge(1, new SimpleDcopEdge(0))
+            println(g.execute)
+            assert(vertex0.state.centralVariableValue != vertex1.state.centralVariableValue, "Color collision")
+          } finally {
+            g.shutdown
+          }
+        }
+
+        true
+      },
+      minSuccessful(1))
+  }
+  
   "A 2-Vertex Ranked-graph" should "correctly assign 2-colors" in {
     check(
       {
@@ -150,8 +182,8 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
               domain = Set(0, 1),
               centralVariableAssignment = (id, initial0Value))
 
-            val vertex0 = new MemoryDcopVertex(new WrmiVertexColoring[Int, Int](0.5, 0.7, 0.5), initialConf(0), debug = false)
-            val vertex1 = new MemoryDcopVertex(new WrmiVertexColoring[Int, Int](0.5, 0.7, 0.5), initialConf(1), debug = false)
+            val vertex0 = new MemoryDcopVertex(new WrmiVertexColoring[Int, Int](0.5, 0.7), initialConf(0), debug = false)
+            val vertex1 = new MemoryDcopVertex(new WrmiVertexColoring[Int, Int](0.5, 0.7), initialConf(1), debug = false)
             g.addVertex(vertex0)
             g.addVertex(vertex1)
             g.addEdge(0, new MemoryDcopEdge(1))
@@ -199,6 +231,8 @@ class ModulesSpec extends FlatSpec with ShouldMatchers with Checkers with TestAn
       },
       minSuccessful(1))
   }
+  
+
 
 }
 
