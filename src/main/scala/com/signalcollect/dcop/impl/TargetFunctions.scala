@@ -25,8 +25,8 @@ trait DiscountedExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleM
 
   def rho: Double
   
-  override def computeExpectedUtilities(c: Config) = {
-    val configUtilities = computeCandidates(c).map(c => 
+  override def computeExpectedUtilities(conf: Config) = {
+    val configUtilities = computeCandidates(conf).map(c => 
       (c.centralVariableValue, if (c.numberOfCollects > 1) rho*computeUtility(c)+(1-rho)*c.memory(c.centralVariableValue) else computeUtility(c))).toMap
     configUtilities
   }
@@ -35,9 +35,10 @@ trait DiscountedExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleM
 
 trait AverageExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends MemoryLessTargetFunction[AgentId, Action, Config, Double] {
   
-  override def computeExpectedUtilities(c: Config) = {
-    val configUtilities = computeCandidates(c).map(c => 
-      (c.centralVariableValue, (computeUtility(c)+(c.numberOfCollects - 1)*c.memory(c.centralVariableValue))/c.numberOfCollects)).toMap
+  override def computeExpectedUtilities(conf: Config) = {
+    val configUtilities = computeCandidates(conf).map(c => 
+      (c.centralVariableValue, if (conf.numberOfCollects == 0) computeUtility(c) else (computeUtility(c)+(c.numberOfCollects - 1)*c.memory(c.centralVariableValue))/c.numberOfCollects)
+      ).toMap
     configUtilities
   }
 }
