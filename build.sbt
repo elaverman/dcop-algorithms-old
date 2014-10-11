@@ -18,10 +18,6 @@ resolvers += "Sonatype Snapshots Repository" at "https://oss.sonatype.org/conten
 
 parallelExecution in Test := false
 
-excludedJars in assembly <<= (fullClasspath in assembly) map { cp => 
-  cp filter {_.data.getName == "minlog-1.2.jar"}
-}
-
 /** Dependencies */
 libraryDependencies ++= Seq(
   "org.scala-lang" % "scala-library" % "2.11.2"  % "compile",
