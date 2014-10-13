@@ -92,7 +92,6 @@ class RankedDcopVertex[Id, Action, UtilityType](
     (oldConfig.centralVariableAssignment == newConfig.centralVariableAssignment) &&
     (oldConfig.neighborhood == newConfig.neighborhood) && 
     sameMaps(oldConfig.ranks, newConfig.ranks)
-    //(math.abs(oldState.ranks(oldState.centralVariableAssignment._1) - newState.ranks(newState.centralVariableAssignment._1)) < eps)
   }
 
   override def collect = {

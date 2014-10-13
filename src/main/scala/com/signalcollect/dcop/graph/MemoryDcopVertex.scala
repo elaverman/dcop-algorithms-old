@@ -76,7 +76,6 @@ class MemoryDcopVertex[Id, Action](
     (oldConfig.centralVariableAssignment == newConfig.centralVariableAssignment) &&
       (oldConfig.neighborhood == newConfig.neighborhood) &&
       sameMaps(oldConfig.memory, newConfig.memory)
-    //(math.abs(oldState.memory(oldState.centralVariableValue) - newState.memory(newState.centralVariableValue)) < eps)
   }
 
   override def collect = {

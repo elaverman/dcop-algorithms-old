@@ -42,7 +42,6 @@ class SimpleDcopVertex[Id, Action, UtilityType](
   
   override def currentConfig: SimpleConfig[Id, Action] = {
     val neighborhood: Map[Id, Action] = mostRecentSignalMap.toMap.asInstanceOf[Map[Id, Action]]
-  //  val centralVariableAssignment = (id, state)
     val c = SimpleConfig[Id, Action](neighborhood, state.numberOfCollects+1, state.domain, state.centralVariableAssignment)
     c
   }
