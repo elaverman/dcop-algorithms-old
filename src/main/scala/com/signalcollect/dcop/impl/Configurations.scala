@@ -17,6 +17,7 @@ case class SimpleConfig[Id, Action](
     val numberOfConflicts = occupiedColors.filter(_ == centralVariableValue).size
     numberOfConflicts
   }
+  
 
   override def toString = s"      neighborhood = $neighborhood.toString\n" +
     s"      domain = $domain.toString\n" +

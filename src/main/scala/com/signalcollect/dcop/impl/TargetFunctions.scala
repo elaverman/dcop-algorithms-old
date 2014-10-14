@@ -10,54 +10,57 @@ trait MemoryLessTargetFunction[AgentId, Action, Config <: Configuration[AgentId,
       assignment <- c.domain
     } yield c.withCentralVariableAssignment(assignment)
   }
-  
+
   def computeExpectedUtilities(c: Config) = {
     val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
     configUtilities
   }
+
+  override def updateMemory(c: Config): Config = c
 }
 
 /**
  * MemoryTargetFunctions
  */
 
-trait DiscountedExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends MemoryLessTargetFunction[AgentId, Action, Config, Double] {
+trait AverageExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends MemoryLessTargetFunction[AgentId, Action, Config, Double] {
+
+  override def computeExpectedUtilities(conf: Config) = {
+    val configUtilities = computeCandidates(conf).map(c =>
+      (c.centralVariableValue, if (conf.numberOfCollects == 0) computeUtility(c) else (computeUtility(c) + (c.numberOfCollects - 1) * c.memory(c.centralVariableValue)) / c.numberOfCollects)).toMap
+    configUtilities
+  }
+
+  override def updateMemory(c: Config) = {
+    c.copy(memory = computeExpectedUtilities(c)).asInstanceOf[Config]
+  }
+}
+
+trait DiscountedExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends AverageExpectedUtilityTargetFunction[AgentId, Action, Config] {
 
   def rho: Double
-  
+
   override def computeExpectedUtilities(conf: Config) = {
-    val configUtilities = computeCandidates(conf).map(c => 
-      (c.centralVariableValue, if (c.numberOfCollects > 1) rho*computeUtility(c)+(1-rho)*c.memory(c.centralVariableValue) else computeUtility(c))).toMap
+    val configUtilities = computeCandidates(conf).map(c =>
+      (c.centralVariableValue, if (c.numberOfCollects > 1) rho * computeUtility(c) + (1 - rho) * c.memory(c.centralVariableValue) else computeUtility(c))).toMap
     configUtilities
   }
+
 }
 
+trait DiscountedAverageRegretsTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends AverageExpectedUtilityTargetFunction[AgentId, Action, Config] {
 
-trait AverageExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends MemoryLessTargetFunction[AgentId, Action, Config, Double] {
-  
-  override def computeExpectedUtilities(conf: Config) = {
-    val configUtilities = computeCandidates(conf).map(c => 
-      (c.centralVariableValue, if (conf.numberOfCollects == 0) computeUtility(c) else (computeUtility(c)+(c.numberOfCollects - 1)*c.memory(c.centralVariableValue))/c.numberOfCollects)
-      ).toMap
-    configUtilities
-  }
-}
-
-
-trait DiscountedAverageRegretsTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends MemoryLessTargetFunction[AgentId, Action, Config, Double] {
-  
   def rho: Double
 
   /*
    * All regrets are minimum 0.
    */
   override def computeExpectedUtilities(conf: Config) = {
-    val configUtilities = computeCandidates(conf).map(c => 
-      (c.centralVariableValue, rho*(math.max(computeUtility(c) - computeUtility(conf), 0)) + (1- rho)*c.memory(c.centralVariableValue))).toMap
+    val configUtilities = computeCandidates(conf).map(c =>
+      (c.centralVariableValue, rho * (math.max(computeUtility(c) - computeUtility(conf), 0)) + (1 - rho) * c.memory(c.centralVariableValue))).toMap
     configUtilities
   }
 }
-
 
 /**
  * RankedTargetFunctions
@@ -80,180 +83,185 @@ trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId
     })
     configUtilities.toMap
   }
+  
+  override def updateMemory(c: Config) = {
+    val newC = super.updateMemory(c)
+    super.updateMemory(newC)
+  }
+  
+}
 
-  /**
-   * Same as RankWeightedTargetFunction, but when it reaches a NE it behaves like the MemoryLessTargetFunction
-   */
-  //TODO Push the Utility calculation into UtilityFunctions.scala and replace the Double in the RankWeightedTargetFunction with the UtilityType.
-  trait DynamicRankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+/**
+ * Same as RankWeightedTargetFunction, but when it reaches a NE it behaves like the MemoryLessTargetFunction
+ */
+//TODO Push the Utility calculation into UtilityFunctions.scala and replace the Double in the RankWeightedTargetFunction with the UtilityType.
+trait DynamicRankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
 
-    def isAtRankedNashEquilibrium(c: Config): Boolean = {
-      val expectedUtilities = computeRankedExpectedUtilities(c)
-      val maxUtility = expectedUtilities.values.max
-      val currentUtility = expectedUtilities(c.centralVariableValue)
-      maxUtility == currentUtility
-    }
-
-    def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
-
-    override def computeExpectedUtilities(c: Config) = {
-      if (!isAtRankedNashEquilibrium(c)) {
-        computeRankedExpectedUtilities(c)
-      } else {
-        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
-        configUtilities
-      }
-    }
+  def isAtRankedNashEquilibrium(c: Config): Boolean = {
+    val expectedUtilities = computeRankedExpectedUtilities(c)
+    val maxUtility = expectedUtilities.values.max
+    val currentUtility = expectedUtilities(c.centralVariableValue)
+    maxUtility == currentUtility
   }
 
-  /**
-   * Same as RankWeightedTargetFunction, but when it reaches a certain iteration it behaves like the MemoryLessTargetFunction
-   */
-  trait Switch1RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+  def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
 
-    var iteration = 0
-    var switched = false
-
-    def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
-
-    override def computeExpectedUtilities(c: Config) = {
-      iteration += 1
-      if (switched == false && iteration > 10)
-        if (Random.nextDouble <= 0.2)
-          switched = true
-
-      if (!switched) {
-        computeRankedExpectedUtilities(c)
-      } else {
-        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
-        configUtilities
-      }
+  override def computeExpectedUtilities(c: Config) = {
+    if (!isAtRankedNashEquilibrium(c)) {
+      computeRankedExpectedUtilities(c)
+    } else {
+      val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
+      configUtilities
     }
   }
+}
 
-  /**
-   * Same as RankWeightedTargetFunction, but when it reaches a certain iteration it behaves like the MemoryLessTargetFunction
-   */
-  trait Switch2RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+/**
+ * Same as RankWeightedTargetFunction, but when it reaches a certain iteration it behaves like the MemoryLessTargetFunction
+ */
+trait Switch1RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
 
-    var iteration = 0
-    var switched = false
+  var iteration = 0
+  var switched = false
 
-    def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
+  def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
 
-    override def computeExpectedUtilities(c: Config) = {
-      iteration += 1
-      if (switched == false && iteration > 15)
-        if (Random.nextDouble <= 0.2)
-          switched = true
+  override def computeExpectedUtilities(c: Config) = {
+    iteration += 1
+    if (switched == false && iteration > 10)
+      if (Random.nextDouble <= 0.2)
+        switched = true
 
-      if (!switched) {
-        computeRankedExpectedUtilities(c)
-      } else {
-        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
-        configUtilities
-      }
+    if (!switched) {
+      computeRankedExpectedUtilities(c)
+    } else {
+      val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
+      configUtilities
     }
   }
+}
 
-  /**
-   * Same as RankWeightedTargetFunction, but when it reaches a certain iteration it behaves like the MemoryLessTargetFunction
-   */
-  trait Switch3RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+/**
+ * Same as RankWeightedTargetFunction, but when it reaches a certain iteration it behaves like the MemoryLessTargetFunction
+ */
+trait Switch2RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
 
-    var iteration = 0
-    var switched = false
+  var iteration = 0
+  var switched = false
 
-    def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
+  def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
 
-    override def computeExpectedUtilities(c: Config) = {
-      iteration += 1
-      if (switched == false && iteration > 20)
-        if (Random.nextDouble <= 0.2)
-          switched = true
+  override def computeExpectedUtilities(c: Config) = {
+    iteration += 1
+    if (switched == false && iteration > 15)
+      if (Random.nextDouble <= 0.2)
+        switched = true
 
-      if (!switched) {
-        computeRankedExpectedUtilities(c)
-      } else {
-        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
-        configUtilities
-      }
+    if (!switched) {
+      computeRankedExpectedUtilities(c)
+    } else {
+      val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
+      configUtilities
     }
   }
+}
 
-  /**
-   * Same as MemoryLessTargetFunction, but when it reaches a certain iteration it behaves like the RankWeightedTargetFunction
-   */
-  trait SwitchInv1RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+/**
+ * Same as RankWeightedTargetFunction, but when it reaches a certain iteration it behaves like the MemoryLessTargetFunction
+ */
+trait Switch3RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
 
-    var iteration = 0
-    var switched = false
+  var iteration = 0
+  var switched = false
 
-    def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
+  def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
 
-    override def computeExpectedUtilities(c: Config) = {
-      iteration += 1
-      if (switched == false && iteration > 10)
-        if (Random.nextDouble <= 0.2)
-          switched = true
+  override def computeExpectedUtilities(c: Config) = {
+    iteration += 1
+    if (switched == false && iteration > 20)
+      if (Random.nextDouble <= 0.2)
+        switched = true
 
-      if (!switched) {
-        computeRankedExpectedUtilities(c)
-      } else {
-        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
-        configUtilities
-      }
+    if (!switched) {
+      computeRankedExpectedUtilities(c)
+    } else {
+      val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
+      configUtilities
     }
   }
+}
 
-  /**
-   * Same as MemoryLessTargetFunction, but when it reaches a certain iteration it behaves like the RankWeightedTargetFunction
-   */
-  trait SwitchInv2RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+/**
+ * Same as MemoryLessTargetFunction, but when it reaches a certain iteration it behaves like the RankWeightedTargetFunction
+ */
+trait SwitchInv1RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
 
-    var iteration = 0
-    var switched = false
+  var iteration = 0
+  var switched = false
 
-    def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
+  def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
 
-    override def computeExpectedUtilities(c: Config) = {
-      iteration += 1
-      if (switched == false && iteration > 15)
-        if (Random.nextDouble <= 0.2)
-          switched = true
+  override def computeExpectedUtilities(c: Config) = {
+    iteration += 1
+    if (switched == false && iteration > 10)
+      if (Random.nextDouble <= 0.2)
+        switched = true
 
-      if (!switched) {
-        computeRankedExpectedUtilities(c)
-      } else {
-        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
-        configUtilities
-      }
+    if (!switched) {
+      computeRankedExpectedUtilities(c)
+    } else {
+      val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
+      configUtilities
     }
   }
+}
 
-  /**
-   * Same as MemoryLessTargetFunction, but when it reaches a certain iteration it behaves like the RankWeightedTargetFunction
-   */
-  trait SwitchInv3RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+/**
+ * Same as MemoryLessTargetFunction, but when it reaches a certain iteration it behaves like the RankWeightedTargetFunction
+ */
+trait SwitchInv2RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
 
-    var iteration = 0
-    var switched = false
+  var iteration = 0
+  var switched = false
 
-    def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
+  def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
 
-    override def computeExpectedUtilities(c: Config) = {
-      iteration += 1
-      if (switched == false && iteration > 20)
-        if (Random.nextDouble <= 0.2)
-          switched = true
+  override def computeExpectedUtilities(c: Config) = {
+    iteration += 1
+    if (switched == false && iteration > 15)
+      if (Random.nextDouble <= 0.2)
+        switched = true
 
-      if (!switched) {
-        computeRankedExpectedUtilities(c)
-      } else {
-        val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
-        configUtilities
-      }
+    if (!switched) {
+      computeRankedExpectedUtilities(c)
+    } else {
+      val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
+      configUtilities
     }
   }
+}
 
+/**
+ * Same as MemoryLessTargetFunction, but when it reaches a certain iteration it behaves like the RankWeightedTargetFunction
+ */
+trait SwitchInv3RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+
+  var iteration = 0
+  var switched = false
+
+  def computeRankedExpectedUtilities(c: Config) = super.computeExpectedUtilities(c)
+
+  override def computeExpectedUtilities(c: Config) = {
+    iteration += 1
+    if (switched == false && iteration > 20)
+      if (Random.nextDouble <= 0.2)
+        switched = true
+
+    if (!switched) {
+      computeRankedExpectedUtilities(c)
+    } else {
+      val configUtilities = computeCandidates(c).map(c => (c.centralVariableValue, computeUtility(c))).toMap
+      configUtilities
+    }
+  }
 }
