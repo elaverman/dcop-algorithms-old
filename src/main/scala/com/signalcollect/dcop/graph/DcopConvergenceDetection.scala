@@ -7,18 +7,18 @@ import com.signalcollect.dcop.modules.Configuration
 /**
  * The Vertex state is of type Config.
  */
-trait DcopConvergenceDetection[AgentId, Action, Config <: Configuration[AgentId, Action], UtilityType] {
-  this: DataGraphVertex[AgentId, Config] =>
+trait DcopConvergenceDetection {
+  this: DataGraphVertex[_,Configuration] =>
 
-  val optimizer: Optimizer[AgentId, Action, Config, UtilityType]
+  val optimizer: Optimizer[_,_,Configuration,_]
 
-  def isConverged(c: Config): Boolean = {
+  def isConverged(c: Configuration): Boolean = {
     optimizer.shouldTerminate(c)
   }
 
-  def currentConfig: Config
+  def currentConfig: Configuration
 
-  def isStateUnchanged(oldConfig: Config, newConfig: Config): Boolean = {
+  def isStateUnchanged(oldConfig: Configuration, newConfig: Configuration): Boolean = {
     oldConfig.centralVariableAssignment == newConfig.centralVariableAssignment &&
       oldConfig.neighborhood == newConfig.neighborhood
   }

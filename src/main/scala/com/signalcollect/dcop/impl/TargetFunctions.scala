@@ -16,7 +16,9 @@ trait MemoryLessTargetFunction[AgentId, Action, Config <: Configuration[AgentId,
     configUtilities
   }
 
-  override def updateMemory(c: Config): Config = c
+  override def updateMemory(c: Config): Config = {
+    c
+  }
 }
 
 /**
@@ -85,8 +87,7 @@ trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId
   }
   
   override def updateMemory(c: Config) = {
-    val newC = super.updateMemory(c)
-    super.updateMemory(newC)
+        
   }
   
 }

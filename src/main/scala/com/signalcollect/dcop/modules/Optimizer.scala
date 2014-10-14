@@ -1,6 +1,10 @@
 package com.signalcollect.dcop.modules
 
-trait Optimizer[AgentId, Action, Config <: Configuration[AgentId, Action], UtilityType] extends Serializable {
+trait Optimizer extends Serializable {
+  type AgentId
+  type Action
+  type UtilityType
+  type Config <: Configuration[AgentId, Action, UtilityType]
   def schedule: AdjustmentSchedule[AgentId, Action, Config]
   def rule: DecisionRule[AgentId, Action, Config] 
     with TargetFunction[AgentId, Action, Config, UtilityType] 

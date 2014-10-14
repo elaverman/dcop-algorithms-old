@@ -1,15 +1,19 @@
 package com.signalcollect.dcop.modules
 
-trait Configuration[AgentId, Action, SignalType] extends Serializable {
+trait Configuration extends Serializable {
+
+  type AgentId
+  type Action
+  type SignalType
+
   def neighborhood: Map[AgentId, Action]
-//  def numberOfCollects: Long
+  //  def numberOfCollects: Long
   def domain: Set[Action]
   def withCentralVariableAssignment(value: Action): this.type
   def centralVariableAssignment: (AgentId, Action)
   def centralVariableValue = centralVariableAssignment._2
   def computeExpectedNumberOfConflicts: Int
 
-   
   /**
    * Returns true if the neighbourhood, the central variable assignment
    * as well as any other config specific state are similar enough for them to be considered
@@ -19,9 +23,8 @@ trait Configuration[AgentId, Action, SignalType] extends Serializable {
    * bookkeeping.
    */
   def isSameState(other: this.type): Boolean
-  
-  
+
   def updateNeighborhood(neighborhood: Map[AgentId, SignalType]): this.type
-  
+
 }
 

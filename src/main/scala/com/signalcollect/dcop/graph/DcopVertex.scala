@@ -12,18 +12,18 @@ import com.signalcollect.dcop.modules._
  * @param initialState Initial state of the vertex
  * @param debug Boolean idicating if there should be any printlines
  */
-abstract class DcopVertex[Id, Action, Config <: Configuration[Id, Action], UtilityType](
-  val optimizer: Optimizer[Id, Action, Config, UtilityType],
+abstract class DcopVertex[Id](
+  val optimizer: Optimizer[Id, _, Configuration, _],
   //Doesn't work with Optimizer[...., this.Signal]
-  val initialState: Config,
+  val initialState: Configuration,
   debug: Boolean = false)
   extends DataGraphVertex(initialState.centralVariableAssignment._1, initialState)
-  with DcopConvergenceDetection[Id, Action, Config, UtilityType] {
+  with DcopConvergenceDetection {
 
   type Signal = Any
-  
-  def changeMove(c: Config): Config = {
-    val move = optimizer.computeMove(c)
+
+  def changeMove(c: Configuration): Configuration = {
+    val move: c.Action = optimizer.computeMove(c)
     val newConfig = c.withCentralVariableAssignment(move)
     val newState = newConfig
     if (debug) {
@@ -37,7 +37,7 @@ abstract class DcopVertex[Id, Action, Config <: Configuration[Id, Action], Utili
     //signalMap.asInstanceOf[Map[Id, Signal]]
     val neighborhoodUpdated = state.updateNeighborhood(Map.empty[Id, Signal].asInstanceOf[Map[Id, state.SignalType]])
     val c = optimizer.updateMemory(neighborhoodUpdated)
-   // val c = currentConfig
+    // val c = currentConfig
     if (optimizer.shouldConsiderMove(c)) {
       changeMove(c)
     } else {
