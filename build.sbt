@@ -8,7 +8,7 @@ version := "1.0-SNAPSHOT"
 
 organization := "com.signalcollect"
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.4"
 
 resolvers += "Typesafe Snapshot Repository" at "http://repo.typesafe.com/typesafe/snapshots/"
 
@@ -20,7 +20,7 @@ parallelExecution in Test := false
 
 /** Dependencies */
 libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-library" % "2.11.2"  % "compile",
+  "org.scala-lang" % "scala-library" % scalaVersion.value  % "compile",
   "junit" % "junit" % "4.8.2"  % "test",
   "com.google.collections" % "google-collections" % "1.0",
   "org.specs2" % "classycle" % "1.4.1" % "test",
