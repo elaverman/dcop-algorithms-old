@@ -3,7 +3,7 @@ package com.signalcollect.dcop.impl
 import com.signalcollect.dcop.modules._
 import scala.util.Random
 
-trait MemoryLessTargetFunction[AgentId, Action, Config <: Configuration[AgentId, Action], UtilityType] extends TargetFunction[AgentId, Action, Config, UtilityType] with UtilityFunction[AgentId, Action, Config, UtilityType] {
+trait MemoryLessTargetFunction[AgentId, Action, SignalType, Config <: Configuration[AgentId, Action, SignalType], UtilityType] extends TargetFunction[AgentId, Action, SignalType, Config, UtilityType] with UtilityFunction[AgentId, Action, SignalType, Config, UtilityType] {
 
   def computeCandidates(c: Config) = {
     for {

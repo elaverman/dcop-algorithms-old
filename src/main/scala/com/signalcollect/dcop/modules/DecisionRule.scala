@@ -2,7 +2,7 @@ package com.signalcollect.dcop.modules
 
 //TODO: Instead of Double replace with UtilityType or at least Numeric
 
-trait DecisionRule[AgentId, Action, Config <: Configuration[AgentId, Action]] extends Serializable with TargetFunction[AgentId, Action, Config, Double] {
+trait DecisionRule[AgentId, Action, SignalType, Config <: Configuration[AgentId, Action, SignalType]] extends Serializable with TargetFunction[AgentId, Action, SignalType, Config, Double] {
   def computeMove(c: Config): Action
   def shouldTerminate(c: Config): Boolean
   

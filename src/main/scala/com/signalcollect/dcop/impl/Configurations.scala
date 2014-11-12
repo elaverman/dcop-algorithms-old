@@ -6,7 +6,7 @@ case class SimpleConfig[Id, Action](
   val neighborhood: Map[Id, Action],
   val numberOfCollects: Long,
   val domain: Set[Action],
-  val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action] {
+  val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action, Action] {
   final def withCentralVariableAssignment(value: Action) = {
     this.copy(centralVariableAssignment = (centralVariableAssignment._1, value)).asInstanceOf[this.type]
   }
@@ -30,7 +30,7 @@ case class SimpleMemoryConfig[Id, Action, UtilityType](
   val memory: Map[Action, UtilityType],
   val numberOfCollects: Long,
   val domain: Set[Action],
-  val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action] {
+  val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action, Action] {
   
   final def withCentralVariableAssignment(value: Action) = {
     this.copy(centralVariableAssignment = (centralVariableAssignment._1, value)).asInstanceOf[this.type]
@@ -54,7 +54,7 @@ case class RankedConfig[Id, Action](
   val numberOfCollects: Long,
   val ranks: Map[Id, Double],
   val domain: Set[Action],
-  val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action] {
+  val centralVariableAssignment: (Id, Action)) extends Configuration[Id, Action, (Action, Double)] {
 
   /*
    * Not only the value changes, but also the rank.  

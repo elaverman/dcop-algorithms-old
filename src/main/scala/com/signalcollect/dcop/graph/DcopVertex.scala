@@ -12,8 +12,8 @@ import com.signalcollect.dcop.modules._
  * @param initialState Initial state of the vertex
  * @param debug Boolean idicating if there should be any printlines
  */
-abstract class DcopVertex[Id, Action, Config <: Configuration[Id, Action], UtilityType](
-  val optimizer: Optimizer[Id, Action, Config, UtilityType],
+abstract class DcopVertex[Id, Action, SignalType, Config <: Configuration[Id, Action, SignalType], UtilityType](
+  val optimizer: Optimizer[Id, Action, SignalType, Config, UtilityType],
   //Doesn't work with Optimizer[...., this.Signal]
   val initialState: Config,
   debug: Boolean = false)
