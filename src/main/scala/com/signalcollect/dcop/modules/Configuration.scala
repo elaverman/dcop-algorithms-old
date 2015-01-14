@@ -9,7 +9,6 @@ trait Configuration[AgentId, Action, SignalType] extends Serializable {
   def centralVariableValue = centralVariableAssignment._2
   def computeExpectedNumberOfConflicts: Int
 
-   
   /**
    * Returns true if the neighbourhood, the central variable assignment
    * as well as any other config specific state are similar enough for them to be considered

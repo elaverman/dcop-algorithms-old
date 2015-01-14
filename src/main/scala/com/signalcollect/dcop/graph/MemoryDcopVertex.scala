@@ -24,7 +24,7 @@ import com.signalcollect.dcop.modules._
 import com.signalcollect.dcop.impl._
 
 class MemoryDcopEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
-  type Source = MemoryDcopVertex[_, _]
+  type Source = MemoryDcopVertex[_, _, _]
 
   def signal = {
     val sourceState = source.state
@@ -42,13 +42,13 @@ class MemoryDcopEdge[Id](targetId: Id) extends DefaultEdge(targetId) {
  * @param debug Boolean idicating if there should be any printlines
  * @param convergeByEntireState Boolean indicating if the algorithm stops when the entire state or only the action stabilizes.
  */
-class MemoryDcopVertex[Id, Action](
-  override val optimizer: Optimizer[Id, Action, SimpleMemoryConfig[Id, Action, Double], Double],
+class MemoryDcopVertex[Id, Action, SignalType](
+  override val optimizer: Optimizer[Id, Action, SignalType, SimpleMemoryConfig[Id, Action, Double], Double],
   initialState: SimpleMemoryConfig[Id, Action, Double],
   debug: Boolean = false,
   eps: Double = 0.00000000001,
   convergeByEntireState: Boolean = true)
-  extends DcopVertex[Id, Action, SimpleMemoryConfig[Id, Action, Double], Double](
+  extends DcopVertex[Id, Action, SignalType, SimpleMemoryConfig[Id, Action, Double], Double](
     optimizer, initialState, debug) {
 
   //Initialize state memory and stuff: (initialAction, Map.empty[Action, Double].withDefaultValue(0), 0)

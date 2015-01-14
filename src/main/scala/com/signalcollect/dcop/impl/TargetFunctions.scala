@@ -3,7 +3,9 @@ package com.signalcollect.dcop.impl
 import com.signalcollect.dcop.modules._
 import scala.util.Random
 
-trait MemoryLessTargetFunction[AgentId, Action, SignalType, Config <: Configuration[AgentId, Action, SignalType], UtilityType] extends TargetFunction[AgentId, Action, SignalType, Config, UtilityType] with UtilityFunction[AgentId, Action, SignalType, Config, UtilityType] {
+trait MemoryLessTargetFunction[AgentId, Action, SignalType, Config <: Configuration[AgentId, Action, SignalType], UtilityType] extends 
+  TargetFunction[AgentId, Action, SignalType, Config, UtilityType] 
+  with UtilityFunction[AgentId, Action, SignalType, Config, UtilityType] {
 
   def computeCandidates(c: Config) = {
     for {
@@ -20,10 +22,10 @@ trait MemoryLessTargetFunction[AgentId, Action, SignalType, Config <: Configurat
 }
 
 /**
- * MemoryTargetFunctions
+ * MemoryTargetFunctions, necessarily simple
  */
 
-trait AverageExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends MemoryLessTargetFunction[AgentId, Action, Config, Double] {
+trait AverageExpectedUtilityTargetFunction[AgentId, Action, Config <: SimpleMemoryConfig[AgentId, Action, Double]] extends MemoryLessTargetFunction[AgentId, Action, Action, Config, Double] {
 
   override def computeExpectedUtilities(conf: Config) = {
     val configUtilities = computeCandidates(conf).map(c =>
@@ -67,7 +69,7 @@ trait DiscountedAverageRegretsTargetFunction[AgentId, Action, Config <: SimpleMe
  */
 
 //TODO: Push the Utility calculation into UtilityFunctions.scala and replace the Double in the TargetFunction with the UtilityType.
-trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends MemoryLessTargetFunction[AgentId, Action, Config, Double] {
+trait RankWeightedTargetFunction[AgentId, Action, SignalType, Config <: RankedConfig[AgentId, Action], UtilityType] extends MemoryLessTargetFunction[AgentId, Action, SignalType, Config, Double] {
 
   override def computeExpectedUtilities(c: Config) = {
     val configUtilities = computeCandidates(c).map(configuration => {
@@ -83,19 +85,19 @@ trait RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId
     })
     configUtilities.toMap
   }
-  
+
   override def updateMemory(c: Config) = {
     val newC = super.updateMemory(c)
     super.updateMemory(newC)
   }
-  
+
 }
 
 /**
  * Same as RankWeightedTargetFunction, but when it reaches a NE it behaves like the MemoryLessTargetFunction
  */
 //TODO Push the Utility calculation into UtilityFunctions.scala and replace the Double in the RankWeightedTargetFunction with the UtilityType.
-trait DynamicRankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+trait DynamicRankWeightedTargetFunction[AgentId, Action, SignalType, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, SignalType, Config, Double] {
 
   def isAtRankedNashEquilibrium(c: Config): Boolean = {
     val expectedUtilities = computeRankedExpectedUtilities(c)
@@ -119,7 +121,7 @@ trait DynamicRankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[
 /**
  * Same as RankWeightedTargetFunction, but when it reaches a certain iteration it behaves like the MemoryLessTargetFunction
  */
-trait Switch1RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+trait Switch1RankWeightedTargetFunction[AgentId, Action, SignalType, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, SignalType, Config, Double] {
 
   var iteration = 0
   var switched = false
@@ -144,7 +146,7 @@ trait Switch1RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[
 /**
  * Same as RankWeightedTargetFunction, but when it reaches a certain iteration it behaves like the MemoryLessTargetFunction
  */
-trait Switch2RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+trait Switch2RankWeightedTargetFunction[AgentId, Action, SignalType, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, SignalType, Config, Double] {
 
   var iteration = 0
   var switched = false
@@ -169,7 +171,7 @@ trait Switch2RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[
 /**
  * Same as RankWeightedTargetFunction, but when it reaches a certain iteration it behaves like the MemoryLessTargetFunction
  */
-trait Switch3RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+trait Switch3RankWeightedTargetFunction[AgentId, Action, SignalType, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, SignalType, Config, Double] {
 
   var iteration = 0
   var switched = false
@@ -194,7 +196,7 @@ trait Switch3RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[
 /**
  * Same as MemoryLessTargetFunction, but when it reaches a certain iteration it behaves like the RankWeightedTargetFunction
  */
-trait SwitchInv1RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+trait SwitchInv1RankWeightedTargetFunction[AgentId, Action, SignalType, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, SignalType, Config, Double] {
 
   var iteration = 0
   var switched = false
@@ -219,7 +221,7 @@ trait SwitchInv1RankWeightedTargetFunction[AgentId, Action, Config <: RankedConf
 /**
  * Same as MemoryLessTargetFunction, but when it reaches a certain iteration it behaves like the RankWeightedTargetFunction
  */
-trait SwitchInv2RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+trait SwitchInv2RankWeightedTargetFunction[AgentId, Action, SignalType, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, SignalType, Config, Double] {
 
   var iteration = 0
   var switched = false
@@ -244,7 +246,7 @@ trait SwitchInv2RankWeightedTargetFunction[AgentId, Action, Config <: RankedConf
 /**
  * Same as MemoryLessTargetFunction, but when it reaches a certain iteration it behaves like the RankWeightedTargetFunction
  */
-trait SwitchInv3RankWeightedTargetFunction[AgentId, Action, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, Config, Double] {
+trait SwitchInv3RankWeightedTargetFunction[AgentId, Action, SignalType, Config <: RankedConfig[AgentId, Action], UtilityType] extends RankWeightedTargetFunction[AgentId, Action, SignalType, Config, Double] {
 
   var iteration = 0
   var switched = false

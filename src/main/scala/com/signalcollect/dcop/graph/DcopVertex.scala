@@ -18,7 +18,7 @@ abstract class DcopVertex[Id, Action, SignalType, Config <: Configuration[Id, Ac
   val initialState: Config,
   debug: Boolean = false)
   extends DataGraphVertex(initialState.centralVariableAssignment._1, initialState)
-  with DcopConvergenceDetection[Id, Action, Config, UtilityType] {
+  with DcopConvergenceDetection[Id, Action, SignalType, Config, UtilityType] {
 
   type Signal = Any
   
@@ -35,7 +35,7 @@ abstract class DcopVertex[Id, Action, SignalType, Config <: Configuration[Id, Ac
   def collect = {
     val signalMap = mostRecentSignalMap.toMap
     //signalMap.asInstanceOf[Map[Id, Signal]]
-    val neighborhoodUpdated = state.updateNeighborhood(Map.empty[Id, Signal].asInstanceOf[Map[Id, state.SignalType]])
+    val neighborhoodUpdated = state.updateNeighborhood(Map.empty[Id, Signal].asInstanceOf[Map[Id, SignalType]])
     val c = optimizer.updateMemory(neighborhoodUpdated)
    // val c = currentConfig
     if (optimizer.shouldConsiderMove(c)) {
